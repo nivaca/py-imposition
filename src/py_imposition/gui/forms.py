@@ -95,13 +95,21 @@ class Field(QWidget):
 
 
 class FlagField(Field):
+    """A checkbox named after the option; its help is shown beside it (wrapped)."""
+
     def __init__(self, action, parent=None):
         super().__init__(action, parent)
-        self.box = QCheckBox(clean_help(action.help) or pretty(action.dest), self)
+        self.box = QCheckBox((long_option(action) or action.dest).lstrip("-"))
         self.box.setToolTip(self.toolTip())
+        self.help = QLabel(clean_help(action.help))
+        self.help.setWordWrap(True)
+        self.help.setToolTip(self.toolTip())
+        self.help.setStyleSheet("color: palette(placeholder-text);")
+        self.help.setMinimumWidth(120)
+        self.help.mousePressEvent = lambda _e: self.box.toggle()
         lay = QHBoxLayout(self)
         lay.setContentsMargins(0, 0, 0, 0)
-        lay.addWidget(self.box)
+        lay.addWidget(self.help)
         self.box.toggled.connect(lambda _: self.changed.emit())
 
     def tokens(self):
@@ -351,7 +359,7 @@ class CommandForm(QWidget):
                     self.by_option[opt] = field
                 field.changed.connect(lambda f=field: self._field_changed(f))
                 if isinstance(field, FlagField):
-                    form.addRow(field)
+                    form.addRow(field.box, field)
                 else:
                     label = (long_option(action) or action.dest).lstrip("-")
                     if action.required or (field.positional and action.nargs not in ("?", "*")):

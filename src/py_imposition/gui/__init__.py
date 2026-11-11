@@ -10,6 +10,17 @@ import sys
 from pathlib import Path
 
 
+def app_icon():
+    """The program's icon, in every size that ships with it."""
+    from PySide6.QtGui import QIcon
+
+    icon = QIcon()
+    hicolor = Path(__file__).resolve().parent.parent / "icons" / "linux" / "hicolor"
+    for png in sorted(hicolor.glob("*/apps/py-imposition.png")):
+        icon.addFile(str(png))
+    return icon
+
+
 def main(argv: list[str] | None = None) -> int:
     argv = list(sys.argv[1:] if argv is None else argv)
     try:
@@ -22,6 +33,9 @@ def main(argv: list[str] | None = None) -> int:
     app = QApplication.instance() or QApplication([sys.argv[0]] + argv)
     app.setApplicationName("py-imposition")
     app.setOrganizationName("py-imposition")
+    # match the menu entry made by py-imposition-install (Wayland app id / WM class)
+    app.setDesktopFileName("py-imposition")
+    app.setWindowIcon(app_icon())
     win = MainWindow()
     files = [a for a in argv if a.lower().endswith(".pdf")]
     if files:

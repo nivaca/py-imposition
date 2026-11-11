@@ -8,7 +8,7 @@ from PySide6.QtCore import QPointF, Qt, Signal
 from PySide6.QtPdf import QPdfDocument
 from PySide6.QtPdfWidgets import QPdfView
 from PySide6.QtWidgets import (
-    QComboBox, QHBoxLayout, QLabel, QSizePolicy, QSpinBox, QToolButton, QVBoxLayout, QWidget,
+    QComboBox, QHBoxLayout, QLabel, QMenu, QSizePolicy, QSpinBox, QToolButton, QVBoxLayout, QWidget,
 )
 
 
@@ -24,7 +24,9 @@ class PdfPane(QWidget):
 
         self.title = QLabel(f"<b>{title}</b>")
         self.info = QLabel("")
-        self.info.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred)
+        # may shrink (the full text is in the tooltip), so the window fits small screens
+        self.info.setSizePolicy(QSizePolicy.Policy.Ignored, QSizePolicy.Policy.Preferred)
+        self.info.setMinimumWidth(40)
         self.outputs = QComboBox()
         self.outputs.setVisible(False)
         self.outputs.currentIndexChanged.connect(self.output_selected.emit)
@@ -42,22 +44,24 @@ class PdfPane(QWidget):
         self.view.setPageSpacing(12)
         self.view.pageNavigator().currentPageChanged.connect(self._page_changed)
 
-        def tool(text, tip, slot):
-            b = QToolButton()
-            b.setText(text)
-            b.setToolTip(tip)
-            b.clicked.connect(slot)
-            return b
+        zoom = QToolButton()
+        zoom.setText("Zoom")
+        zoom.setToolTip("Fit the page or its width, or zoom in and out (also Ctrl+wheel)")
+        zoom.setPopupMode(QToolButton.ToolButtonPopupMode.InstantPopup)
+        menu = QMenu(zoom)
+        menu.addAction("Fit page", lambda: self.set_zoom("page"))
+        menu.addAction("Fit width", lambda: self.set_zoom("width"))
+        menu.addSeparator()
+        menu.addAction("Zoom in", lambda: self.zoom_by(1.25))
+        menu.addAction("Zoom out", lambda: self.zoom_by(1 / 1.25))
+        zoom.setMenu(menu)
 
         top = QHBoxLayout()
         top.addWidget(self.title)
         top.addWidget(self.outputs)
         top.addWidget(self.info, 1)
         top.addWidget(self.page)
-        top.addWidget(tool("Fit page", "Show whole pages", lambda: self.set_zoom("page")))
-        top.addWidget(tool("Fit width", "Fit the page width", lambda: self.set_zoom("width")))
-        top.addWidget(tool("−", "Zoom out", lambda: self.zoom_by(1 / 1.25)))
-        top.addWidget(tool("+", "Zoom in", lambda: self.zoom_by(1.25)))
+        top.addWidget(zoom)
 
         lay = QVBoxLayout(self)
         lay.setContentsMargins(4, 4, 4, 4)
@@ -85,6 +89,7 @@ class PdfPane(QWidget):
         dims = f"{size.width() / 72 * 2.54:.1f} × {size.height() / 72 * 2.54:.1f} cm" if size else ""
         self.info.setText(f"{path.name} — {n} page{'s' if n != 1 else ''}{', ' + dims if dims else ''}"
                           + (f" — {note}" if note else ""))
+        self.info.setToolTip(self.info.text())
         self.view.setZoomMode(self.view.zoomMode())
 
     def clear(self, note: str):
@@ -118,6 +123,13 @@ class PdfPane(QWidget):
         z = self.view.zoomFactor()
         self.view.setZoomMode(QPdfView.ZoomMode.Custom)
         self.view.setZoomFactor(max(0.05, min(z * factor, 20)))
+
+    def wheelEvent(self, event):
+        if event.modifiers() & Qt.KeyboardModifier.ControlModifier:
+            self.zoom_by(1.15 if event.angleDelta().y() > 0 else 1 / 1.15)
+            event.accept()
+        else:
+            super().wheelEvent(event)
 
     def keyPressEvent(self, event):
         if event.key() in (Qt.Key.Key_PageDown, Qt.Key.Key_Right):

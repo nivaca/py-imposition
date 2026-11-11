@@ -397,6 +397,7 @@ class MainWindow(QMainWindow):
         self.stack = QStackedWidget()
         scroll = QScrollArea()
         scroll.setWidgetResizable(True)
+        scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         scroll.setWidget(self.stack)
 
         self.b_preview = QPushButton("Preview")
@@ -420,12 +421,18 @@ class MainWindow(QMainWindow):
         self.b_stop.clicked.connect(self.stop)
         self.b_stop.setEnabled(False)
 
-        actions = QHBoxLayout()
-        for b in (self.b_preview, self.b_apply, self.b_save_result, self.b_add, self.b_reset):
-            actions.addWidget(b)
-        actions.addStretch(1)
-        actions.addWidget(self.auto)
-        actions.addWidget(self.b_stop)
+        actions = QVBoxLayout()
+        row1, row2 = QHBoxLayout(), QHBoxLayout()
+        for b in (self.b_preview, self.b_apply, self.b_save_result):
+            row1.addWidget(b)
+        row1.addStretch(1)
+        row1.addWidget(self.b_stop)
+        for b in (self.b_add, self.b_reset):
+            row2.addWidget(b)
+        row2.addStretch(1)
+        row2.addWidget(self.auto)
+        actions.addLayout(row1)
+        actions.addLayout(row2)
 
         middle = QWidget()
         ml = QVBoxLayout(middle)
@@ -448,7 +455,7 @@ class MainWindow(QMainWindow):
         self.split.addWidget(previews)
         self.split.setStretchFactor(1, 2)
         self.split.setStretchFactor(2, 5)
-        self.split.setSizes([200, 430, 900])
+        self.split.setSizes([210, 520, 900])
         self.setCentralWidget(self.split)
 
     def _build_docks(self):

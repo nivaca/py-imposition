@@ -16,6 +16,7 @@ dependencies = [
 
 [project.scripts]
 py-imposition = "py_imposition:main"
+py-imposition-install = "py_imposition.install:main"
 
 [project.gui-scripts]
 py-imposition-gui = "py_imposition.gui:main"

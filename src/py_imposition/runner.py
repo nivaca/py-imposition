@@ -39,6 +39,8 @@ def build_parser(prog: str = "py-imposition") -> argparse.ArgumentParser:
                "'%(prog)s file.pdf' on its own makes a booklet with the default settings.",
         parents=[parent],
     )
+    from . import __version__
+    parser.add_argument("--version", action="version", version=f"%(prog)s {__version__}")
     sub = parser.add_subparsers(dest="command", metavar="COMMAND")
     for name in sorted(COMMANDS):
         cmd = COMMANDS[name]

@@ -128,7 +128,8 @@ def test_commands_run(sample, tmp_path, args):
     assert run(*args, sample, "-o", out) == 0
     pdf = pikepdf.open(out)
     assert len(pdf.pages) > 0
-    subprocess.run(["qpdf", "--check", str(out)], check=False, capture_output=True)
+    check = subprocess.run(["qpdf", "--check", str(out)], capture_output=True, text=True)
+    assert check.returncode == 0, check.stdout + check.stderr
 
 
 def test_text_and_peel(sample, tmp_path):

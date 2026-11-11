@@ -36,8 +36,11 @@ def window(app, tmp_path, monkeypatch):
     from py_imposition.gui.window import MainWindow
     w = MainWindow()
     yield w
-    w.runner.stop()
-    w.close()
+    try:
+        w.runner.stop()
+        w.close()
+    except RuntimeError:  # (already deleted: the window was built again in another language)
+        pass
 
 
 def namespace(tokens):
@@ -144,3 +147,42 @@ def test_sequence_run_on_document(app, window, tmp_path):
     assert window.res_pane.doc.pageCount() == 4
     window.apply()
     assert window.undo_stack == [sample]
+
+
+def test_change_language_keeps_the_document(app, window, tmp_path, monkeypatch):
+    from py_imposition import config, interface
+    from py_imposition.gui import window as winmod
+    monkeypatch.setenv(config.ENV, str(tmp_path / "cfg"))
+    sample = tmp_path / "s.pdf"
+    assert main(["sample", "--count", "4", "-o", str(sample), "-q"]) == 0
+    window.auto.setChecked(False)
+    window.open_path(sample)
+    window.select_command("reverse")
+    window.preview()
+    wait(app, window)
+    window.apply()
+    applied = window.source
+    try:
+        window.change_language("es")
+        new = winmod._WINDOWS[-1]
+        assert new is not window
+        assert interface.code() == "es" and config.get("interface") == "es"
+        assert new.menuBar().actions()[0].text() == "&Archivo"
+        assert new.b_preview.text() == "Vista previa"
+        assert new.source == applied and new.undo_stack == [sample]
+        assert new.src_pane.doc.pageCount() == 4
+        # the commands run by the window speak its language, and their output is still understood
+        new.auto.setChecked(False)
+        new.select_command("reverse")
+        new.preview()
+        wait(app, new)
+        assert len(new.result_files) == 1
+        new.change_language("en")
+        assert winmod._WINDOWS[-1].b_preview.text() == "Preview"
+    finally:
+        interface.use("en")
+        interface.translate_argparse()
+        for w in list(winmod._WINDOWS):
+            w.runner.stop()
+            w.close()
+        winmod._WINDOWS.clear()

@@ -1,4 +1,4 @@
-"""Tests for py-imposition. Expected orders come from the Quite Imposing manual's worked examples."""
+"""Tests for py-imposition. Expected orders come from worked examples of standard impositions."""
 
 from __future__ import annotations
 

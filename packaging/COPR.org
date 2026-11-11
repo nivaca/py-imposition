@@ -1,0 +1,101 @@
+#+TITLE: Publishing py-imposition RPMs on Fedora Copr
+#+AUTHOR: nivaca
+#+STARTUP: overview
+
+* Overview
+Copr (https://copr.fedorainfracloud.org) builds RPMs from a source RPM
+(SRPM), signs them with its own key, and publishes them as a dnf repository.
+- Project URL :: https://copr.fedorainfracloud.org/coprs/nivaca/py-imposition/
+- Users install with :: =sudo dnf copr enable nivaca/py-imposition && sudo dnf install py-imposition=
+
+Releases go through =tools/release.py --rpm= (see [[*Releasing a new version]]):
+it builds and signs the RPM here, attaches it and its public key to the
+GitHub and Codeberg releases, and sends the signed SRPM to Copr.
+
+* One-time setup
+** 1. Tools
+#+begin_src sh
+sudo dnf install copr-cli rpm-build rpm-sign rpmdevtools \
+    python3-devel pyproject-rpm-macros python3-uv-build \
+    python3-pikepdf python3-reportlab python3-pyside6 python3-pytest \
+    poppler-utils qpdf desktop-file-utils
+#+end_src
+=rpmbuild= checks the build dependencies of the spec (=%generate_buildrequires=
+and =BuildRequires=), so they must be installed here too.
+
+** 2. Copr API token
+- Open https://copr.fedorainfracloud.org/api/ while logged in with the Fedora
+  account, and copy the block it shows into =~/.config/copr= (=chmod 600=).
+- =copr-cli whoami= should print =nivaca=.
+- *The token expires after 180 days*: download a new block then.
+
+** 3. Signing key
+=build-rpm.sh --sign= uses the first secret key gpg holds (or =--sign=KEY=);
+gpg asks for the passphrase. The public key is exported next to the RPMs as
+=build/rpm/RPM-GPG-KEY-py-imposition= and attached to the releases.
+
+** 4. The project (done once)
+#+begin_src sh
+copr-cli create py-imposition \
+  --chroot fedora-44-x86_64 \
+  --chroot fedora-45-x86_64 \
+  --chroot fedora-rawhide-x86_64 \
+  --description "PDF imposition toolkit: booklets, n-up, step and repeat, shuffling, bleeds, stamps, sequences and hot folders; a command line and a window (Qt), in English or Spanish." \
+  --instructions "sudo dnf copr enable nivaca/py-imposition && sudo dnf install py-imposition" \
+  --repo-priority 99
+#+end_src
+- The package is =noarch=: one architecture per Fedora is enough.
+- Everything it needs is in Fedora: python3-uv-build (the build backend),
+  python3-pikepdf, python3-reportlab, python3-pyside6. The build makes the
+  wheel with Fedora's Python macros (=%pyproject_wheel=) and runs the whole
+  test suite in =%check=, without network.
+- Python 3.12 or later is required (Fedora 44 has 3.14, Fedora 45 has 3.15).
+
+* Releasing a new version
+1. Bump the version in =pyproject.toml= and =src/py_imposition/__init__.py=,
+   then the spec's, with a changelog entry:
+   #+begin_src sh
+   rpmdev-bumpspec -n 0.5 -c "Short description of the change" \
+       -u "Nicolas Vaughan <nivaca@fastmail.com>" packaging/py-imposition.spec
+   #+end_src
+   =tests/test_packaging.py= fails while the versions differ.
+   - =-n VERSION= sets =Version:= and resets =Release:= to 1.
+   - For a packaging-only fix with the same version, leave out =-n= (Release
+     1 → 2), and release with =tools/release.py --rpm --redo= or build by hand.
+2. Commit, then publish:
+   #+begin_src sh
+   uv run python tools/release.py --rpm --notes-file NOTES.md
+   #+end_src
+   It shows the plan and asks before running it: the tests, the wheel and
+   source package, the AppImage, the signed RPM (gpg asks for the
+   passphrase), the tag, the pushes to GitHub and Codeberg, the releases with
+   all the files, and =copr-cli build py-imposition build/rpm/SRPMS/....src.rpm=.
+   =--no-copr= leaves the Copr build out; to do it by hand:
+   #+begin_src sh
+   packaging/build-rpm.sh --sign
+   copr-cli build py-imposition build/rpm/SRPMS/py-imposition-0.5-*.src.rpm
+   #+end_src
+3. Users get it with =sudo dnf upgrade= (=--refresh= to skip dnf's cache).
+
+*Rule:* each upload needs a higher Version-Release than the last, or dnf
+doesn't see it as an update.
+
+* Maintenance
+** New Fedora release / end of life
+#+begin_src sh
+copr-cli modify py-imposition \
+  --chroot fedora-45-x86_64 --chroot fedora-46-x86_64 --chroot fedora-rawhide-x86_64
+#+end_src
+(=--chroot= in =modify= *replaces* the whole list.) Then rebuild the current
+SRPM so the new chroot has packages.
+
+** Housekeeping
+#+begin_src sh
+copr-cli list-builds nivaca/py-imposition
+copr-cli status <BUILD_ID>
+copr-cli watch-build <BUILD_ID>
+copr-cli get nivaca/py-imposition          # project settings
+#+end_src
+- Failed builds: read =builder-live.log= on the build page. To reproduce
+  locally: =mock -r fedora-45-x86_64 build/rpm/SRPMS/py-imposition-*.src.rpm=
+  (=sudo dnf install mock && sudo usermod -aG mock $USER=, then log in again).

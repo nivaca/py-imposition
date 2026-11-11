@@ -31,11 +31,12 @@ from pathlib import Path
 from typing import NamedTuple
 
 from . import __version__
+from .interface import N_, tr
 
 APP_ID = "py-imposition"  # the names of the entry and the icons
 BUNDLE_ID = "io.github.nivaca.py-imposition"
 NAME = "py-imposition"
-COMMENT = "Impose PDF pages: booklets, n-up, step and repeat and more"
+COMMENT = N_("Impose PDF pages: booklets, n-up, step and repeat and more")
 ICON_DIR = Path(__file__).resolve().parent / "icons"
 MODULE = "py_imposition.gui"  # what the entry runs: python -m MODULE
 
@@ -50,9 +51,7 @@ def check_gui():
     try:
         import PySide6.QtPdfWidgets  # noqa: F401
     except ImportError:
-        raise OSError("the window needs PySide6, which is not installed for "
-                      f"{sys.executable}; install py-imposition with the gui extra: "
-                      "pip install 'py-imposition[gui]' (or uv tool install 'py-imposition[gui]')") from None
+        raise OSError(tr("the window needs PySide6, which is not installed for {executable}; install py-imposition with the gui extra: pip install 'py-imposition[gui]' (or uv tool install 'py-imposition[gui]')", executable=sys.executable)) from None
 
 
 # ---------------------------------------------------------------------------
@@ -135,7 +134,7 @@ def installed_icons() -> list[Path]:
 
 
 def entry_text() -> str:
-    return ENTRY.format(name=NAME, comment=COMMENT, app_id=APP_ID,
+    return ENTRY.format(name=NAME, comment=tr(COMMENT), app_id=APP_ID,
                         exec=" ".join(exec_arg(a) for a in gui_command()))
 
 
@@ -207,12 +206,12 @@ def install_windows() -> list[Path]:
     s = windows_shortcut()
     s.path.parent.mkdir(parents=True, exist_ok=True)
     env = dict(os.environ, PYI_LNK=str(s.path), PYI_TARGET=s.target, PYI_ARGS=s.arguments,
-               PYI_DIR=s.folder, PYI_ICON=s.icon, PYI_COMMENT=COMMENT)
+               PYI_DIR=s.folder, PYI_ICON=s.icon, PYI_COMMENT=tr(COMMENT))
     result = subprocess.run(["powershell", "-NoProfile", "-NonInteractive", "-Command", SHORTCUT_SCRIPT],
                             env=env, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, check=False)
     if result.returncode != 0 or not s.path.is_file():
         output = result.stdout.decode(errors="replace").strip()
-        raise OSError(f"could not make the shortcut {s.path}: {output}")
+        raise OSError(tr('could not make the shortcut {path}: {output}', path=s.path, output=output))
     return [s.path]
 
 
@@ -280,7 +279,7 @@ def install_macos() -> list[Path]:
     app = app_path()
     if app.exists():
         if not is_ours(app):
-            raise OSError(f"{app} exists and was not made by py-imposition-install; move it away first")
+            raise OSError(tr('{app} exists and was not made by py-imposition-install; move it away first', app=app))
         shutil.rmtree(app)
     contents = app / "Contents"
     (contents / "MacOS").mkdir(parents=True)
@@ -345,34 +344,38 @@ def uninstall() -> list[Path]:
     return {"linux": uninstall_linux, "windows": uninstall_windows, "macos": uninstall_macos}[system()]()
 
 
-WHERE = {"linux": "the applications menu", "windows": "the Start menu",
-         "macos": "Applications (in your home folder)"}
+WHERE = {"linux": N_("the applications menu"), "windows": N_("the Start menu"),
+         "macos": N_("Applications (in your home folder)")}
 
 
 def main(argv: list[str] | None = None) -> int:
+    from . import interface
+    interface.use_configured()
+    interface.translate_argparse()
     parser = argparse.ArgumentParser(
         prog="py-imposition-install",
-        description="Add the py-imposition window to the applications menu, or remove it. "
-                    "Everything goes in your own folders; no administrator rights are needed.")
-    parser.add_argument("--uninstall", action="store_true", help="remove what was added")
+        description=tr("Add the py-imposition window to the applications menu, or remove it. "
+                    "Everything goes in your own folders; no administrator rights are needed."))
+    parser.add_argument("--uninstall", action="store_true", help=tr("remove what was added"))
     parser.add_argument("--version", action="version", version=f"%(prog)s {__version__}")
     args = parser.parse_args(argv)
-    where = WHERE[system()]
+    where = tr(WHERE[system()])
     try:
         if args.uninstall:
             removed = uninstall()
-            print(f"Removed py-imposition from {where}." if removed else "There was nothing to remove.")
+            print(tr("Removed py-imposition from {where}.", where=where) if removed
+                  else tr("There was nothing to remove."))
             return 0
         paths = install()
     except OSError as e:
-        print(f"py-imposition-install: {e}", file=sys.stderr)
+        print(tr('py-imposition-install: {error}', error=e), file=sys.stderr)
         return 1
-    print(f"Added py-imposition to {where}:")
+    print(tr('Added py-imposition to {where}:', where=where))
     for path in paths:
         print(f"  {path}")
-    print("It starts the window with:")
+    print(tr("It starts the window with:"))
     print("  " + " ".join(shlex.quote(a) for a in gui_command()))
-    print("If that Python environment moves or is rebuilt, run this again.")
+    print(tr("If that Python environment moves or is rebuilt, run this again."))
     return 0
 
 

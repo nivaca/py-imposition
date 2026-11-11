@@ -13,6 +13,7 @@ from pikepdf import Pdf
 
 from . import pdfutil as pu
 from .units import PAPER_SIZES, orient, parse_length, parse_length_list, parse_paper
+from .interface import tr
 
 
 class ImpositionError(Exception):
@@ -51,7 +52,7 @@ class Context:
     def warn(self, msg: str):
         self.warnings.append(msg)
         if not self.quiet:
-            print(f"warning: {msg}", file=sys.stderr)
+            print(tr('warning: {msg}', msg=msg), file=sys.stderr)
 
 
 # A command result is a single PDF, or several named PDFs (suffix -> Pdf).
@@ -87,17 +88,17 @@ def command(name: str, help: str, args: Callable[[argparse.ArgumentParser], None
 
 def add_page_args(p: argparse.ArgumentParser, what: str = "pages to process"):
     p.add_argument("--pages", default="all", metavar="RANGE",
-                   help=f"{what}: e.g. 'all', '1-4,7', 'LAST-1..LAST' (default: all)")
+                   help=tr("{what}: e.g. 'all', '1-4,7', 'LAST-1..LAST' (default: all)", what=what))
     p.add_argument("--parity", choices=["all", "odd", "even"], default="all",
-                   help="restrict to odd or even page numbers")
+                   help=tr("restrict to odd or even page numbers"))
 
 
 def add_margin_args(p: argparse.ArgumentParser, name: str = "margin", help_what: str = "margin"):
     p.add_argument(f"--{name}", default="0", metavar="LEN",
-                   help=f"{help_what} on all four sides (default: 0)")
+                   help=tr('{help_what} on all four sides (default: 0)', help_what=help_what))
     for side in ("top", "bottom", "left", "right"):
         p.add_argument(f"--{name}-{side}", default=None, metavar="LEN",
-                       help=f"{side} {help_what} (overrides --{name})")
+                       help=tr('{side} {help_what} (overrides --{name})', side=side, help_what=help_what, name=name))
 
 
 def get_margins(args, ctx: Context, name: str = "margin") -> tuple[float, float, float, float]:
@@ -113,24 +114,23 @@ def get_margins(args, ctx: Context, name: str = "margin") -> tuple[float, float,
 def add_paper_args(p: argparse.ArgumentParser, default: str = "a4", default_orientation: str = "tall",
                    extra_choices: tuple[str, ...] = ()):
     p.add_argument("--paper", default=default, metavar="SIZE",
-                   help=f"sheet size: {', '.join(sorted(PAPER_SIZES))}{''.join(', ' + c for c in extra_choices)}, "
-                        f"or WxH such as 21x29.7cm (default: {default})")
+                   help=tr('sheet size: {items}{items2}, or WxH such as 21x29.7cm (default: {default})', items=', '.join(sorted(PAPER_SIZES)), items2=''.join(', ' + c for c in extra_choices), default=default))
     p.add_argument("--orientation", default=default_orientation,
                    choices=["tall", "wide", "portrait", "landscape", "best", "as-is"],
-                   help=f"sheet orientation (default: {default_orientation})")
+                   help=tr('sheet orientation (default: {default_orientation})', default_orientation=default_orientation))
 
 
 def add_mark_args(p: argparse.ArgumentParser, frames: bool = True):
-    g = p.add_argument_group("marks")
-    g.add_argument("--crop-marks", action="store_true", help="add smart crop marks")
+    g = p.add_argument_group(tr("marks"))
+    g.add_argument("--crop-marks", action="store_true", help=tr("add smart crop marks"))
     if frames:
-        g.add_argument("--frames", action="store_true", help="draw a frame around each page")
+        g.add_argument("--frames", action="store_true", help=tr("draw a frame around each page"))
     g.add_argument("--mark-offset", default="10pt", metavar="LEN",
-                   help="gap between page edge and crop mark (default: 10pt)")
-    g.add_argument("--mark-length", default="20pt", metavar="LEN", help="crop mark length (default: 20pt)")
-    g.add_argument("--mark-width", default="0.5pt", metavar="LEN", help="crop mark line width (default: 0.5pt)")
+                   help=tr("gap between page edge and crop mark (default: 10pt)"))
+    g.add_argument("--mark-length", default="20pt", metavar="LEN", help=tr("crop mark length (default: 20pt)"))
+    g.add_argument("--mark-width", default="0.5pt", metavar="LEN", help=tr("crop mark line width (default: 0.5pt)"))
     g.add_argument("--mark-white-background", action="store_true",
-                   help="draw a near-white halo behind marks so they show on dark backgrounds")
+                   help=tr("draw a near-white halo behind marks so they show on dark backgrounds"))
 
 
 def get_mark_style(args, ctx: Context) -> pu.MarkStyle:
@@ -146,10 +146,10 @@ def get_mark_style(args, ctx: Context) -> pu.MarkStyle:
 def add_sides_args(p: argparse.ArgumentParser):
     p.add_argument("--sides", default="duplex",
                    choices=["duplex", "flip-backs", "fronts-then-backs", "separate"],
-                   help="how to output fronts and backs: duplex (in order), flip-backs (backs upside down), "
-                        "fronts-then-backs (one file, all fronts first), separate (two files) (default: duplex)")
+                   help=tr("how to output fronts and backs: duplex (in order), flip-backs (backs upside down), "
+                        "fronts-then-backs (one file, all fronts first), separate (two files) (default: duplex)"))
     p.add_argument("--reverse-backs", action="store_true",
-                   help="output the backs in reverse order (for manual double-sided printing)")
+                   help=tr("output the backs in reverse order (for manual double-sided printing)"))
 
 
 def arrange_sides(pdf: Pdf, mode: str, reverse_backs: bool = False) -> Result:
@@ -179,7 +179,7 @@ def arrange_sides(pdf: Pdf, mode: str, reverse_backs: bool = False) -> Result:
         return reorder(pdf, fronts + backs)
     if mode == "separate":
         return {"fronts": reorder(pdf, fronts), "backs": reorder(pdf, backs)}
-    raise ImpositionError(f"unknown sides mode {mode!r}")
+    raise ImpositionError(tr('unknown sides mode {mode!r}', mode=mode))
 
 
 def reorder(pdf: Pdf, order: list[int | None], blank_size: tuple[float, float] | None = None) -> Pdf:
@@ -227,5 +227,5 @@ def parse_align(spec: str) -> tuple[float, float]:
         elif part in ("center", "middle"):
             pass
         else:
-            raise ImpositionError(f"invalid alignment {spec!r}")
+            raise ImpositionError(tr('invalid alignment {spec!r}', spec=spec))
     return h, v

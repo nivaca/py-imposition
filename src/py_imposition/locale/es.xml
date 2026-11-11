@@ -1,0 +1,2574 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- The interface of py-imposition in Spanish: each <text> gives an English text of the
+     program (<en>) and its translation (<tr>). See src/py_imposition/interface.py.
+     tests/test_interface.py checks that every text of the program is here, and nothing else. -->
+<interface code="es" name="Spanish" native="Español">
+  <text>
+    <en>error: {error}</en>
+    <tr>error: {error}</tr>
+  </text>
+  <text>
+    <en>Wrote {path} ({count} page)</en>
+    <tr>Se escribió {path} ({count} página)</tr>
+  </text>
+  <text>
+    <en>Wrote {path} ({count} pages)</en>
+    <tr>Se escribió {path} ({count} páginas)</tr>
+  </text>
+  <text>
+    <en>{inp} not found</en>
+    <tr>no se encontró {inp}</tr>
+  </text>
+  <text>
+    <en>Wrote {path}</en>
+    <tr>Se escribió {path}</tr>
+  </text>
+  <text>
+    <en>Define bleeds: set TrimBox/BleedBox so imposition lines up the trim area and lets artwork run beyond it. Can generate missing bleed content by mirroring or scaling.</en>
+    <tr>Definir sangrados: establecer TrimBox/BleedBox para que la imposición alinee el área de corte y permita que el contenido se extienda más allá. Puede generar el sangrado que falte reflejando o escalando.</tr>
+  </text>
+  <text>
+    <en>all: same bleed on every edge; except-fold: no bleed on the binding edge; edges: per-edge amounts; from-crop: trim = crop box, bleed = media box; remove: delete bleeds; generate-only: keep existing boxes and just generate bleed content (default: all)</en>
+    <tr>all: el mismo sangrado en todos los bordes; except-fold: sin sangrado en el borde de encuadernación; edges: valores por borde; from-crop: corte = caja de recorte, sangrado = caja del soporte; remove: eliminar los sangrados; generate-only: conservar las cajas existentes y solo generar el contenido del sangrado (por defecto: all)</tr>
+  </text>
+  <text>
+    <en>bleed for all/except-fold (default: 3mm)</en>
+    <tr>sangrado para all/except-fold (por defecto: 3mm)</tr>
+  </text>
+  <text>
+    <en>take the bleed from outside the visible area (previously cropped content); otherwise the bleed is inside the visible page</en>
+    <tr>tomar el sangrado de fuera del área visible (contenido recortado previamente); si no, el sangrado queda dentro de la página visible</tr>
+  </text>
+  <text>
+    <en>make the whole bleed area visible (crop box = bleed box)</en>
+    <tr>hacer visible toda el área de sangrado (caja de recorte = caja de sangrado)</tr>
+  </text>
+  <text>
+    <en>binding edge for --mode except-fold (default: left)</en>
+    <tr>borde de encuadernación para --mode except-fold (por defecto: left)</tr>
+  </text>
+  <text>
+    <en>fill the bleed area: mirror the page edges, or scale the trim area up (default: none)</en>
+    <tr>rellenar el área de sangrado: reflejar los bordes de la página o ampliar el área de corte (por defecto: none)</tr>
+  </text>
+  <text>
+    <en>bleed on the {edge} edge with --mode edges</en>
+    <tr>sangrado del borde {edge} con --mode edges</tr>
+  </text>
+  <text>
+    <en>page {index}: bleed limited to the media box (use --generate to create it)</en>
+    <tr>página {index}: sangrado limitado a la caja del soporte (use --generate para crearlo)</tr>
+  </text>
+  <text>
+    <en>page {index}: bleed larger than the page</en>
+    <tr>página {index}: sangrado mayor que la página</tr>
+  </text>
+  <text>
+    <en>marks</en>
+    <tr>marcas</tr>
+  </text>
+  <text>
+    <en>unknown sides mode {mode!r}</en>
+    <tr>modo de caras desconocido {mode!r}</tr>
+  </text>
+  <text>
+    <en>{what}: e.g. 'all', '1-4,7', 'LAST-1..LAST' (default: all)</en>
+    <tr>{what}: p. ej. 'all', '1-4,7', 'LAST-1..LAST' (por defecto: all)</tr>
+  </text>
+  <text>
+    <en>restrict to odd or even page numbers</en>
+    <tr>limitar a números de página impares o pares</tr>
+  </text>
+  <text>
+    <en>{help_what} on all four sides (default: 0)</en>
+    <tr>{help_what} en los cuatro lados (por defecto: 0)</tr>
+  </text>
+  <text>
+    <en>sheet size: {items}{items2}, or WxH such as 21x29.7cm (default: {default})</en>
+    <tr>tamaño del pliego: {items}{items2}, o WxH como 21x29.7cm (por defecto: {default})</tr>
+  </text>
+  <text>
+    <en>sheet orientation (default: {default_orientation})</en>
+    <tr>orientación del pliego (por defecto: {default_orientation})</tr>
+  </text>
+  <text>
+    <en>add smart crop marks</en>
+    <tr>añadir marcas de corte inteligentes</tr>
+  </text>
+  <text>
+    <en>gap between page edge and crop mark (default: 10pt)</en>
+    <tr>separación entre el borde de la página y la marca de corte (por defecto: 10pt)</tr>
+  </text>
+  <text>
+    <en>crop mark length (default: 20pt)</en>
+    <tr>longitud de las marcas de corte (por defecto: 20pt)</tr>
+  </text>
+  <text>
+    <en>crop mark line width (default: 0.5pt)</en>
+    <tr>grosor de línea de las marcas de corte (por defecto: 0.5pt)</tr>
+  </text>
+  <text>
+    <en>draw a near-white halo behind marks so they show on dark backgrounds</en>
+    <tr>dibujar un halo casi blanco detrás de las marcas para que se vean sobre fondos oscuros</tr>
+  </text>
+  <text>
+    <en>how to output fronts and backs: duplex (in order), flip-backs (backs upside down), fronts-then-backs (one file, all fronts first), separate (two files) (default: duplex)</en>
+    <tr>cómo producir anversos y reversos: duplex (en orden), flip-backs (reversos boca abajo), fronts-then-backs (un archivo, primero todos los anversos), separate (dos archivos) (por defecto: duplex)</tr>
+  </text>
+  <text>
+    <en>output the backs in reverse order (for manual double-sided printing)</en>
+    <tr>producir los reversos en orden inverso (para imprimir a doble cara manualmente)</tr>
+  </text>
+  <text>
+    <en>warning: {msg}</en>
+    <tr>advertencia: {msg}</tr>
+  </text>
+  <text>
+    <en>{side} {help_what} (overrides --{name})</en>
+    <tr>{side} {help_what} (anula --{name})</tr>
+  </text>
+  <text>
+    <en>draw a frame around each page</en>
+    <tr>dibujar un marco alrededor de cada página</tr>
+  </text>
+  <text>
+    <en>invalid alignment {spec!r}</en>
+    <tr>alineación no válida {spec!r}</tr>
+  </text>
+  <text>
+    <en>The settings of py-imposition. Delete this file to use the usual values.</en>
+    <tr>Los ajustes de py-imposition. Borre este archivo para usar los valores habituales.</tr>
+  </text>
+  <text>
+    <en>data source: CSV/TSV with a header row</en>
+    <tr>fuente de datos: CSV/TSV con una fila de encabezado</tr>
+  </text>
+  <text>
+    <en>fields file (TOML); see the description</en>
+    <tr>archivo de campos (TOML); véase la descripción</tr>
+  </text>
+  <text>
+    <en>column separator: auto, ',', ';', 'tab'</en>
+    <tr>separador de columnas: auto, ',', ';', 'tab'</tr>
+  </text>
+  <text>
+    <en>text encoding of the data (default: utf-8-sig)</en>
+    <tr>codificación de texto de los datos (por defecto: utf-8-sig)</tr>
+  </text>
+  <text>
+    <en>the document is a master copied once per record (otherwise records are added to successive groups of pages)</en>
+    <tr>el documento es una plantilla que se copia una vez por registro (si no, los registros se añaden a grupos sucesivos de páginas)</tr>
+  </text>
+  <text>
+    <en>without --master: pages used by each record (default: 1)</en>
+    <tr>sin --master: páginas usadas por cada registro (por defecto: 1)</tr>
+  </text>
+  <text>
+    <en>fail if records and pages don't match exactly</en>
+    <tr>fallar si los registros y las páginas no coinciden exactamente</tr>
+  </text>
+  <text>
+    <en>records to use, e.g. 1-10</en>
+    <tr>registros que usar, p. ej. 1-10</tr>
+  </text>
+  <text>
+    <en>data source is empty</en>
+    <tr>la fuente de datos está vacía</tr>
+  </text>
+  <text>
+    <en>unknown column {{{key}}} (columns: {items})</en>
+    <tr>columna desconocida {{{key}}} (columnas: {items})</tr>
+  </text>
+  <text>
+    <en>fields file defines no [[text]], [[picture]] or [[block]]</en>
+    <tr>el archivo de campos no define ningún [[text]], [[picture]] ni [[block]]</tr>
+  </text>
+  <text>
+    <en>cannot read data source {path}: {error}</en>
+    <tr>no se puede leer la fuente de datos {path}: {error}</tr>
+  </text>
+  <text>
+    <en>cannot read fields file {fields}: {error}</en>
+    <tr>no se puede leer el archivo de campos {fields}: {error}</tr>
+  </text>
+  <text>
+    <en>--pages-per-record must be at least 1</en>
+    <tr>--pages-per-record debe ser al menos 1</tr>
+  </text>
+  <text>
+    <en>{count} records but {number} pages in groups of {per}</en>
+    <tr>{count} registros pero {number} páginas en grupos de {per}</tr>
+  </text>
+  <text>
+    <en>{count} record(s) have no pages and are ignored</en>
+    <tr>{count} registro(s) no tienen páginas y se ignoran</tr>
+  </text>
+  <text>
+    <en>picture page {pno} not in {fpath}</en>
+    <tr>la página de imagen {pno} no está en {fpath}</tr>
+  </text>
+  <text>
+    <en>record {rec_no}: line too long for the block: {text!r}</en>
+    <tr>registro {rec_no}: línea demasiado larga para el bloque: {text!r}</tr>
+  </text>
+  <text>
+    <en>record {record}: text cut off: {text!r}</en>
+    <tr>registro {record}: texto cortado: {text!r}</tr>
+  </text>
+  <text>
+    <en>picture column {page!r} must hold a page number, got {val!r}</en>
+    <tr>la columna de imagen {page!r} debe contener un número de página; se obtuvo {val!r}</tr>
+  </text>
+  <text>
+    <en>record {record}: text scaled to {percent}: {text!r}</en>
+    <tr>registro {record}: texto escalado al {percent}: {text!r}</tr>
+  </text>
+  <text>
+    <en>invalid position {pos!r}</en>
+    <tr>posición no válida {pos!r}</tr>
+  </text>
+  <text>
+    <en>The GUI needs PySide6. Install it with: pip install 'py-imposition[gui]'</en>
+    <tr>La interfaz gráfica necesita PySide6. Instálela con: pip install 'py-imposition[gui]'</tr>
+  </text>
+  <text>
+    <en>All files (*)</en>
+    <tr>Todos los archivos (*)</tr>
+  </text>
+  <text>
+    <en>Files</en>
+    <tr>Archivos</tr>
+  </text>
+  <text>
+    <en>Options</en>
+    <tr>Opciones</tr>
+  </text>
+  <text>
+    <en>Marks</en>
+    <tr>Marcas</tr>
+  </text>
+  <text>
+    <en>Background</en>
+    <tr>Fondo</tr>
+  </text>
+  <text>
+    <en>PDF files (*.pdf)</en>
+    <tr>Archivos PDF (*.pdf)</tr>
+  </text>
+  <text>
+    <en>Browse…</en>
+    <tr>Examinar…</tr>
+  </text>
+  <text>
+    <en>Data files (*.csv *.tsv *.txt)</en>
+    <tr>Archivos de datos (*.csv *.tsv *.txt)</tr>
+  </text>
+  <text>
+    <en>TOML files (*.toml)</en>
+    <tr>Archivos TOML (*.toml)</tr>
+  </text>
+  <text>
+    <en>default: {default}</en>
+    <tr>por defecto: {default}</tr>
+  </text>
+  <text>
+    <en>Add…</en>
+    <tr>Añadir…</tr>
+  </text>
+  <text>
+    <en>Reference</en>
+    <tr>Referencia</tr>
+  </text>
+  <text>
+    <en>page</en>
+    <tr>página</tr>
+  </text>
+  <text>
+    <en>Zoom</en>
+    <tr>Zoom</tr>
+  </text>
+  <text>
+    <en>Fit the page or its width, or zoom in and out (also Ctrl+wheel)</en>
+    <tr>Ajustar la página o su ancho, o acercar y alejar (también Ctrl+rueda)</tr>
+  </text>
+  <text>
+    <en>Fit page</en>
+    <tr>Ajustar página</tr>
+  </text>
+  <text>
+    <en>Fit width</en>
+    <tr>Ajustar ancho</tr>
+  </text>
+  <text>
+    <en>Zoom in</en>
+    <tr>Acercar</tr>
+  </text>
+  <text>
+    <en>Zoom out</en>
+    <tr>Alejar</tr>
+  </text>
+  <text>
+    <en>{name} — {count} page</en>
+    <tr>{name} — {count} página</tr>
+  </text>
+  <text>
+    <en>{name} — {count} pages</en>
+    <tr>{name} — {count} páginas</tr>
+  </text>
+  <text>
+    <en>Create booklet</en>
+    <tr>Crear folleto</tr>
+  </text>
+  <text>
+    <en>n-Up pages</en>
+    <tr>Páginas n-up</tr>
+  </text>
+  <text>
+    <en>Step and repeat</en>
+    <tr>Paso y repetición</tr>
+  </text>
+  <text>
+    <en>Join two pages</en>
+    <tr>Unir dos páginas</tr>
+  </text>
+  <text>
+    <en>Manual imposition</en>
+    <tr>Imposición manual</tr>
+  </text>
+  <text>
+    <en>Shuffle pages</en>
+    <tr>Reordenar páginas</tr>
+  </text>
+  <text>
+    <en>Even/odd pages</en>
+    <tr>Páginas pares/impares</tr>
+  </text>
+  <text>
+    <en>Reverse pages</en>
+    <tr>Invertir páginas</tr>
+  </text>
+  <text>
+    <en>Duplicate pages</en>
+    <tr>Duplicar páginas</tr>
+  </text>
+  <text>
+    <en>Delete pages</en>
+    <tr>Eliminar páginas</tr>
+  </text>
+  <text>
+    <en>Move pages</en>
+    <tr>Mover páginas</tr>
+  </text>
+  <text>
+    <en>Insert pages</en>
+    <tr>Insertar páginas</tr>
+  </text>
+  <text>
+    <en>Split / merge (partials)</en>
+    <tr>Dividir / unir (parciales)</tr>
+  </text>
+  <text>
+    <en>Trim and shift</en>
+    <tr>Recortar y desplazar</tr>
+  </text>
+  <text>
+    <en>Creep</en>
+    <tr>Corrimiento</tr>
+  </text>
+  <text>
+    <en>Adjust page sizes</en>
+    <tr>Ajustar tamaños de página</tr>
+  </text>
+  <text>
+    <en>Rotate pages</en>
+    <tr>Girar páginas</tr>
+  </text>
+  <text>
+    <en>Tile pages</en>
+    <tr>Páginas en mosaico</tr>
+  </text>
+  <text>
+    <en>Define bleeds</en>
+    <tr>Definir sangrados</tr>
+  </text>
+  <text>
+    <en>Text and numbers</en>
+    <tr>Texto y números</tr>
+  </text>
+  <text>
+    <en>Stick on PDF pages</en>
+    <tr>Pegar páginas PDF</tr>
+  </text>
+  <text>
+    <en>Masking tape</en>
+    <tr>Cinta de enmascarar</tr>
+  </text>
+  <text>
+    <en>Peel off</en>
+    <tr>Despegar</tr>
+  </text>
+  <text>
+    <en>Variable data merge</en>
+    <tr>Combinación de datos variables</tr>
+  </text>
+  <text>
+    <en>Sample document</en>
+    <tr>Documento de muestra</tr>
+  </text>
+  <text>
+    <en>Imposition info</en>
+    <tr>Información de imposición</tr>
+  </text>
+  <text>
+    <en>Run sequence on files</en>
+    <tr>Ejecutar secuencia en archivos</tr>
+  </text>
+  <text>
+    <en>Replay (imposition by example)</en>
+    <tr>Repetir (imposición por ejemplo)</tr>
+  </text>
+  <text>
+    <en>Hot folder</en>
+    <tr>Carpeta vigilada</tr>
+  </text>
+  <text>
+    <en>Impose</en>
+    <tr>Imponer</tr>
+  </text>
+  <text>
+    <en>Arrange pages</en>
+    <tr>Ordenar páginas</tr>
+  </text>
+  <text>
+    <en>Change pages</en>
+    <tr>Modificar páginas</tr>
+  </text>
+  <text>
+    <en>Stick on / peel off</en>
+    <tr>Pegar / despegar</tr>
+  </text>
+  <text>
+    <en>Information &amp; automation</en>
+    <tr>Información y automatización</tr>
+  </text>
+  <text>
+    <en>Added {count} recorded step(s)</en>
+    <tr>Se añadieron {count} paso(s) registrado(s)</tr>
+  </text>
+  <text>
+    <en>Load sequence</en>
+    <tr>Cargar secuencia</tr>
+  </text>
+  <text>
+    <en>Loaded {count} step(s) from {name}</en>
+    <tr>Se cargaron {count} paso(s) de {name}</tr>
+  </text>
+  <text>
+    <en>Save sequence</en>
+    <tr>Guardar secuencia</tr>
+  </text>
+  <text>
+    <en>Saved {page}</en>
+    <tr>Se guardó {page}</tr>
+  </text>
+  <text>
+    <en>PDF files to process</en>
+    <tr>Archivos PDF que procesar</tr>
+  </text>
+  <text>
+    <en>Output folder</en>
+    <tr>Carpeta de salida</tr>
+  </text>
+  <text>
+    <en>Preferences</en>
+    <tr>Preferencias</tr>
+  </text>
+  <text>
+    <en>Open…</en>
+    <tr>Abrir…</tr>
+  </text>
+  <text>
+    <en>Save document…</en>
+    <tr>Guardar documento…</tr>
+  </text>
+  <text>
+    <en>Undo apply</en>
+    <tr>Deshacer aplicación</tr>
+  </text>
+  <text>
+    <en>Colour of crop marks and registration-coloured text</en>
+    <tr>Color de las marcas de corte y del texto en color de registro</tr>
+  </text>
+  <text>
+    <en>Use page bleed boxes when imposing, or impose the visible page only</en>
+    <tr>Usar las cajas de sangrado de las páginas al imponer, o imponer solo la página visible</tr>
+  </text>
+  <text>
+    <en>PDF/X</en>
+    <tr>PDF/X</tr>
+  </text>
+  <text>
+    <en>Keep a TrimBox when bleeds are removed</en>
+    <tr>Conservar una TrimBox cuando se quitan los sangrados</tr>
+  </text>
+  <text>
+    <en>Preview</en>
+    <tr>Vista previa</tr>
+  </text>
+  <text>
+    <en>Run the command on the current document and show the result (F5)</en>
+    <tr>Ejecutar la orden en el documento actual y mostrar el resultado (F5)</tr>
+  </text>
+  <text>
+    <en>Apply</en>
+    <tr>Aplicar</tr>
+  </text>
+  <text>
+    <en>Make the result the current document, to continue with another command (Ctrl+Enter)</en>
+    <tr>Hacer del resultado el documento actual, para continuar con otra orden (Ctrl+Enter)</tr>
+  </text>
+  <text>
+    <en>Save result…</en>
+    <tr>Guardar resultado…</tr>
+  </text>
+  <text>
+    <en>Defaults</en>
+    <tr>Valores por defecto</tr>
+  </text>
+  <text>
+    <en>Reset this command's options</en>
+    <tr>Restablecer las opciones de esta orden</tr>
+  </text>
+  <text>
+    <en>Add to sequence</en>
+    <tr>Añadir a la secuencia</tr>
+  </text>
+  <text>
+    <en>Auto preview</en>
+    <tr>Vista previa automática</tr>
+  </text>
+  <text>
+    <en>Preview automatically after changing options</en>
+    <tr>Mostrar la vista previa automáticamente al cambiar las opciones</tr>
+  </text>
+  <text>
+    <en>Stop</en>
+    <tr>Detener</tr>
+  </text>
+  <text>
+    <en>Document</en>
+    <tr>Documento</tr>
+  </text>
+  <text>
+    <en>Result</en>
+    <tr>Resultado</tr>
+  </text>
+  <text>
+    <en>Sequence</en>
+    <tr>Secuencia</tr>
+  </text>
+  <text>
+    <en>Log</en>
+    <tr>Mensajes</tr>
+  </text>
+  <text>
+    <en>&amp;File</en>
+    <tr>&amp;Archivo</tr>
+  </text>
+  <text>
+    <en>&amp;Run</en>
+    <tr>&amp;Ejecutar</tr>
+  </text>
+  <text>
+    <en>&amp;View</en>
+    <tr>&amp;Ver</tr>
+  </text>
+  <text>
+    <en>&amp;Settings</en>
+    <tr>Aj&amp;ustes</tr>
+  </text>
+  <text>
+    <en>Language of the interface</en>
+    <tr>Idioma de la interfaz</tr>
+  </text>
+  <text>
+    <en>&amp;Help</en>
+    <tr>A&amp;yuda</tr>
+  </text>
+  <text>
+    <en>Stopped</en>
+    <tr>Detenido</tr>
+  </text>
+  <text>
+    <en>Applied {current}. The result is now the current document.</en>
+    <tr>Se aplicó {current}. El resultado es ahora el documento actual.</tr>
+  </text>
+  <text>
+    <en>{count} command applied</en>
+    <tr>{count} orden aplicada</tr>
+  </text>
+  <text>
+    <en>{count} commands applied</en>
+    <tr>{count} órdenes aplicadas</tr>
+  </text>
+  <text>
+    <en>Opened {path}</en>
+    <tr>Se abrió {path}</tr>
+  </text>
+  <text>
+    <en>Open PDF</en>
+    <tr>Abrir PDF</tr>
+  </text>
+  <text>
+    <en>Undone</en>
+    <tr>Deshecho</tr>
+  </text>
+  <text>
+    <en>py-imposition {current} --help</en>
+    <tr>py-imposition {current} --help</tr>
+  </text>
+  <text>
+    <en>Command line copied</en>
+    <tr>Línea de órdenes copiada</tr>
+  </text>
+  <text>
+    <en>About py-imposition</en>
+    <tr>Acerca de py-imposition</tr>
+  </text>
+  <text>
+    <en>&lt;b&gt;py-imposition {version}&lt;/b&gt;&lt;p&gt;A PDF imposition toolkit.&lt;/p&gt;&lt;p&gt;Licensed under the GNU General Public License, version 3 or later.&lt;/p&gt;</en>
+    <tr>&lt;b&gt;py-imposition {version}&lt;/b&gt;&lt;p&gt;Un conjunto de herramientas de imposición de PDF.&lt;/p&gt;&lt;p&gt;Distribuido bajo la Licencia Pública General de GNU, versión 3 o posterior.&lt;/p&gt;</tr>
+  </text>
+  <text>
+    <en>Add current</en>
+    <tr>Añadir actual</tr>
+  </text>
+  <text>
+    <en>Add the command and options in the form as a step</en>
+    <tr>Añadir la orden y las opciones del formulario como un paso</tr>
+  </text>
+  <text>
+    <en>Replace</en>
+    <tr>Reemplazar</tr>
+  </text>
+  <text>
+    <en>Replace the selected step with the form</en>
+    <tr>Reemplazar el paso seleccionado con el formulario</tr>
+  </text>
+  <text>
+    <en>Edit</en>
+    <tr>Editar</tr>
+  </text>
+  <text>
+    <en>Load the selected step into the form (or double-click)</en>
+    <tr>Cargar el paso seleccionado en el formulario (o doble clic)</tr>
+  </text>
+  <text>
+    <en>Remove</en>
+    <tr>Quitar</tr>
+  </text>
+  <text>
+    <en>Remove the selected step</en>
+    <tr>Quitar el paso seleccionado</tr>
+  </text>
+  <text>
+    <en>Clear</en>
+    <tr>Vaciar</tr>
+  </text>
+  <text>
+    <en>Remove all steps</en>
+    <tr>Quitar todos los pasos</tr>
+  </text>
+  <text>
+    <en>From document</en>
+    <tr>Del documento</tr>
+  </text>
+  <text>
+    <en>Add the commands recorded in the current document (imposition by example)</en>
+    <tr>Añadir las órdenes registradas en el documento actual (imposición por ejemplo)</tr>
+  </text>
+  <text>
+    <en>Load…</en>
+    <tr>Cargar…</tr>
+  </text>
+  <text>
+    <en>Load a sequence file</en>
+    <tr>Cargar un archivo de secuencia</tr>
+  </text>
+  <text>
+    <en>Save…</en>
+    <tr>Guardar…</tr>
+  </text>
+  <text>
+    <en>Save the steps as a sequence file</en>
+    <tr>Guardar los pasos como archivo de secuencia</tr>
+  </text>
+  <text>
+    <en>Run on document</en>
+    <tr>Ejecutar en el documento</tr>
+  </text>
+  <text>
+    <en>Run all steps on the current document and preview the result</en>
+    <tr>Ejecutar todos los pasos en el documento actual y mostrar la vista previa del resultado</tr>
+  </text>
+  <text>
+    <en>Run on files…</en>
+    <tr>Ejecutar en archivos…</tr>
+  </text>
+  <text>
+    <en>Run all steps on several PDF files</en>
+    <tr>Ejecutar todos los pasos en varios archivos PDF</tr>
+  </text>
+  <text>
+    <en>Open a PDF first</en>
+    <tr>Abra primero un PDF</tr>
+  </text>
+  <text>
+    <en>The current document has no recorded commands</en>
+    <tr>El documento actual no tiene órdenes registradas</tr>
+  </text>
+  <text>
+    <en>The sequence is empty</en>
+    <tr>La secuencia está vacía</tr>
+  </text>
+  <text>
+    <en>Units</en>
+    <tr>Unidades</tr>
+  </text>
+  <text>
+    <en>Registration</en>
+    <tr>Registro</tr>
+  </text>
+  <text>
+    <en>Bleeds</en>
+    <tr>Sangrados</tr>
+  </text>
+  <text>
+    <en>Revert to original</en>
+    <tr>Volver al original</tr>
+  </text>
+  <text>
+    <en>Quit</en>
+    <tr>Salir</tr>
+  </text>
+  <text>
+    <en>Copy command line</en>
+    <tr>Copiar línea de órdenes</tr>
+  </text>
+  <text>
+    <en>Command-line help for this command</en>
+    <tr>Ayuda de línea de órdenes para esta orden</tr>
+  </text>
+  <text>
+    <en>About</en>
+    <tr>Acerca de</tr>
+  </text>
+  <text>
+    <en>The language of the interface could not be changed: {error}</en>
+    <tr>No se pudo cambiar el idioma de la interfaz: {error}</tr>
+  </text>
+  <text>
+    <en>Running {job_label}…</en>
+    <tr>Ejecutando {job_label}…</tr>
+  </text>
+  <text>
+    <en>Previewing {job_label}…</en>
+    <tr>Generando la vista previa de {job_label}…</tr>
+  </text>
+  <text>
+    <en>Stop watching</en>
+    <tr>Dejar de vigilar</tr>
+  </text>
+  <text>
+    <en>Start watching</en>
+    <tr>Empezar a vigilar</tr>
+  </text>
+  <text>
+    <en>Done</en>
+    <tr>Hecho</tr>
+  </text>
+  <text>
+    <en>Processed: {number} file(s) written</en>
+    <tr>Procesado: {number} archivo(s) escrito(s)</tr>
+  </text>
+  <text>
+    <en>{job_label}: done (no PDF produced)</en>
+    <tr>{job_label}: hecho (no se produjo ningún PDF)</tr>
+  </text>
+  <text>
+    <en>This command produced several documents. Use “Save result…” to save them.</en>
+    <tr>Esta orden produjo varios documentos. Use «Guardar resultado…» para guardarlos.</tr>
+  </text>
+  <text>
+    <en>{path} not found</en>
+    <tr>no se encontró {path}</tr>
+  </text>
+  <text>
+    <en>Nothing to undo</en>
+    <tr>Nada que deshacer</tr>
+  </text>
+  <text>
+    <en>Reverted to the original document</en>
+    <tr>Se volvió al documento original</tr>
+  </text>
+  <text>
+    <en>Nothing to save</en>
+    <tr>Nada que guardar</tr>
+  </text>
+  <text>
+    <en>No result yet: click Preview first</en>
+    <tr>Aún no hay resultado: pulse primero Vista previa</tr>
+  </text>
+  <text>
+    <en>Could not keep the setting: {error}</en>
+    <tr>No se pudo guardar el ajuste: {error}</tr>
+  </text>
+  <text>
+    <en>py-imposition — {name} (modified)</en>
+    <tr>py-imposition — {name} (modificado)</tr>
+  </text>
+  <text>
+    <en>That is the file currently open</en>
+    <tr>Ese es el archivo abierto actualmente</tr>
+  </text>
+  <text>
+    <en>Open a PDF first (File ▸ Open, or drop a file on the window)</en>
+    <tr>Abra primero un PDF (Archivo ▸ Abrir, o suelte un archivo en la ventana)</tr>
+  </text>
+  <text>
+    <en>Show info</en>
+    <tr>Mostrar información</tr>
+  </text>
+  <text>
+    <en>Run</en>
+    <tr>Ejecutar</tr>
+  </text>
+  <text>
+    <en>Reorder pages and place them two per sheet side for folding into a booklet.</en>
+    <tr>Reordenar las páginas y colocarlas de dos en dos por cara del pliego para plegarlas en un folleto.</tr>
+  </text>
+  <text>
+    <en>background</en>
+    <tr>fondo</tr>
+  </text>
+  <text>
+    <en>Combine pages onto larger sheets in rows and columns, with margins, spacing, alignment, crop marks and backgrounds.</en>
+    <tr>Combinar páginas en pliegos más grandes en filas y columnas, con márgenes, espaciado, alineación, marcas de corte y fondos.</tr>
+  </text>
+  <text>
+    <en>Step And Repeat: each output sheet holds as many copies of one source page as fit.</en>
+    <tr>Paso y repetición: cada pliego de salida contiene tantas copias de una página de origen como quepan.</tr>
+  </text>
+  <text>
+    <en>Join Two Pages: make a spread from two pages, with no change to margins.</en>
+    <tr>Unir dos páginas: formar una doble página a partir de dos páginas, sin cambiar los márgenes.</tr>
+  </text>
+  <text>
+    <en>perfect: separate folded signatures, stacked; saddle: all sheets nested and folded together; continuous: pages in order 1,2 | 3,4 (not folded); cut-stack: sheets are cut in half and the stacks placed one on the other (default: perfect)</en>
+    <tr>perfect: cuadernillos plegados por separado y apilados; saddle: todos los pliegos encajados y plegados juntos; continuous: páginas en orden 1,2 | 3,4 (sin plegar); cut-stack: los pliegos se cortan por la mitad y las pilas se colocan una sobre otra (por defecto: perfect)</tr>
+  </text>
+  <text>
+    <en>pages per signature for perfect binding; multiple of 4 (default: 4)</en>
+    <tr>páginas por cuadernillo para encuadernación encolada; múltiplo de 4 (por defecto: 4)</tr>
+  </text>
+  <text>
+    <en>perfect binding: pad a short last signature to full length or just to a multiple of 4</en>
+    <tr>encuadernación encolada: completar un último cuadernillo corto hasta la longitud completa o solo hasta un múltiplo de 4</tr>
+  </text>
+  <text>
+    <en>cut-stack: single-sided stacks</en>
+    <tr>cut-stack: pilas a una cara</tr>
+  </text>
+  <text>
+    <en>binding edge: left (left-to-right books) or right (right-to-left) (default: left)</en>
+    <tr>borde de encuadernación: left (libros de izquierda a derecha) o right (de derecha a izquierda) (por defecto: left)</tr>
+  </text>
+  <text>
+    <en>space between the two pages (default: 0)</en>
+    <tr>espacio entre las dos páginas (por defecto: 0)</tr>
+  </text>
+  <text>
+    <en>shrink pages that don't fit, never enlarge</en>
+    <tr>reducir las páginas que no caben, nunca ampliar</tr>
+  </text>
+  <text>
+    <en>place pages at 100%%; fail if they don't fit</en>
+    <tr>colocar las páginas al 100%%; fallar si no caben</tr>
+  </text>
+  <text>
+    <en>center pages in their half of the sheet, or pull them to the fold/spine (default: center)</en>
+    <tr>centrar las páginas en su mitad del pliego, o acercarlas al pliegue/lomo (por defecto: center)</tr>
+  </text>
+  <text>
+    <en>document has no pages</en>
+    <tr>el documento no tiene páginas</tr>
+  </text>
+  <text>
+    <en>margins and gutter leave no room for pages</en>
+    <tr>los márgenes y el medianil no dejan espacio para las páginas</tr>
+  </text>
+  <text>
+    <en>impose onto pages of this PDF instead of blank sheets (sets the sheet size)</en>
+    <tr>imponer sobre las páginas de este PDF en lugar de pliegos en blanco (fija el tamaño del pliego)</tr>
+  </text>
+  <text>
+    <en>background pages to use</en>
+    <tr>páginas de fondo que se usan</tr>
+  </text>
+  <text>
+    <en>repeat the backgrounds, use them once, or repeat only the last N (default: repeat)</en>
+    <tr>repetir los fondos, usarlos una vez o repetir solo los N últimos (por defecto: repeat)</tr>
+  </text>
+  <text>
+    <en>with --background-mode repeat-last: how many pages to repeat</en>
+    <tr>con --background-mode repeat-last: cuántas páginas repetir</tr>
+  </text>
+  <text>
+    <en>columns per sheet (maximum, or exact with --scale fit)</en>
+    <tr>columnas por pliego (máximo, o exacto con --scale fit)</tr>
+  </text>
+  <text>
+    <en>rows per sheet (maximum, or exact with --scale fit)</en>
+    <tr>filas por pliego (máximo, o exacto con --scale fit)</tr>
+  </text>
+  <text>
+    <en>'none' (100%%), 'fit' (scale so exactly --cols x --rows fit, based on the first page) or a percentage like 50 (default: none)</en>
+    <tr>'none' (100%%), 'fit' (escalar para que quepan exactamente --cols x --rows, según la primera página) o un porcentaje como 50 (por defecto: none)</tr>
+  </text>
+  <text>
+    <en>remove unused space at the edge of each sheet (sheet shrinks to the pages plus margins)</en>
+    <tr>recortar el espacio no usado en el borde de cada pliego (el pliego se reduce a las páginas más los márgenes)</tr>
+  </text>
+  <text>
+    <en>space between rows and columns (default: 0)</en>
+    <tr>espacio entre filas y columnas (por defecto: 0)</tr>
+  </text>
+  <text>
+    <en>horizontal spacing between columns; a list like '0 40' repeats (overrides --spacing)</en>
+    <tr>espaciado horizontal entre columnas; una lista como '0 40' se repite (anula --spacing)</tr>
+  </text>
+  <text>
+    <en>vertical spacing between rows; a list repeats (overrides --spacing)</en>
+    <tr>espaciado vertical entre filas; una lista se repite (anula --spacing)</tr>
+  </text>
+  <text>
+    <en>where pages sit on sheets that aren't full (default: top-left)</en>
+    <tr>dónde se sitúan las páginas en los pliegos que no están llenos (por defecto: top-left)</tr>
+  </text>
+  <text>
+    <en>align each sheet on its own instead of matching all sheets</en>
+    <tr>alinear cada pliego por separado en lugar de igualar todos los pliegos</tr>
+  </text>
+  <text>
+    <en>also align each row horizontally (short rows)</en>
+    <tr>alinear también cada fila horizontalmente (filas cortas)</tr>
+  </text>
+  <text>
+    <en>mirror margins and alignment on even (back) sheets: horizontally, vertically or both</en>
+    <tr>reflejar márgenes y alineación en los pliegos pares (reverso): horizontal, verticalmente o en ambos sentidos</tr>
+  </text>
+  <text>
+    <en>normal: fill each sheet in turn; double: alternate front/back sheets with backs mirrored; double-flip: as double, with backs upside down (default: normal)</en>
+    <tr>normal: llenar cada pliego por turno; double: alternar pliegos de anverso/reverso con los reversos reflejados; double-flip: como double, con los reversos boca abajo (por defecto: normal)</tr>
+  </text>
+  <text>
+    <en>allow rows of rotated copies when that fits more on a sheet (not with scaling)</en>
+    <tr>permitir filas de copias giradas cuando así caben más en un pliego (no con escalado)</tr>
+  </text>
+  <text>
+    <en>--rotate is ignored when pages are scaled</en>
+    <tr>--rotate se ignora cuando las páginas se escalan</tr>
+  </text>
+  <text>
+    <en>join this page with the next one (default: 1)</en>
+    <tr>unir esta página con la siguiente (por defecto: 1)</tr>
+  </text>
+  <text>
+    <en>join every pair of pages (1+2, 3+4, ...)</en>
+    <tr>unir cada par de páginas (1+2, 3+4, ...)</tr>
+  </text>
+  <text>
+    <en>vertical alignment when heights differ (default: bottom)</en>
+    <tr>alineación vertical cuando las alturas difieren (por defecto: bottom)</tr>
+  </text>
+  <text>
+    <en>pages ({maxw:.1f}x{maxh:.1f}pt) don't fit at 100% in {cw:.1f}x{ch:.1f}pt cells; choose a larger paper or allow scaling</en>
+    <tr>las páginas ({maxw:.1f}x{maxh:.1f}pt) no caben al 100% en celdas de {cw:.1f}x{ch:.1f}pt; elija un papel más grande o permita el escalado</tr>
+  </text>
+  <text>
+    <en>background selection is empty</en>
+    <tr>la selección del fondo está vacía</tr>
+  </text>
+  <text>
+    <en>--scale fit needs both --cols and --rows</en>
+    <tr>--scale fit necesita --cols y --rows</tr>
+  </text>
+  <text>
+    <en>margins/spacing leave no room for pages</en>
+    <tr>los márgenes/el espaciado no dejan espacio para las páginas</tr>
+  </text>
+  <text>
+    <en>invalid --scale {scale!r}</en>
+    <tr>--scale no válido {scale!r}</tr>
+  </text>
+  <text>
+    <en>margins leave no room on the sheet</en>
+    <tr>los márgenes no dejan espacio en el pliego</tr>
+  </text>
+  <text>
+    <en>some pages are larger than the sheet; enlarging sheet to fit</en>
+    <tr>algunas páginas son mayores que el pliego; se amplía el pliego para que quepan</tr>
+  </text>
+  <text>
+    <en>page {number} does not fit on the sheet</en>
+    <tr>la página {number} no cabe en el pliego</tr>
+  </text>
+  <text>
+    <en>--first must leave a following page to join</en>
+    <tr>--first debe dejar una página siguiente para unir</tr>
+  </text>
+  <text>
+    <en>joined page would exceed the 200 inch PDF limit</en>
+    <tr>la página unida superaría el límite de 200 pulgadas de PDF</tr>
+  </text>
+  <text>
+    <en>signature size (pages per fold) must be a positive multiple of 4</en>
+    <tr>el tamaño del cuadernillo (páginas por pliegue) debe ser un múltiplo positivo de 4</tr>
+  </text>
+  <text>
+    <en>pages of different sizes chose different sheet orientations</en>
+    <tr>páginas de distintos tamaños eligieron orientaciones de pliego distintas</tr>
+  </text>
+  <text>
+    <en>unknown binding {binding!r}</en>
+    <tr>encuadernación desconocida {binding!r}</tr>
+  </text>
+  <text>
+    <en>{path}: {count} page</en>
+    <tr>{path}: {count} página</tr>
+  </text>
+  <text>
+    <en>{path}: {count} pages</en>
+    <tr>{path}: {count} páginas</tr>
+  </text>
+  <text>
+    <en>Show the size, boxes and bleeds of the pages, and the commands recorded in the document.</en>
+    <tr>Mostrar el tamaño, las cajas y los sangrados de las páginas, y las órdenes registradas en el documento.</tr>
+  </text>
+  <text>
+    <en>The interface is now in {name} (kept in {path}).</en>
+    <tr>La interfaz está ahora en {name} (se guarda en {path}).</tr>
+  </text>
+  <text>
+    <en>The language of the help, the messages and the window. The choice is kept in the configuration file; --interface CODE changes it for one run only.</en>
+    <tr>El idioma de la ayuda, los mensajes y la ventana. La elección se guarda en el archivo de configuración; --interface CODE la cambia solo para una ejecución.</tr>
+  </text>
+  <text>
+    <en>machine-readable output</en>
+    <tr>salida legible por máquina</tr>
+  </text>
+  <text>
+    <en>list every page instead of grouping runs</en>
+    <tr>listar todas las páginas en lugar de agrupar series</tr>
+  </text>
+  <text>
+    <en>units for the report (default: --units)</en>
+    <tr>unidades del informe (por defecto: --units)</tr>
+  </text>
+  <text>
+    <en>page {page}</en>
+    <tr>página {page}</tr>
+  </text>
+  <text>
+    <en>pages {first}-{last}</en>
+    <tr>páginas {first}-{last}</tr>
+  </text>
+  <text>
+    <en>, rotated {degrees}°</en>
+    <tr>, girada {degrees}°</tr>
+  </text>
+  <text>
+    <en>; trim {size}, bleed L{left} B{bottom} R{right} T{top} {unit}</en>
+    <tr>; corte {size}, sangrado L{left} B{bottom} R{right} T{top} {unit}</tr>
+  </text>
+  <text>
+    <en>, {count} annotation</en>
+    <tr>, {count} anotación</tr>
+  </text>
+  <text>
+    <en>, {count} annotations</en>
+    <tr>, {count} anotaciones</tr>
+  </text>
+  <text>
+    <en>Recorded commands (replay with 'replay --from'):</en>
+    <tr>Órdenes registradas (repetir con 'replay --from'):</tr>
+  </text>
+  <text>
+    <en>the language to keep for the interface; without it, show the languages and the one in use</en>
+    <tr>el idioma que conservar para la interfaz; sin él, mostrar los idiomas y el que está en uso</tr>
+  </text>
+  <text>
+    <en>Languages of the interface:</en>
+    <tr>Idiomas de la interfaz:</tr>
+  </text>
+  <text>
+    <en>Configuration file: {path}</en>
+    <tr>Archivo de configuración: {path}</tr>
+  </text>
+  <text>
+    <en>the language {code} cannot be used: {error}</en>
+    <tr>no se puede usar el idioma {code}: {error}</tr>
+  </text>
+  <text>
+    <en>Insert Pages: blank pages or pages from a file, at a position, at intervals, or until a condition holds (e.g. --until multiple:4). Without an input PDF, creates a new document.</en>
+    <tr>Insertar páginas: páginas en blanco o páginas de un archivo, en una posición, a intervalos o hasta que se cumpla una condición (p. ej. --until multiple:4). Sin un PDF de entrada, crea un documento nuevo.</tr>
+  </text>
+  <text>
+    <en>insert N blank pages</en>
+    <tr>insertar N páginas en blanco</tr>
+  </text>
+  <text>
+    <en>insert pages from this PDF</en>
+    <tr>insertar páginas de este PDF</tr>
+  </text>
+  <text>
+    <en>pages of --file to insert</en>
+    <tr>páginas de --file que insertar</tr>
+  </text>
+  <text>
+    <en>copies of the inserted pages (default: 1)</en>
+    <tr>copias de las páginas insertadas (por defecto: 1)</tr>
+  </text>
+  <text>
+    <en>copies as A A B B instead of A B A B</en>
+    <tr>copias como A A B B en lugar de A B A B</tr>
+  </text>
+  <text>
+    <en>insert before this page (e.g. 1, LAST)</en>
+    <tr>insertar antes de esta página (p. ej., 1, LAST)</tr>
+  </text>
+  <text>
+    <en>insert after this page (e.g. 3, LAST-1)</en>
+    <tr>insertar después de esta página (p. ej., 3, LAST-1)</tr>
+  </text>
+  <text>
+    <en>insert at the start or end (default)</en>
+    <tr>insertar al principio o al final (por defecto)</tr>
+  </text>
+  <text>
+    <en>blank page size (paper or WxH); default: size of a neighbouring page</en>
+    <tr>tamaño de las páginas en blanco (papel o WxH); por defecto: el tamaño de una página vecina</tr>
+  </text>
+  <text>
+    <en>blank pages the same size as this page</en>
+    <tr>páginas en blanco del mismo tamaño que esta página</tr>
+  </text>
+  <text>
+    <en>insert at intervals: insert, then skip K original pages, and repeat</en>
+    <tr>insertar a intervalos: insertar, luego saltar K páginas originales, y repetir</tr>
+  </text>
+  <text>
+    <en>with --file and --every: insert the whole selection each time, or the next N pages</en>
+    <tr>con --file y --every: insertar la selección completa cada vez, o las N páginas siguientes</tr>
+  </text>
+  <text>
+    <en>with --each-time N: stop when the file's pages run out instead of starting again</en>
+    <tr>con --each-time N: detenerse cuando se acaben las páginas del archivo en lugar de volver a empezar</tr>
+  </text>
+  <text>
+    <en>insert only if the page count meets COND: odd, even, lt:N, ge:N, multiple:N</en>
+    <tr>insertar solo si el número de páginas cumple COND: odd, even, lt:N, ge:N, multiple:N</tr>
+  </text>
+  <text>
+    <en>insert unless COND is met</en>
+    <tr>insertar salvo que se cumpla COND</tr>
+  </text>
+  <text>
+    <en>insert pages one at a time until COND is met (up to the number requested)</en>
+    <tr>insertar páginas de una en una hasta que se cumpla COND (hasta el número pedido)</tr>
+  </text>
+  <text>
+    <en>invalid condition {cond!r} (odd, even, lt:N, ge:N, multiple:N)</en>
+    <tr>condición no válida {cond!r} (odd, even, lt:N, ge:N, multiple:N)</tr>
+  </text>
+  <text>
+    <en>multiple:N needs N &gt; 0</en>
+    <tr>multiple:N necesita N &gt; 0</tr>
+  </text>
+  <text>
+    <en>insertion page is out of range</en>
+    <tr>la página de inserción está fuera de intervalo</tr>
+  </text>
+  <text>
+    <en>the result has no pages</en>
+    <tr>el resultado no tiene páginas</tr>
+  </text>
+  <text>
+    <en>--blank must be zero or more</en>
+    <tr>--blank debe ser cero o más</tr>
+  </text>
+  <text>
+    <en>conditions can't be combined with --every</en>
+    <tr>las condiciones no pueden combinarse con --every</tr>
+  </text>
+  <text>
+    <en>Impose PDF pages: booklets, n-up, step and repeat and more</en>
+    <tr>Imponer páginas PDF: folletos, n-up, paso y repetición y más</tr>
+  </text>
+  <text>
+    <en>the applications menu</en>
+    <tr>el menú de aplicaciones</tr>
+  </text>
+  <text>
+    <en>the Start menu</en>
+    <tr>el menú Inicio</tr>
+  </text>
+  <text>
+    <en>Applications (in your home folder)</en>
+    <tr>Aplicaciones (en su carpeta personal)</tr>
+  </text>
+  <text>
+    <en>Added py-imposition to {where}:</en>
+    <tr>Se añadió py-imposition a {where}:</tr>
+  </text>
+  <text>
+    <en>It starts the window with:</en>
+    <tr>Inicia la ventana con:</tr>
+  </text>
+  <text>
+    <en>If that Python environment moves or is rebuilt, run this again.</en>
+    <tr>Si ese entorno de Python se mueve o se reconstruye, vuelva a ejecutar esto.</tr>
+  </text>
+  <text>
+    <en>could not make the shortcut {path}: {output}</en>
+    <tr>no se pudo crear el acceso directo {path}: {output}</tr>
+  </text>
+  <text>
+    <en>Add the py-imposition window to the applications menu, or remove it. Everything goes in your own folders; no administrator rights are needed.</en>
+    <tr>Añadir la ventana de py-imposition al menú de aplicaciones, o quitarla. Todo va en sus propias carpetas; no se necesitan permisos de administrador.</tr>
+  </text>
+  <text>
+    <en>remove what was added</en>
+    <tr>quitar lo que se añadió</tr>
+  </text>
+  <text>
+    <en>the window needs PySide6, which is not installed for {executable}; install py-imposition with the gui extra: pip install 'py-imposition[gui]' (or uv tool install 'py-imposition[gui]')</en>
+    <tr>la ventana necesita PySide6, que no está instalado para {executable}; instale py-imposition con el extra gui: pip install 'py-imposition[gui]' (o uv tool install 'py-imposition[gui]')</tr>
+  </text>
+  <text>
+    <en>{app} exists and was not made by py-imposition-install; move it away first</en>
+    <tr>{app} existe y no lo creó py-imposition-install; muévalo antes a otro lugar</tr>
+  </text>
+  <text>
+    <en>py-imposition-install: {error}</en>
+    <tr>py-imposition-install: {error}</tr>
+  </text>
+  <text>
+    <en>Removed py-imposition from {where}.</en>
+    <tr>Se quitó py-imposition de {where}.</tr>
+  </text>
+  <text>
+    <en>There was nothing to remove.</en>
+    <tr>No había nada que quitar.</tr>
+  </text>
+  <text>
+    <en>layout file (TOML); see the description</en>
+    <tr>archivo de disposición (TOML); véase la descripción</tr>
+  </text>
+  <text>
+    <en>drop crop mark segments that would overlap pages</en>
+    <tr>omitir los segmentos de las marcas de corte que se solaparían con las páginas</tr>
+  </text>
+  <text>
+    <en>layout has no [[place]] entries</en>
+    <tr>la disposición no tiene entradas [[place]]</tr>
+  </text>
+  <text>
+    <en>sides must be single, double-h or double-v</en>
+    <tr>sides debe ser single, double-h o double-v</tr>
+  </text>
+  <text>
+    <en>{number} page(s) were not placed (repeat = false)</en>
+    <tr>{number} página(s) no se colocaron (repeat = false)</tr>
+  </text>
+  <text>
+    <en>cannot read layout {layout}: {error}</en>
+    <tr>no se puede leer la disposición {layout}: {error}</tr>
+  </text>
+  <text>
+    <en>place.sheet {sheet} is outside 1..{per_cycle_sheets}</en>
+    <tr>place.sheet {sheet} está fuera de 1..{per_cycle_sheets}</tr>
+  </text>
+  <text>
+    <en>place.side must be front, back or both</en>
+    <tr>place.side debe ser front, back o both</tr>
+  </text>
+  <text>
+    <en>back placements need sides = double-h or double-v</en>
+    <tr>las colocaciones en el reverso necesitan sides = double-h o double-v</tr>
+  </text>
+  <text>
+    <en>page {sl} is out of range</en>
+    <tr>la página {sl} está fuera del intervalo</tr>
+  </text>
+  <text>
+    <en>invalid page number {token!r}</en>
+    <tr>número de página no válido {token!r}</tr>
+  </text>
+  <text>
+    <en>invalid parity {parity!r}</en>
+    <tr>paridad no válida {parity!r}</tr>
+  </text>
+  <text>
+    <en>page {page} is out of range (document has {number} pages)</en>
+    <tr>la página {page} está fuera del intervalo (el documento tiene {number} páginas)</tr>
+  </text>
+  <text>
+    <en>Trim And Shift: remove or add space at page edges, make pages the same size, and shift contents (e.g. for binding offsets).</en>
+    <tr>Recortar y desplazar: quitar o añadir espacio en los bordes de las páginas, igualar el tamaño de las páginas y desplazar el contenido (p. ej., para desplazamientos de encuadernación).</tr>
+  </text>
+  <text>
+    <en>Creep pages for binding: shift (or squeeze) page contents so they line up after folding and trimming. Run before 'booklet'.</en>
+    <tr>Compensar el corrimiento de las páginas para la encuadernación: desplazar (o comprimir) el contenido de las páginas para que quede alineado tras plegar y cortar. Ejecutar antes de 'booklet'.</tr>
+  </text>
+  <text>
+    <en>Adjust Page Sizes: scale pages to a size or percentage, rotate to fit, verify sizes.</en>
+    <tr>Ajustar tamaños de página: escalar las páginas a un tamaño o porcentaje, girarlas para que se ajusten, verificar tamaños.</tr>
+  </text>
+  <text>
+    <en>Tile Pages: split each page into smaller pages, optionally overlapping.</en>
+    <tr>Páginas en mosaico: dividir cada página en páginas más pequeñas, con solapamiento opcional.</tr>
+  </text>
+  <text>
+    <en>expected DIRECTION=LENGTH, got {value!r}</en>
+    <tr>se esperaba DIRECTION=LENGTH, se obtuvo {value!r}</tr>
+  </text>
+  <text>
+    <en>unknown direction {value!r} (left, right, up, down)</en>
+    <tr>dirección desconocida {value!r} (left, right, up, down)</tr>
+  </text>
+  <text>
+    <en>remove space from an edge (left/right/top/bottom/all); repeatable</en>
+    <tr>recortar espacio de un borde (left/right/top/bottom/all); se puede repetir</tr>
+  </text>
+  <text>
+    <en>add space around an edge (can make pages larger than the original); repeatable</en>
+    <tr>añadir espacio en un borde (puede hacer las páginas más grandes que el original); repetible</tr>
+  </text>
+  <text>
+    <en>make every page this size (paper name or WxH), centred, cropping or padding</en>
+    <tr>dar a todas las páginas este tamaño (nombre de papel o WxH), centradas, recortando o rellenando</tr>
+  </text>
+  <text>
+    <en>shift contents by a fixed amount: left/right/up/down</en>
+    <tr>desplazar el contenido en una cantidad fija: left/right/up/down</tr>
+  </text>
+  <text>
+    <en>shift by an amount varying from FIRST (first page) to LAST (last page), e.g. right=0:3mm</en>
+    <tr>desplazar en una cantidad que varía de FIRST (primera página) a LAST (última página), p. ej. right=0:3mm</tr>
+  </text>
+  <text>
+    <en>improved: never uncover cropped content, move contents; original: move the page origin and allow uncovering (default: improved)</en>
+    <tr>improved: no descubrir nunca contenido recortado, mover el contenido; original: mover el origen de la página y permitir descubrirlo (por defecto: improved)</tr>
+  </text>
+  <text>
+    <en>keep bleed/trim margins the same after trimming</en>
+    <tr>mantener iguales los márgenes de sangrado/corte después de recortar</tr>
+  </text>
+  <text>
+    <en>document: one folded booklet; signatures: separately folded signatures</en>
+    <tr>document: un único folleto plegado; signatures: cuadernillos plegados por separado</tr>
+  </text>
+  <text>
+    <en>pages per signature with --scope signatures (default: 16)</en>
+    <tr>páginas por cuadernillo con --scope signatures (por defecto: 16)</tr>
+  </text>
+  <text>
+    <en>paper thickness (e.g. 0.1mm)</en>
+    <tr>grosor del papel (p. ej. 0.1mm)</tr>
+  </text>
+  <text>
+    <en>total shift for the most-shifted pages</en>
+    <tr>desplazamiento total de las páginas más desplazadas</tr>
+  </text>
+  <text>
+    <en>inside: centre pages move most (toward the spine); outside: outer pages move most (toward the fore-edge), e.g. for a centre spread (default: inside)</en>
+    <tr>inside: las páginas centrales se desplazan más (hacia el lomo); outside: las páginas exteriores se desplazan más (hacia el corte delantero), p. ej., para un pliego central (por defecto: inside)</tr>
+  </text>
+  <text>
+    <en>shift contents, or scale them horizontally (default: shift)</en>
+    <tr>desplazar el contenido o escalarlo horizontalmente (por defecto: shift)</tr>
+  </text>
+  <text>
+    <en>binding edge (default: left)</en>
+    <tr>borde de encuadernación (por defecto: left)</tr>
+  </text>
+  <text>
+    <en>signature size must be a multiple of 4</en>
+    <tr>el tamaño del cuadernillo debe ser un múltiplo de 4</tr>
+  </text>
+  <text>
+    <en>target size: paper name or WxH</en>
+    <tr>tamaño de destino: nombre del papel o WxH</tr>
+  </text>
+  <text>
+    <en>scale by a percentage, e.g. 200</en>
+    <tr>escalar en un porcentaje, p. ej. 200</tr>
+  </text>
+  <text>
+    <en>make pages the size of this page</en>
+    <tr>dar a las páginas el tamaño de esta página</tr>
+  </text>
+  <text>
+    <en>orientation of --size (default: as-is)</en>
+    <tr>orientación de --size (por defecto: as-is)</tr>
+  </text>
+  <text>
+    <en>anamorphic: stretch to fit; proportional: same scale both ways, then pad; none: no scaling, pad or crop (default: proportional)</en>
+    <tr>anamorphic: estirar para ajustar; proportional: la misma escala en ambos sentidos y luego rellenar; none: sin escalado, rellenar o recortar (por defecto: proportional)</tr>
+  </text>
+  <text>
+    <en>rotate pages 90° when that matches the target shape better</en>
+    <tr>girar las páginas 90° cuando así se ajusten mejor a la forma de destino</tr>
+  </text>
+  <text>
+    <en>only enlarge or only shrink pages (default: both)</en>
+    <tr>solo ampliar o solo reducir las páginas (por defecto: ambas cosas)</tr>
+  </text>
+  <text>
+    <en>only adjust pages whose size is within this distance of the target</en>
+    <tr>ajustar solo las páginas cuyo tamaño esté a esta distancia del objetivo</tr>
+  </text>
+  <text>
+    <en>don't change anything; fail if pages differ</en>
+    <tr>no cambiar nada; fallar si las páginas difieren</tr>
+  </text>
+  <text>
+    <en>anamorphic: size the trim area and keep bleed margins the same</en>
+    <tr>anamorphic: dimensionar el área de corte y mantener iguales los márgenes de sangrado</tr>
+  </text>
+  <text>
+    <en>never reveal content previously cropped when adding space</en>
+    <tr>no revelar nunca contenido recortado previamente al añadir espacio</tr>
+  </text>
+  <text>
+    <en>clockwise angle in degrees; 90/180/270 set the page rotation, other values rotate the contents freely</en>
+    <tr>ángulo en grados en sentido horario; 90/180/270 fijan la rotación de la página, otros valores giran libremente el contenido</tr>
+  </text>
+  <text>
+    <en>rotate only tall or only wide pages</en>
+    <tr>girar solo las páginas altas o solo las anchas</tr>
+  </text>
+  <text>
+    <en>free rotation: keep the original page size and bleed instead of enlarging</en>
+    <tr>giro libre: conservar el tamaño y el sangrado originales de la página en lugar de ampliarla</tr>
+  </text>
+  <text>
+    <en>free rotation: crop to the visible page first so only blank background appears</en>
+    <tr>giro libre: recortar primero a la página visible para que solo aparezca fondo en blanco</tr>
+  </text>
+  <text>
+    <en>pages to duplicate (default: all)</en>
+    <tr>páginas que duplicar (por defecto: todas)</tr>
+  </text>
+  <text>
+    <en>number of extra copies</en>
+    <tr>número de copias adicionales</tr>
+  </text>
+  <text>
+    <en>1 1 1 2 2 2 instead of 1 2 1 2 1 2</en>
+    <tr>1 1 1 2 2 2 en lugar de 1 2 1 2 1 2</tr>
+  </text>
+  <text>
+    <en>--copies must be zero or more</en>
+    <tr>--copies debe ser cero o más</tr>
+  </text>
+  <text>
+    <en>pages to delete</en>
+    <tr>páginas que eliminar</tr>
+  </text>
+  <text>
+    <en>cannot delete every page</en>
+    <tr>no se pueden eliminar todas las páginas</tr>
+  </text>
+  <text>
+    <en>pages to move</en>
+    <tr>páginas que mover</tr>
+  </text>
+  <text>
+    <en>move before this page (original numbering)</en>
+    <tr>mover antes de esta página (numeración original)</tr>
+  </text>
+  <text>
+    <en>move after this page (original numbering)</en>
+    <tr>mover después de esta página (numeración original)</tr>
+  </text>
+  <text>
+    <en>the target page is one of the pages being moved</en>
+    <tr>la página de destino es una de las páginas que se mueven</tr>
+  </text>
+  <text>
+    <en>split each page into a grid, e.g. 2x1</en>
+    <tr>dividir cada página en una cuadrícula, p. ej. 2x1</tr>
+  </text>
+  <text>
+    <en>exact tile sizes: a width list and a height list separated by '/', e.g. '4in 4.5in / 4in 3in' (lists repeat)</en>
+    <tr>tamaños exactos de las teselas: una lista de anchos y una de altos separadas por '/', p. ej., '4in 4.5in / 4in 3in' (las listas se repiten)</tr>
+  </text>
+  <text>
+    <en>cut a 2-up booklet back into single pages in reading order</en>
+    <tr>cortar un folleto 2-up de nuevo en páginas sueltas en orden de lectura</tr>
+  </text>
+  <text>
+    <en>--undo-booklet perfect: pages per signature</en>
+    <tr>--undo-booklet perfect: páginas por cuadernillo</tr>
+  </text>
+  <text>
+    <en>--undo-booklet binding edge</en>
+    <tr>--undo-booklet: borde de encuadernación</tr>
+  </text>
+  <text>
+    <en>overlap between tiles</en>
+    <tr>solapamiento entre teselas</tr>
+  </text>
+  <text>
+    <en>make the overlap into bleed (trim/bleed boxes)</en>
+    <tr>convertir el solapamiento en sangrado (cajas de corte/sangrado)</tr>
+  </text>
+  <text>
+    <en>split only wide pages (e.g. reader's spreads)</en>
+    <tr>dividir solo las páginas anchas (p. ej. dobles páginas de lector)</tr>
+  </text>
+  <text>
+    <en>give --grid, --sizes or --undo-booklet</en>
+    <tr>indique --grid, --sizes o --undo-booklet</tr>
+  </text>
+  <text>
+    <en>expected EDGE=LENGTH, got {value!r}</en>
+    <tr>se esperaba EDGE=LENGTH, se obtuvo {value!r}</tr>
+  </text>
+  <text>
+    <en>unknown direction {value!r}</en>
+    <tr>dirección desconocida {value!r}</tr>
+  </text>
+  <text>
+    <en>page {index} would have no area left</en>
+    <tr>la página {index} se quedaría sin superficie</tr>
+  </text>
+  <text>
+    <en>--verify needs --size or --same-as</en>
+    <tr>--verify necesita --size o --same-as</tr>
+  </text>
+  <text>
+    <en>pages not the required size: {pages}</en>
+    <tr>páginas sin el tamaño requerido: {pages}</tr>
+  </text>
+  <text>
+    <en>tile sizes must be positive</en>
+    <tr>los tamaños de las teselas deben ser positivos</tr>
+  </text>
+  <text>
+    <en>unknown edge {edge!r} (left, right, top, bottom, all)</en>
+    <tr>borde desconocido {edge!r} (left, right, top, bottom, all)</tr>
+  </text>
+  <text>
+    <en>page {page}: {width}x{height}pt</en>
+    <tr>página {page}: {width}x{height}pt</tr>
+  </text>
+  <text>
+    <en>page {index}: bleed removed by resizing</en>
+    <tr>página {index}: sangrado eliminado al cambiar el tamaño</tr>
+  </text>
+  <text>
+    <en>--grid must look like 2x1</en>
+    <tr>--grid debe tener la forma 2x1</tr>
+  </text>
+  <text>
+    <en>preferences</en>
+    <tr>preferencias</tr>
+  </text>
+  <text>
+    <en>unit for lengths given without a suffix (default: cm)</en>
+    <tr>unidad de las longitudes dadas sin sufijo (por defecto: cm)</tr>
+  </text>
+  <text>
+    <en>colour for marks and registration-coloured text: black, CMYK, or all separations</en>
+    <tr>color de las marcas y del texto en color de registro: negro, CMYK o todas las separaciones</tr>
+  </text>
+  <text>
+    <en>use page bleed boxes when imposing, or ignore them (default: use)</en>
+    <tr>usar las cajas de sangrado de las páginas al imponer, o ignorarlas (por defecto: use)</tr>
+  </text>
+  <text>
+    <en>keep a TrimBox when removing bleeds (PDF/X)</en>
+    <tr>conservar una TrimBox al eliminar los sangrados (PDF/X)</tr>
+  </text>
+  <text>
+    <en>no warnings</en>
+    <tr>sin avisos</tr>
+  </text>
+  <text>
+    <en>the language of the interface, for this run only (to keep a choice, use the 'interface' command)</en>
+    <tr>el idioma de la interfaz, solo para esta ejecución (para conservar una elección, use la orden 'interface')</tr>
+  </text>
+  <text>
+    <en>PDF imposition toolkit: booklets, n-up, step and repeat, shuffling, trimming, bleeds, page numbers, stamps, automation sequences and hot folders.</en>
+    <tr>Herramientas de imposición de PDF: folletos, n-up, paso y repetición, reordenación, recorte, sangrados, números de página, sellos, secuencias de automatización y carpetas vigiladas.</tr>
+  </text>
+  <text>
+    <en>Run '%(prog)s COMMAND -h' for help on a command. '%(prog)s file.pdf' on its own makes a booklet with the default settings.</en>
+    <tr>Ejecute '%(prog)s COMMAND -h' para obtener ayuda sobre una orden. '%(prog)s file.pdf' por sí solo crea un folleto con los ajustes por defecto.</tr>
+  </text>
+  <text>
+    <en>COMMAND</en>
+    <tr>COMMAND</tr>
+  </text>
+  <text>
+    <en>unknown command in step: {items!r}</en>
+    <tr>orden desconocida en el paso: {items!r}</tr>
+  </text>
+  <text>
+    <en>output PDF (default: &lt;input&gt;-&lt;command&gt;.pdf)</en>
+    <tr>PDF de salida (por defecto: &lt;input&gt;-&lt;command&gt;.pdf)</tr>
+  </text>
+  <text>
+    <en>invalid options in step: {items}</en>
+    <tr>opciones no válidas en el paso: {items}</tr>
+  </text>
+  <text>
+    <en>step {index} ({steps}) produced several documents; it must be the last step</en>
+    <tr>el paso {index} ({steps}) produjo varios documentos; debe ser el último paso</tr>
+  </text>
+  <text>
+    <en>source PDF</en>
+    <tr>PDF de origen</tr>
+  </text>
+  <text>
+    <en>Imposition by example: every output records the commands that made it. Replay them on a new document, or export them as a sequence file.</en>
+    <tr>Imposición por ejemplo: cada salida registra las órdenes que la produjeron. Repítalas en un documento nuevo o expórtelas como archivo de secuencia.</tr>
+  </text>
+  <text>
+    <en>Watching {folder} (sequence: {prefs}); Ctrl+C to stop</en>
+    <tr>Vigilando {folder} (secuencia: {prefs}); Ctrl+C para detener</tr>
+  </text>
+  <text>
+    <en>Hot folders: watch a folder and run a sequence on every PDF dropped into it. Results go to an output folder; inputs move to done/ or errors/. Ctrl+C to stop.</en>
+    <tr>Carpetas vigiladas: vigilar una carpeta y ejecutar una secuencia en cada PDF que se deje en ella. Los resultados van a una carpeta de salida; las entradas se mueven a done/ o errors/. Ctrl+C para detener.</tr>
+  </text>
+  <text>
+    <en>sequence {path} has no 'steps' list</en>
+    <tr>la secuencia {path} no tiene lista 'steps'</tr>
+  </text>
+  <text>
+    <en>sequence file (TOML); see the description</en>
+    <tr>archivo de secuencia (TOML); véase la descripción</tr>
+  </text>
+  <text>
+    <en>directory for outputs (default: next to each input)</en>
+    <tr>directorio para los resultados (por defecto: junto a cada entrada)</tr>
+  </text>
+  <text>
+    <en>output name suffix (default: the sequence name)</en>
+    <tr>sufijo del nombre de salida (por defecto: el nombre de la secuencia)</tr>
+  </text>
+  <text>
+    <en>-o can only be used with a single input; use --out-dir</en>
+    <tr>-o solo puede usarse con una única entrada; use --out-dir</tr>
+  </text>
+  <text>
+    <en>a PDF made by this tool; its recorded commands are replayed</en>
+    <tr>un PDF hecho con esta herramienta; se repiten las órdenes que tiene registradas</tr>
+  </text>
+  <text>
+    <en>PDF to process</en>
+    <tr>PDF que procesar</tr>
+  </text>
+  <text>
+    <en>write the recorded commands to this sequence file instead</en>
+    <tr>escribir en cambio las órdenes registradas en este archivo de secuencia</tr>
+  </text>
+  <text>
+    <en>{example} has no recorded commands</en>
+    <tr>{example} no tiene órdenes registradas</tr>
+  </text>
+  <text>
+    <en>Wrote {path} ({count} step)</en>
+    <tr>Se escribió {path} ({count} paso)</tr>
+  </text>
+  <text>
+    <en>Wrote {path} ({count} steps)</en>
+    <tr>Se escribió {path} ({count} pasos)</tr>
+  </text>
+  <text>
+    <en>{input} not found</en>
+    <tr>no se encontró {input}</tr>
+  </text>
+  <text>
+    <en>hot folder to watch for PDFs</en>
+    <tr>carpeta vigilada en la que buscar PDF</tr>
+  </text>
+  <text>
+    <en>sequence file to run on each PDF</en>
+    <tr>archivo de secuencia que ejecutar en cada PDF</tr>
+  </text>
+  <text>
+    <en>output folder (default: FOLDER/out)</en>
+    <tr>carpeta de salida (por defecto: FOLDER/out)</tr>
+  </text>
+  <text>
+    <en>processed inputs are moved here (default: FOLDER/done)</en>
+    <tr>las entradas procesadas se mueven aquí (por defecto: FOLDER/done)</tr>
+  </text>
+  <text>
+    <en>inputs that failed are moved here (default: FOLDER/errors)</en>
+    <tr>las entradas que fallaron se mueven aquí (por defecto: FOLDER/errors)</tr>
+  </text>
+  <text>
+    <en>seconds between scans (default: 2)</en>
+    <tr>segundos entre exploraciones (por defecto: 2)</tr>
+  </text>
+  <text>
+    <en>process what is there now, then exit</en>
+    <tr>procesar lo que haya ahora y terminar</tr>
+  </text>
+  <text>
+    <en>{folder} is not a folder</en>
+    <tr>{folder} no es una carpeta</tr>
+  </text>
+  <text>
+    <en>cannot read sequence {path}: {error}</en>
+    <tr>no se puede leer la secuencia {path}: {error}</tr>
+  </text>
+  <text>
+    <en>{strftime} {name} FAILED: {error}</en>
+    <tr>{strftime} {name} FALLÓ: {error}</tr>
+  </text>
+  <text>
+    <en>Shuffle Pages For Imposing. Usually followed by 'nup'.</en>
+    <tr>Reordenar páginas para la imposición. Normalmente seguido de 'nup'.</tr>
+  </text>
+  <text>
+    <en>Shuffle Even/Odd Pages: handy for printing double-sided on a single-sided printer.</en>
+    <tr>Reordenar páginas pares/impares: útil para imprimir a doble cara en una impresora de una sola cara.</tr>
+  </text>
+  <text>
+    <en>empty shuffle rule</en>
+    <tr>regla de reordenación vacía</tr>
+  </text>
+  <text>
+    <en>group size must be at least 1</en>
+    <tr>el tamaño del grupo debe ser al menos 1</tr>
+  </text>
+  <text>
+    <en>page order for one group, e.g. '4 1 2 3' or '8 1 5* 4* 2 7 3* 6*'. Suffix * = upside down, &gt; = 90° clockwise, &lt; = 90° anticlockwise; X = blank; a..b = range</en>
+    <tr>orden de las páginas de un grupo, p. ej. '4 1 2 3' o '8 1 5* 4* 2 7 3* 6*'. Sufijo * = cabeza abajo, &gt; = 90° en sentido horario, &lt; = 90° en sentido antihorario; X = en blanco; a..b = intervalo</tr>
+  </text>
+  <text>
+    <en>group size: pages before the rule repeats (default: highest page number in the rule)</en>
+    <tr>tamaño del grupo: páginas antes de que se repita la regla (por defecto: el número de página más alto de la regla)</tr>
+  </text>
+  <text>
+    <en>normal/perfect bound: repeat the rule every group; saddle: the rule describes the first sheet of a saddle-stitched book and stretches to any length; cut-single / cut-double: cut stacks printed on one or both sides (default: normal)</en>
+    <tr>normal/perfect bound: repetir la regla en cada grupo; saddle: la regla describe el primer pliego de un libro grapado a caballete y se extiende a cualquier longitud; cut-single / cut-double: pilas cortadas impresas a una o a dos caras (por defecto: normal)</tr>
+  </text>
+  <text>
+    <en>cut stacks: consecutive pages per group (advanced stacks A)</en>
+    <tr>corte y apilado: páginas consecutivas por grupo (pilas avanzadas A)</tr>
+  </text>
+  <text>
+    <en>cut stacks: start the stacks again after B sheets; 0 = never (advanced stacks B)</en>
+    <tr>corte y apilado: volver a empezar las pilas después de B pliegos; 0 = nunca (pilas avanzadas B)</tr>
+  </text>
+  <text>
+    <en>rule omits page(s) {items} of each group; they will be dropped</en>
+    <tr>la regla omite la(s) página(s) {items} de cada grupo; se descartarán</tr>
+  </text>
+  <text>
+    <en>rule repeats page(s) {items}; they will be duplicated</en>
+    <tr>la regla repite la(s) página(s) {items}; se duplicarán</tr>
+  </text>
+  <text>
+    <en>none: keep order; odds-first: all odd pages then all even; split: two documents; join: interleave this document (odd pages) with --evens (default: odds-first)</en>
+    <tr>none: mantener el orden; odds-first: todas las páginas impares y luego todas las pares; split: dos documentos; join: intercalar este documento (páginas impares) con --evens (por defecto: odds-first)</tr>
+  </text>
+  <text>
+    <en>with --mode join: the document holding the even pages</en>
+    <tr>con --mode join: el documento que contiene las páginas pares</tr>
+  </text>
+  <text>
+    <en>reverse the order of the even pages</en>
+    <tr>invertir el orden de las páginas pares</tr>
+  </text>
+  <text>
+    <en>turn the even pages upside down</en>
+    <tr>poner cabeza abajo las páginas pares</tr>
+  </text>
+  <text>
+    <en>invalid token {tok!r} in shuffle rule</en>
+    <tr>elemento no válido {tok!r} en la regla de reordenación</tr>
+  </text>
+  <text>
+    <en>page {page} in rule is outside the group size {group}</en>
+    <tr>la página {page} de la regla está fuera del tamaño del grupo {group}</tr>
+  </text>
+  <text>
+    <en>--mode join needs --evens FILE</en>
+    <tr>--mode join necesita --evens FILE</tr>
+  </text>
+  <text>
+    <en>saddle repeat needs an even group size</en>
+    <tr>la repetición saddle necesita un tamaño de grupo par</tr>
+  </text>
+  <text>
+    <en>unknown repeat mode {repeat!r}</en>
+    <tr>modo de repetición desconocido {repeat!r}</tr>
+  </text>
+  <text>
+    <en>group size {group} must be a multiple of {unit} for these cut stacks</en>
+    <tr>el tamaño del grupo {group} debe ser múltiplo de {unit} para estas pilas cortadas</tr>
+  </text>
+  <text>
+    <en>Split/merge (partials): split a document by odd/even, page lists, equal sizes or duplicates, run a sequence on each part, then merge or keep the parts.</en>
+    <tr>Dividir/unir (parciales): dividir un documento por impares/pares, listas de páginas, tamaños iguales o duplicados, ejecutar una secuencia en cada parte y luego unir o conservar las partes.</tr>
+  </text>
+  <text>
+    <en>odd-even: two parts; list: pages listed per part; equal: parts of --size pages; duplicates: --copies complete copies of the document</en>
+    <tr>odd-even: dos partes; list: páginas indicadas para cada parte; equal: partes de --size páginas; duplicates: --copies copias completas del documento</tr>
+  </text>
+  <text>
+    <en>with --by list: parts separated by ';', e.g. '1..4 9..12; 5..8*'. Pages may use LAST/LAST-n, ranges a..b, rotation suffixes * &gt; &lt; and X for a blank</en>
+    <tr>con --by list: partes separadas por ';', p. ej. '1..4 9..12; 5..8*'. Las páginas pueden usar LAST/LAST-n, intervalos a..b, sufijos de rotación * &gt; &lt; y X para una en blanco</tr>
+  </text>
+  <text>
+    <en>with --by list: require exactly this many pages (0 = any)</en>
+    <tr>con --by list: exigir exactamente este número de páginas (0 = cualquiera)</tr>
+  </text>
+  <text>
+    <en>skip listed pages beyond the end</en>
+    <tr>omitir las páginas indicadas que estén más allá del final</tr>
+  </text>
+  <text>
+    <en>with --by equal: pages per part</en>
+    <tr>con --by equal: páginas por parte</tr>
+  </text>
+  <text>
+    <en>with --by duplicates: number of copies</en>
+    <tr>con --by duplicates: número de copias</tr>
+  </text>
+  <text>
+    <en>sequence file to run on every part</en>
+    <tr>archivo de secuencia que ejecutar en cada parte</tr>
+  </text>
+  <text>
+    <en>sequence file for part N (overrides --sequence); repeatable</en>
+    <tr>archivo de secuencia para la parte N (anula --sequence); se puede repetir</tr>
+  </text>
+  <text>
+    <en>inline commands for part N, separated by ';', e.g. '2=nup --cols 2 --rows 2 --scale fit'; repeatable</en>
+    <tr>órdenes en línea para la parte N, separadas por ';', p. ej., '2=nup --cols 2 --rows 2 --scale fit'; repetible</tr>
+  </text>
+  <text>
+    <en>join the processed parts into one document</en>
+    <tr>unir las partes procesadas en un documento</tr>
+  </text>
+  <text>
+    <en>nothing to split</en>
+    <tr>nada que dividir</tr>
+  </text>
+  <text>
+    <en>invalid token {tok!r} in page list</en>
+    <tr>elemento no válido {tok!r} en la lista de páginas</tr>
+  </text>
+  <text>
+    <en>part {number} is empty</en>
+    <tr>la parte {number} está vacía</tr>
+  </text>
+  <text>
+    <en>page {page} does not exist (document has {number} pages)</en>
+    <tr>la página {page} no existe (el documento tiene {number} páginas)</tr>
+  </text>
+  <text>
+    <en>--by list needs --list</en>
+    <tr>--by list necesita --list</tr>
+  </text>
+  <text>
+    <en>expected {page_count} pages, document has {number}</en>
+    <tr>se esperaban {page_count} páginas, el documento tiene {number}</tr>
+  </text>
+  <text>
+    <en>the sequence for part {number} produced several documents</en>
+    <tr>la secuencia de la parte {number} produjo varios documentos</tr>
+  </text>
+  <text>
+    <en>--by equal needs --size N</en>
+    <tr>--by equal necesita --size N</tr>
+  </text>
+  <text>
+    <en>--by duplicates needs --copies N</en>
+    <tr>--by duplicates necesita --copies N</tr>
+  </text>
+  <text>
+    <en>invalid colour {spec!r} (black, red, #ff0000, rgb:255,0,0, cmyk:0,100,100,0, gray:50, registration)</en>
+    <tr>color no válido {spec!r} (black, red, #ff0000, rgb:255,0,0, cmyk:0,100,100,0, gray:50, registration)</tr>
+  </text>
+  <text>
+    <en>Stick On Text and Numbers: page numbers, Bates numbers, labels and fields. Remove later with 'peel --what text'.</en>
+    <tr>Pegar texto y números: números de página, números Bates, etiquetas y campos. Se quitan después con 'peel --what text'.</tr>
+  </text>
+  <text>
+    <en>Stick On PDF Pages: add a logo, stamp or advert from another PDF.</en>
+    <tr>Pegar páginas PDF: añadir un logotipo, sello o anuncio de otro PDF.</tr>
+  </text>
+  <text>
+    <en>Stick On Masking Tape: cover areas (e.g. old page numbers) with opaque rectangles. Remove later with 'peel --what tape'.</en>
+    <tr>Pegar cinta de enmascarar: cubrir zonas (p. ej. números de página antiguos) con rectángulos opacos. Se quita después con 'peel --what tape'.</tr>
+  </text>
+  <text>
+    <en>Peel Off Text and Numbers / Masking Tape / Registration Marks added by this tool, even after further imposition.</en>
+    <tr>Despegar texto y números / cinta de enmascarar / marcas de registro añadidos por esta herramienta, incluso tras una imposición posterior.</tr>
+  </text>
+  <text>
+    <en>Create Sample Document: grey pages with a thick border, a large page number and rules 20 mm and 1 inch from each edge.</en>
+    <tr>Crear documento de muestra: páginas grises con un borde grueso, un número de página grande y líneas a 20 mm y a 1 pulgada de cada borde.</tr>
+  </text>
+  <text>
+    <en>font file {path} is not TrueType (.ttf); only TrueType fonts can be embedded</en>
+    <tr>el archivo de fuente {path} no es TrueType (.ttf); solo se pueden incrustar fuentes TrueType</tr>
+  </text>
+  <text>
+    <en>text to add; [#] is the number, and fields like [Doc:NumPages], [Page], [Date], [Date:mdy], [Time], [DateTime], [File:Name], [File:Path], [File:Folder], [Doc:Title], [Computer] are replaced. Use \n for a new line. Default: '[#]'</en>
+    <tr>texto que añadir; [#] es el número, y se sustituyen campos como [Doc:NumPages], [Page], [Date], [Date:mdy], [Time], [DateTime], [File:Name], [File:Path], [File:Folder], [Doc:Title], [Computer]. Use \n para una línea nueva. Por defecto: '[#]'</tr>
+  </text>
+  <text>
+    <en>first number; leading zeros are kept (e.g. 00098 for Bates numbering) (default: 1)</en>
+    <tr>primer número; se conservan los ceros iniciales (p. ej., 00098 para la numeración Bates) (por defecto: 1)</tr>
+  </text>
+  <text>
+    <en>repeat each number N times</en>
+    <tr>repetir cada número N veces</tr>
+  </text>
+  <text>
+    <en>step between numbers (may be negative)</en>
+    <tr>incremento entre números (puede ser negativo)</tr>
+  </text>
+  <text>
+    <en>add text only every N-th page (numbers don't advance on skipped pages)</en>
+    <tr>añadir texto solo cada N páginas (los números no avanzan en las páginas omitidas)</tr>
+  </text>
+  <text>
+    <en>(default: bottom-center)</en>
+    <tr>(por defecto: bottom-center)</tr>
+  </text>
+  <text>
+    <en>horizontal offset from the position</en>
+    <tr>desplazamiento horizontal desde la posición</tr>
+  </text>
+  <text>
+    <en>vertical offset (to the text baseline) from the position (default: 1cm)</en>
+    <tr>desplazamiento vertical (hasta la línea base del texto) desde la posición (por defecto: 1cm)</tr>
+  </text>
+  <text>
+    <en>swap left and right positions on even pages (outside corners of a book)</en>
+    <tr>intercambiar las posiciones izquierda y derecha en las páginas pares (esquinas exteriores de un libro)</tr>
+  </text>
+  <text>
+    <en>standard PDF font name, TrueType file, or installed font name (embedded) (default: Helvetica)</en>
+    <tr>nombre de fuente PDF estándar, archivo TrueType o nombre de fuente instalada (incrustada) (por defecto: Helvetica)</tr>
+  </text>
+  <text>
+    <en>point size (default: 10)</en>
+    <tr>tamaño en puntos (por defecto: 10)</tr>
+  </text>
+  <text>
+    <en>black, red, #rrggbb, rgb:R,G,B, cmyk:C,M,Y,K (percent), gray:P, or registration</en>
+    <tr>black, red, #rrggbb, rgb:R,G,B, cmyk:C,M,Y,K (porcentaje), gray:P o registration</tr>
+  </text>
+  <text>
+    <en>text rotation, counterclockwise</en>
+    <tr>rotación del texto, en sentido antihorario</tr>
+  </text>
+  <text>
+    <en>--repeat-each and --every must be at least 1</en>
+    <tr>--repeat-each y --every deben ser al menos 1</tr>
+  </text>
+  <text>
+    <en>PDF whose pages are added</en>
+    <tr>PDF cuyas páginas se añaden</tr>
+  </text>
+  <text>
+    <en>pages of --file to use; they cycle over the target pages (default: all)</en>
+    <tr>páginas de --file que usar; se repiten cíclicamente sobre las páginas de destino (por defecto: todas)</tr>
+  </text>
+  <text>
+    <en>(default: center)</en>
+    <tr>(por defecto: center)</tr>
+  </text>
+  <text>
+    <en>horizontal offset, measured in the natural direction from the position</en>
+    <tr>desplazamiento horizontal, medido en la dirección natural desde la posición</tr>
+  </text>
+  <text>
+    <en>vertical offset</en>
+    <tr>desplazamiento vertical</tr>
+  </text>
+  <text>
+    <en>percentage (default: 100)</en>
+    <tr>porcentaje (por defecto: 100)</tr>
+  </text>
+  <text>
+    <en>scale to fit this box</en>
+    <tr>escalar para ajustar a esta caja</tr>
+  </text>
+  <text>
+    <en>with --fit: don't preserve the aspect ratio</en>
+    <tr>con --fit: no conservar la relación de aspecto</tr>
+  </text>
+  <text>
+    <en>clockwise rotation</en>
+    <tr>giro en sentido horario</tr>
+  </text>
+  <text>
+    <en>place behind the page content</en>
+    <tr>colocar detrás del contenido de la página</tr>
+  </text>
+  <text>
+    <en>area to cover, measured from --origin of the visible page; repeatable</en>
+    <tr>área que cubrir, medida desde --origin de la página visible; repetible</tr>
+  </text>
+  <text>
+    <en>corner the --rect coordinates are measured from (default: bottom-left)</en>
+    <tr>esquina desde la que se miden las coordenadas de --rect (por defecto: bottom-left)</tr>
+  </text>
+  <text>
+    <en>tape colour (default: white)</en>
+    <tr>color de la cinta (por defecto: white)</tr>
+  </text>
+  <text>
+    <en>text (Stick On Text), tape (masking tape), marks (crop marks/frames), pdf (stuck-on PDF pages), bleed (generated bleed), or all (default: text)</en>
+    <tr>text (texto pegado), tape (cinta de enmascarar), marks (marcas de corte/marcos), pdf (páginas PDF pegadas), bleed (sangrado generado) o all (por defecto: text)</tr>
+  </text>
+  <text>
+    <en>nothing to peel off ({what})</en>
+    <tr>nada que despegar ({what})</tr>
+  </text>
+  <text>
+    <en>page size: paper name or WxH (default: a4)</en>
+    <tr>tamaño de página: nombre del papel o WxH (por defecto: a4)</tr>
+  </text>
+  <text>
+    <en>number of pages (default: 8)</en>
+    <tr>número de páginas (por defecto: 8)</tr>
+  </text>
+  <text>
+    <en>--count must be at least 1</en>
+    <tr>--count debe ser al menos 1</tr>
+  </text>
+  <text>
+    <en>font {name!r} not found; use a standard font ({items}...) or a .ttf path</en>
+    <tr>no se encontró la fuente {name!r}; use una fuente estándar ({items}...) o una ruta a un .ttf</tr>
+  </text>
+  <text>
+    <en>cannot use font {path}: {error}</en>
+    <tr>no se puede usar la fuente {path}: {error}</tr>
+  </text>
+  <text>
+    <en>--start must be a whole number</en>
+    <tr>--start debe ser un número entero</tr>
+  </text>
+  <text>
+    <en>--rect needs X,Y,W,H, got {value!r}</en>
+    <tr>--rect necesita X,Y,W,H; se recibió {value!r}</tr>
+  </text>
+  <text>
+    <en>unknown paper size {spec!r}; use one of {items} or WxH like 21x29.7cm</en>
+    <tr>tamaño de papel desconocido {spec!r}; use uno de {items} o WxH como 21x29.7cm</tr>
+  </text>
+  <text>
+    <en>invalid length: {value!r}</en>
+    <tr>longitud no válida: {value!r}</tr>
+  </text>
+  <text>
+    <en>unknown unit {suffix!r} in {value!r} (use pt, mm, cm or in)</en>
+    <tr>unidad desconocida {suffix!r} en {value!r} (use pt, mm, cm o in)</tr>
+  </text>
+  <text>
+    <en>empty list of lengths</en>
+    <tr>lista de longitudes vacía</tr>
+  </text>
+  <text>
+    <en>invalid number in {value!r}</en>
+    <tr>número no válido en {value!r}</tr>
+  </text>
+  <text>
+    <en>%(heading)s:</en>
+    <tr>%(heading)s:</tr>
+  </text>
+  <text>
+    <en>%(prog)s: error: %(message)s</en>
+    <tr>%(prog)s: error: %(message)s</tr>
+  </text>
+  <text>
+    <en>%(prog)s: warning: %(message)s</en>
+    <tr>%(prog)s: advertencia: %(message)s</tr>
+  </text>
+  <text>
+    <en>(default: %(default)s)</en>
+    <tr>(por defecto: %(default)s)</tr>
+  </text>
+  <text>
+    <en>Automation sequences: run several commands in order, on a batch of files.</en>
+    <tr>Secuencias de automatización: ejecutar varias órdenes en orden, sobre un lote de archivos.</tr>
+  </text>
+  <text>
+    <en>Each step is a command line without the input and output files.</en>
+    <tr>Cada paso es una línea de órdenes sin los archivos de entrada y salida.</tr>
+  </text>
+  <text>
+    <en>Fields file (TOML). Column values are written as {Column Name}:</en>
+    <tr>Archivo de campos (TOML). Los valores de las columnas se escriben como {Column Name}:</tr>
+  </text>
+  <text>
+    <en>Layout file (TOML) example:</en>
+    <tr>Ejemplo de archivo de disposición (TOML):</tr>
+  </text>
+  <text>
+    <en>Manual Imposition: place each page at a chosen corner offset, scale and rotation on sheets, optionally double-sided with automatically mirrored backs, repeating the layout over the whole document.</en>
+    <tr>Imposición manual: colocar cada página en los pliegos con un desplazamiento de esquina, una escala y un giro elegidos, opcionalmente a doble cara con reversos reflejados automáticamente, repitiendo la disposición en todo el documento.</tr>
+  </text>
+  <text>
+    <en>Sequence file (TOML):</en>
+    <tr>Archivo de secuencia (TOML):</tr>
+  </text>
+  <text>
+    <en>Variable data merge: add text, text blocks and pictures to pages using records from a CSV file, either by copying a master document per record or by filling successive pages.</en>
+    <tr>Combinación de datos variables: añadir texto, bloques de texto e imágenes a las páginas con registros de un archivo CSV, ya sea copiando un documento maestro por registro o rellenando páginas sucesivas.</tr>
+  </text>
+  <text>
+    <en>    [[block]]                      # a text block, e.g. a mailing label
+    width = "8cm"
+    height = "4cm"
+    position = "bottom-left"
+    x = "2cm"
+    y = "2cm"
+    font = "Helvetica"
+    size = 11
+    justify = "left"               # left | center | right
+    overflow = "scale"             # scale | cut | fail
+    warn_below = 50                # warn if text is scaled below this percent
+    rotation = 0
+    lines = [
+      { text = "{Title}" },
+      { text = "{First name}" },
+      { text = "{Last name}", same_line = true },
+      { text = "{Address 1}", close_gap = true },
+      { text = "{Address 2}", close_gap = true, justify = "right", size = 9 },
+    ]</en>
+    <tr>    [[block]]                      # un bloque de texto, p. ej. una etiqueta postal
+    width = "8cm"
+    height = "4cm"
+    position = "bottom-left"
+    x = "2cm"
+    y = "2cm"
+    font = "Helvetica"
+    size = 11
+    justify = "left"               # left | center | right
+    overflow = "scale"             # scale | cut | fail
+    warn_below = 50                # avisar si el texto se reduce por debajo de este porcentaje
+    rotation = 0
+    lines = [
+      { text = "{Title}" },
+      { text = "{First name}" },
+      { text = "{Last name}", same_line = true },
+      { text = "{Address 1}", close_gap = true },
+      { text = "{Address 2}", close_gap = true, justify = "right", size = 9 },
+    ]</tr>
+  </text>
+  <text>
+    <en>    [[picture]]
+    file = "logos.pdf"             # one picture per page
+    column = "Logo number"         # page number of the picture to use
+    position = "top-right"
+    x = "1cm"
+    y = "1cm"
+    fit = "3x2cm"                  # or scale = 100</en>
+    <tr>    [[picture]]
+    file = "logos.pdf"             # una imagen por página
+    column = "Logo number"         # número de página de la imagen que se usa
+    position = "top-right"
+    x = "1cm"
+    y = "1cm"
+    fit = "3x2cm"                  # o scale = 100</tr>
+  </text>
+  <text>
+    <en>    [[place]]                 # one entry per page, taken from the source in order
+    side = "front"            # front | back | both (front, then the next page on the back)
+    sheet = 1                 # which sheet / pair of the cycle
+    corner = "top-left"       # corner of the sheet and page the offsets are measured between
+    x = "1cm"                 # horizontal offset (natural direction from the corner)
+    y = "1cm"                 # vertical offset
+    scale = 100               # percent
+    rotate = 0                # clockwise: 0, 90, 180, 270
+    page = 3                  # optional: a fixed source page instead of the next one</en>
+    <tr>    [[place]]                 # una entrada por página, tomadas del origen en orden
+    side = "front"            # front | back | both (anverso, y la página siguiente en el reverso)
+    sheet = 1                 # qué pliego / par del ciclo
+    corner = "top-left"       # esquina del pliego y de la página entre las que se miden los desplazamientos
+    x = "1cm"                 # desplazamiento horizontal (en la dirección natural desde la esquina)
+    y = "1cm"                 # desplazamiento vertical
+    scale = 100               # porcentaje
+    rotate = 0                # en el sentido de las agujas del reloj: 0, 90, 180, 270
+    page = 3                  # opcional: una página de origen fija en vez de la siguiente</tr>
+  </text>
+  <text>
+    <en>    [[text]]
+    template = "{Name} - {Company Name}"
+    page = 1                       # page within the master / record (default: all)
+    position = "top-left"          # see 'text --help' for positions
+    x = "2cm"
+    y = "2cm"
+    font = "Helvetica"
+    size = 12
+    color = "black"
+    rotation = 0</en>
+    <tr>    [[text]]
+    template = "{Name} - {Company Name}"
+    page = 1                       # página dentro del maestro / registro (por defecto: todas)
+    position = "top-left"          # véanse las posiciones en 'text --help'
+    x = "2cm"
+    y = "2cm"
+    font = "Helvetica"
+    size = 12
+    color = "black"
+    rotation = 0</tr>
+  </text>
+  <text>
+    <en>adjust page sizes (scale, pad or crop to a size)</en>
+    <tr>ajustar tamaños de página (escalar, rellenar o recortar a un tamaño)</tr>
+  </text>
+  <text>
+    <en>ambiguous option: %(option)s could match %(matches)s</en>
+    <tr>opción ambigua: %(option)s podría ser %(matches)s</tr>
+  </text>
+  <text>
+    <en>argument "-" with mode %r</en>
+    <tr>argumento "-" con modo %r</tr>
+  </text>
+  <text>
+    <en>argument %(argument_name)s: %(message)s</en>
+    <tr>argumento %(argument_name)s: %(message)s</tr>
+  </text>
+  <text>
+    <en>argument '%(argument_name)s' is deprecated</en>
+    <tr>el argumento '%(argument_name)s' está obsoleto</tr>
+  </text>
+  <text>
+    <en>can't open '%(filename)s': %(error)s</en>
+    <tr>no se puede abrir '%(filename)s': %(error)s</tr>
+  </text>
+  <text>
+    <en>command '%(parser_name)s' is deprecated</en>
+    <tr>la orden '%(parser_name)s' está obsoleta</tr>
+  </text>
+  <text>
+    <en>compensate for creep in folded booklets</en>
+    <tr>compensar el corrimiento en folletos plegados</tr>
+  </text>
+  <text>
+    <en>conflicting option string: %s</en>
+    <tr>cadena de opción en conflicto: %s</tr>
+  </text>
+  <text>
+    <en>conflicting option strings: %s</en>
+    <tr>cadenas de opción en conflicto: %s</tr>
+  </text>
+  <text>
+    <en>create a 2-up booklet</en>
+    <tr>crear un folleto 2-up</tr>
+  </text>
+  <text>
+    <en>create a sample document for testing impositions</en>
+    <tr>crear un documento de muestra para probar imposiciones</tr>
+  </text>
+  <text>
+    <en>define page bleeds (trim and bleed boxes)</en>
+    <tr>definir los sangrados de las páginas (cajas de corte y de sangrado)</tr>
+  </text>
+  <text>
+    <en>delete pages</en>
+    <tr>eliminar páginas</tr>
+  </text>
+  <text>
+    <en>duplicate pages</en>
+    <tr>duplicar páginas</tr>
+  </text>
+  <text>
+    <en>expected %s argument</en>
+    <tr>se esperaba %s argumento</tr>
+  </text>
+  <text>
+    <en>expected %s arguments</en>
+    <tr>se esperaban %s argumentos</tr>
+  </text>
+  <text>
+    <en>expected at least one argument</en>
+    <tr>se esperaba al menos un argumento</tr>
+  </text>
+  <text>
+    <en>expected at most one argument</en>
+    <tr>se esperaba como mucho un argumento</tr>
+  </text>
+  <text>
+    <en>expected one argument</en>
+    <tr>se esperaba un argumento</tr>
+  </text>
+  <text>
+    <en>fill sheets with copies of each page</en>
+    <tr>llenar los pliegos con copias de cada página</tr>
+  </text>
+  <text>
+    <en>hot folder: process PDFs as they arrive</en>
+    <tr>carpeta vigilada: procesar los PDF a medida que llegan</tr>
+  </text>
+  <text>
+    <en>ignored explicit argument %r</en>
+    <tr>se ignoró el argumento explícito %r</tr>
+  </text>
+  <text>
+    <en>impose pages at exact positions described in a layout file</en>
+    <tr>imponer páginas en posiciones exactas descritas en un archivo de disposición</tr>
+  </text>
+  <text>
+    <en>insert blank pages or pages from another PDF</en>
+    <tr>insertar páginas en blanco o páginas de otro PDF</tr>
+  </text>
+  <text>
+    <en>invalid %(type)s value: %(value)r</en>
+    <tr>valor %(type)s no válido: %(value)r</tr>
+  </text>
+  <text>
+    <en>invalid choice: %(value)r (choose from %(choices)s)</en>
+    <tr>opción no válida: %(value)r (elija entre %(choices)s)</tr>
+  </text>
+  <text>
+    <en>invalid choice: %(value)r, maybe you meant %(closest)r? (choose from %(choices)s)</en>
+    <tr>opción no válida: %(value)r; ¿quiso decir %(closest)r? (elija entre %(choices)s)</tr>
+  </text>
+  <text>
+    <en>join two pages side by side into one</en>
+    <tr>unir dos páginas lado a lado en una sola</tr>
+  </text>
+  <text>
+    <en>move pages within the document</en>
+    <tr>mover páginas dentro del documento</tr>
+  </text>
+  <text>
+    <en>    name = "numbered booklet"
+    units = "mm"                   # optional preferences: units, registration, bleed, pdfx
+    steps = [
+      "text --position bottom-center --offset-y 10",
+      "booklet --paper legal --orientation wide",
+    ]</en>
+    <tr>    name = "numbered booklet"
+    units = "mm"                   # preferencias opcionales: units, registration, bleed, pdfx
+    steps = [
+      "text --position bottom-center --offset-y 10",
+      "booklet --paper legal --orientation wide",
+    ]</tr>
+  </text>
+  <text>
+    <en>not allowed with argument %s</en>
+    <tr>no se permite con el argumento %s</tr>
+  </text>
+  <text>
+    <en>one of the arguments %s is required</en>
+    <tr>se necesita uno de los argumentos %s</tr>
+  </text>
+  <text>
+    <en>option '%(option)s' is deprecated</en>
+    <tr>la opción '%(option)s' está obsoleta</tr>
+  </text>
+  <text>
+    <en>options</en>
+    <tr>opciones</tr>
+  </text>
+  <text>
+    <en>peel off stuck-on text, tape, marks or PDF pages</en>
+    <tr>despegar texto, cinta, marcas o páginas PDF pegados</tr>
+  </text>
+  <text>
+    <en>place several pages on each sheet (n-up)</en>
+    <tr>colocar varias páginas en cada pliego (n-up)</tr>
+  </text>
+  <text>
+    <en>positional arguments</en>
+    <tr>argumentos posicionales</tr>
+  </text>
+  <text>
+    <en>reorder (and rotate) pages by a repeating rule</en>
+    <tr>reordenar (y girar) las páginas según una regla que se repite</tr>
+  </text>
+  <text>
+    <en>repeat the commands recorded in another output (imposition by example)</en>
+    <tr>repetir las órdenes registradas en otra salida (imposición por ejemplo)</tr>
+  </text>
+  <text>
+    <en>reverse the order of all pages</en>
+    <tr>invertir el orden de todas las páginas</tr>
+  </text>
+  <text>
+    <en>rotate pages by any angle</en>
+    <tr>girar las páginas cualquier ángulo</tr>
+  </text>
+  <text>
+    <en>run a saved sequence of commands on one or more PDFs</en>
+    <tr>ejecutar una secuencia guardada de órdenes en uno o más PDF</tr>
+  </text>
+  <text>
+    <en>separate, reorder or rejoin odd and even pages</en>
+    <tr>separar, reordenar o volver a unir las páginas impares y pares</tr>
+  </text>
+  <text>
+    <en>    sheet = "a3"              # paper name or WxH; omit when using a background
+    orientation = "wide"      # tall | wide | as-is
+    background = "plate.pdf"  # optional background PDF (sets the sheet size)
+    sides = "double-h"        # single | double-h (backs mirrored left-right) | double-v (top-bottom)
+    sheets = 1                # sheets (single) or front/back pairs (double) in one cycle
+    repeat = true             # repeat the cycle until all pages are placed
+    crop_marks = true         # default for every placement</en>
+    <tr>    sheet = "a3"              # nombre de papel o WxH; omítase si se usa un fondo
+    orientation = "wide"      # tall | wide | as-is
+    background = "plate.pdf"  # PDF de fondo opcional (fija el tamaño del pliego)
+    sides = "double-h"        # single | double-h (reversos reflejados de izquierda a derecha) | double-v (de arriba abajo)
+    sheets = 1                # pliegos (single) o pares anverso/reverso (double) en un ciclo
+    repeat = true             # repetir el ciclo hasta colocar todas las páginas
+    crop_marks = true         # valor por defecto para cada colocación</tr>
+  </text>
+  <text>
+    <en>show or choose the language of the interface</en>
+    <tr>mostrar o elegir el idioma de la interfaz</tr>
+  </text>
+  <text>
+    <en>show page sizes, boxes, bleeds and recorded commands</en>
+    <tr>mostrar tamaños de página, cajas, sangrados y órdenes registradas</tr>
+  </text>
+  <text>
+    <en>show program's version number and exit</en>
+    <tr>mostrar el número de versión del programa y terminar</tr>
+  </text>
+  <text>
+    <en>show this help message and exit</en>
+    <tr>mostrar esta ayuda y terminar</tr>
+  </text>
+  <text>
+    <en>split into parts, process each part differently, and optionally rejoin</en>
+    <tr>dividir en partes, procesar cada parte de forma distinta y, opcionalmente, volver a unirlas</tr>
+  </text>
+  <text>
+    <en>split pages into tiles (or undo a 2-up booklet)</en>
+    <tr>dividir las páginas en teselas (o deshacer un folleto 2-up)</tr>
+  </text>
+  <text>
+    <en>stick masking tape over areas of pages</en>
+    <tr>pegar cinta de enmascarar sobre zonas de las páginas</tr>
+  </text>
+  <text>
+    <en>stick on text and page numbers</en>
+    <tr>pegar texto y números de página</tr>
+  </text>
+  <text>
+    <en>stick pages of another PDF onto pages</en>
+    <tr>pegar páginas de otro PDF sobre las páginas</tr>
+  </text>
+  <text>
+    <en>subcommands</en>
+    <tr>subórdenes</tr>
+  </text>
+  <text>
+    <en>the following arguments are required: %s</en>
+    <tr>se necesitan los argumentos siguientes: %s</tr>
+  </text>
+  <text>
+    <en>trim, extend, resize or shift page contents</en>
+    <tr>recortar, ampliar, redimensionar o desplazar el contenido de las páginas</tr>
+  </text>
+  <text>
+    <en>unexpected option string: %s</en>
+    <tr>cadena de opción inesperada: %s</tr>
+  </text>
+  <text>
+    <en>unknown parser %(parser_name)r (choices: %(choices)s)</en>
+    <tr>analizador desconocido %(parser_name)r (opciones: %(choices)s)</tr>
+  </text>
+  <text>
+    <en>unrecognized arguments: %s</en>
+    <tr>argumentos no reconocidos: %s</tr>
+  </text>
+  <text>
+    <en>usage:</en>
+    <tr>uso:</tr>
+  </text>
+  <text>
+    <en>variable data merge from a CSV file</en>
+    <tr>combinación de datos variables desde un archivo CSV</tr>
+  </text>
+  <text>
+    <en>Other</en>
+    <tr>Otras</tr>
+  </text>
+  <text>
+    <en>{label}: done — {count} warning, see Log</en>
+    <tr>{label}: hecho — {count} advertencia, véase Mensajes</tr>
+  </text>
+  <text>
+    <en>{label}: done — {count} warnings, see Log</en>
+    <tr>{label}: hecho — {count} advertencias, véase Mensajes</tr>
+  </text>
+  <text>
+    <en>{label}: done</en>
+    <tr>{label}: hecho</tr>
+  </text>
+  <text>
+    <en>%r is not callable</en>
+    <tr>%r no es invocable</tr>
+  </text>
+  <text>
+    <en>'required' is an invalid argument for positionals</en>
+    <tr>'required' no es un argumento válido para los posicionales</tr>
+  </text>
+  <text>
+    <en>.__call__() not defined</en>
+    <tr>.__call__() no está definido</tr>
+  </text>
+  <text>
+    <en>cannot have multiple subparser arguments</en>
+    <tr>no puede haber varios argumentos de subanalizadores</tr>
+  </text>
+  <text>
+    <en>cannot merge actions - two groups are named %r</en>
+    <tr>no se pueden combinar las acciones: dos grupos se llaman %r</tr>
+  </text>
+  <text>
+    <en>conflicting subparser alias: %s</en>
+    <tr>alias de subanalizador en conflicto: %s</tr>
+  </text>
+  <text>
+    <en>conflicting subparser: %s</en>
+    <tr>subanalizador en conflicto: %s</tr>
+  </text>
+  <text>
+    <en>dest= is required for options like %r</en>
+    <tr>se necesita dest= para opciones como %r</tr>
+  </text>
+  <text>
+    <en>invalid conflict_resolution value: %r</en>
+    <tr>valor de conflict_resolution no válido: %r</tr>
+  </text>
+  <text>
+    <en>invalid option string %(option)r: must start with a character %(prefix_chars)r</en>
+    <tr>cadena de opción no válida %(option)r: debe empezar con un carácter %(prefix_chars)r</tr>
+  </text>
+  <text>
+    <en>mutually exclusive arguments must be optional</en>
+    <tr>los argumentos mutuamente excluyentes deben ser opcionales</tr>
+  </text>
+</interface>

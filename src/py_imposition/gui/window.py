@@ -11,7 +11,7 @@ import tempfile
 from pathlib import Path
 
 from PySide6.QtCore import QByteArray, QObject, QProcess, QProcessEnvironment, QSettings, Qt, QTimer, Signal
-from PySide6.QtGui import QAction, QFont, QKeySequence
+from PySide6.QtGui import QAction, QActionGroup, QFont, QKeySequence
 from PySide6.QtWidgets import (
     QApplication, QCheckBox, QComboBox, QDialog, QDialogButtonBox, QDockWidget, QFileDialog, QHBoxLayout,
     QLabel, QListWidget, QListWidgetItem, QMainWindow, QMessageBox, QPlainTextEdit, QPushButton,
@@ -20,31 +20,75 @@ from PySide6.QtWidgets import (
 
 from .. import __version__
 from ..common import COMMANDS
-from .forms import CommandForm, subparsers
+from .. import config, interface
+from ..interface import N_, ntr, tr
+from .forms import CommandForm, file_filter, subparsers
 from .preview import PdfPane
 
 CATEGORIES = [
-    ("Impose", ["booklet", "nup", "step-repeat", "join", "manual"]),
-    ("Arrange pages", ["shuffle", "evenodd", "reverse", "duplicate", "delete", "move", "insert", "split"]),
-    ("Change pages", ["trim-shift", "creep", "resize", "rotate", "tile", "bleed"]),
-    ("Stick on / peel off", ["text", "stick-pdf", "mask", "peel", "merge-data", "sample"]),
-    ("Information & automation", ["info", "run", "replay", "watch"]),
+    (N_("Impose"), ["booklet", "nup", "step-repeat", "join", "manual"]),
+    (N_("Arrange pages"), ["shuffle", "evenodd", "reverse", "duplicate", "delete", "move", "insert", "split"]),
+    (N_("Change pages"), ["trim-shift", "creep", "resize", "rotate", "tile", "bleed"]),
+    (N_("Stick on / peel off"), ["text", "stick-pdf", "mask", "peel", "merge-data", "sample"]),
+    (N_("Information & automation"), ["info", "run", "replay", "watch"]),
 ]
 
 TITLES = {
-    "booklet": "Create booklet", "nup": "n-Up pages", "step-repeat": "Step and repeat", "join": "Join two pages",
-    "manual": "Manual imposition", "shuffle": "Shuffle pages", "evenodd": "Even/odd pages",
-    "reverse": "Reverse pages", "duplicate": "Duplicate pages", "delete": "Delete pages", "move": "Move pages",
-    "insert": "Insert pages", "split": "Split / merge (partials)", "trim-shift": "Trim and shift",
-    "creep": "Creep", "resize": "Adjust page sizes", "rotate": "Rotate pages", "tile": "Tile pages",
-    "bleed": "Define bleeds", "text": "Text and numbers", "stick-pdf": "Stick on PDF pages",
-    "mask": "Masking tape", "peel": "Peel off", "merge-data": "Variable data merge",
-    "sample": "Sample document", "info": "Imposition info", "run": "Run sequence on files",
-    "replay": "Replay (imposition by example)", "watch": "Hot folder",
+    "booklet": N_("Create booklet"), "nup": N_("n-Up pages"), "step-repeat": N_("Step and repeat"), "join": N_("Join two pages"),
+    "manual": N_("Manual imposition"), "shuffle": N_("Shuffle pages"), "evenodd": N_("Even/odd pages"),
+    "reverse": N_("Reverse pages"), "duplicate": N_("Duplicate pages"), "delete": N_("Delete pages"), "move": N_("Move pages"),
+    "insert": N_("Insert pages"), "split": N_("Split / merge (partials)"), "trim-shift": N_("Trim and shift"),
+    "creep": N_("Creep"), "resize": N_("Adjust page sizes"), "rotate": N_("Rotate pages"), "tile": N_("Tile pages"),
+    "bleed": N_("Define bleeds"), "text": N_("Text and numbers"), "stick-pdf": N_("Stick on PDF pages"),
+    "mask": N_("Masking tape"), "peel": N_("Peel off"), "merge-data": N_("Variable data merge"),
+    "sample": N_("Sample document"), "info": N_("Imposition info"), "run": N_("Run sequence on files"),
+    "replay": N_("Replay (imposition by example)"), "watch": N_("Hot folder"),
 }
 
 NO_PREVIEW = {"info", "run", "watch"}
-WROTE_RE = re.compile(r"^Wrote (.+?)(?: \(\d+ pages?\))?$")
+NOT_IN_WINDOW = {"interface"}  # (the window has Settings ▸ Language of the interface)
+def wrote_paths(output: str) -> list[Path]:
+    """The files a command says it wrote ("Wrote PATH (N pages)"), in the language in use."""
+    patterns = []
+    for template in (tr("Wrote {path} ({count} page)"), tr("Wrote {path} ({count} pages)"), tr("Wrote {path}")):
+        rx = re.escape(template).replace(re.escape("{path}"), "(?P<path>.+?)")
+        patterns.append(re.compile("^" + rx.replace(re.escape("{count}"), r"\d+") + "$"))
+    found = []
+    for line in output.splitlines():
+        for rx in patterns:
+            m = rx.match(line.strip())
+            if m:
+                found.append(Path(m.group("path")))
+                break
+    return found
+
+
+def warning_prefix() -> str:
+    return tr("warning: {msg}").split("{msg}")[0]
+
+
+_WINDOWS: list = []  # (windows built again in another language must stay referenced)
+
+
+def install_qt_translations():
+    """Qt's own texts (file dialogs, standard buttons) in the language in use."""
+    from PySide6.QtCore import QLibraryInfo, QLocale, QTranslator
+
+    app = QApplication.instance()
+    for old in getattr(app, "_py_imposition_translators", []):
+        app.removeTranslator(old)
+    app._py_imposition_translators = []
+    code = interface.code()
+    QLocale.setDefault(QLocale(code))
+    if code == "en":
+        return
+    folder = QLibraryInfo.path(QLibraryInfo.LibraryPath.TranslationsPath)
+    for name in ("qtbase", "qt"):
+        t = QTranslator(app)
+        if t.load(f"{name}_{code}", folder):
+            app.installTranslator(t)
+            app._py_imposition_translators.append(t)
+            break
 
 
 def python_command() -> list[str]:
@@ -134,23 +178,23 @@ class SequencePanel(QWidget):
 
         left = QVBoxLayout()
         for b in (
-            btn("Add current", "Add the command and options in the form as a step", self.add_current),
-            btn("Replace", "Replace the selected step with the form", self.replace_selected),
-            btn("Edit", "Load the selected step into the form (or double-click)", self.edit_selected),
-            btn("Remove", "Remove the selected step", self.remove_selected),
-            btn("Clear", "Remove all steps", self.list.clear),
+            btn(tr("Add current"), tr("Add the command and options in the form as a step"), self.add_current),
+            btn(tr("Replace"), tr("Replace the selected step with the form"), self.replace_selected),
+            btn(tr("Edit"), tr("Load the selected step into the form (or double-click)"), self.edit_selected),
+            btn(tr("Remove"), tr("Remove the selected step"), self.remove_selected),
+            btn(tr("Clear"), tr("Remove all steps"), self.list.clear),
         ):
             left.addWidget(b)
         left.addStretch(1)
         right = QVBoxLayout()
         for b in (
-            btn("From document", "Add the commands recorded in the current document (imposition by example)",
+            btn(tr("From document"), tr("Add the commands recorded in the current document (imposition by example)"),
                 self.from_document),
-            btn("Load…", "Load a sequence file", self.load),
-            btn("Save…", "Save the steps as a sequence file", self.save),
-            btn("Run on document", "Run all steps on the current document and preview the result",
+            btn(tr("Load…"), tr("Load a sequence file"), self.load),
+            btn(tr("Save…"), tr("Save the steps as a sequence file"), self.save),
+            btn(tr("Run on document"), tr("Run all steps on the current document and preview the result"),
                 self.run_on_document),
-            btn("Run on files…", "Run all steps on several PDF files", self.run_on_files),
+            btn(tr("Run on files…"), tr("Run all steps on several PDF files"), self.run_on_files),
         ):
             right.addWidget(b)
         right.addStretch(1)
@@ -194,7 +238,7 @@ class SequencePanel(QWidget):
 
     def from_document(self):
         if not self.w.source:
-            self.w.status("Open a PDF first", error=True)
+            self.w.status(tr("Open a PDF first"), error=True)
             return
         import pikepdf
 
@@ -202,11 +246,11 @@ class SequencePanel(QWidget):
         with pikepdf.open(self.w.source) as pdf:
             hist = get_history(pdf)
         if not hist:
-            self.w.status("The current document has no recorded commands", error=True)
+            self.w.status(tr("The current document has no recorded commands"), error=True)
             return
         for s in hist:
             self.list.addItem(shlex.join(s))
-        self.w.status(f"Added {len(hist)} recorded step(s)")
+        self.w.status(tr('Added {count} recorded step(s)', count=len(hist)))
 
     def write_toml(self, path: Path, name: str):
         from ..sequence import write_sequence
@@ -223,8 +267,8 @@ class SequencePanel(QWidget):
         path.write_text("\n".join(lines[:1] + extra + lines[1:]) + "\n")
 
     def load(self):
-        path, _ = QFileDialog.getOpenFileName(self, "Load sequence", self.w.last_dir(),
-                                              "TOML files (*.toml);;All files (*)")
+        path, _ = QFileDialog.getOpenFileName(self, tr("Load sequence"), self.w.last_dir(),
+                                              file_filter("toml"))
         if not path:
             return
         from ..common import ImpositionError
@@ -232,29 +276,29 @@ class SequencePanel(QWidget):
         try:
             steps, prefs = load_sequence(Path(path))
         except ImpositionError as e:
-            QMessageBox.warning(self, "Load sequence", str(e))
+            QMessageBox.warning(self, tr("Load sequence"), str(e))
             return
         self.set_steps(steps)
         self.w.apply_prefs(prefs)
-        self.w.status(f"Loaded {len(steps)} step(s) from {Path(path).name}")
+        self.w.status(tr('Loaded {count} step(s) from {name}', count=len(steps), name=Path(path).name))
 
     def save(self):
         if not self.list.count():
-            self.w.status("The sequence is empty", error=True)
+            self.w.status(tr("The sequence is empty"), error=True)
             return
-        path, _ = QFileDialog.getSaveFileName(self, "Save sequence", self.w.last_dir(),
-                                              "TOML files (*.toml);;All files (*)")
+        path, _ = QFileDialog.getSaveFileName(self, tr("Save sequence"), self.w.last_dir(),
+                                              file_filter("toml"))
         if not path:
             return
         p = Path(path)
         if p.suffix != ".toml":
             p = p.with_suffix(".toml")
         self.write_toml(p, p.stem)
-        self.w.status(f"Saved {p}")
+        self.w.status(tr('Saved {page}', page=p))
 
     def _temp_sequence(self) -> Path | None:
         if not self.list.count():
-            self.w.status("The sequence is empty", error=True)
+            self.w.status(tr("The sequence is empty"), error=True)
             return None
         p = self.w.tmp / f"sequence-{self.w.next_id()}.toml"
         self.write_toml(p, "sequence")
@@ -262,7 +306,7 @@ class SequencePanel(QWidget):
 
     def run_on_document(self):
         if not self.w.source:
-            self.w.status("Open a PDF first", error=True)
+            self.w.status(tr("Open a PDF first"), error=True)
             return
         seq = self._temp_sequence()
         if seq:
@@ -274,11 +318,11 @@ class SequencePanel(QWidget):
         seq = self._temp_sequence()
         if not seq:
             return
-        files, _ = QFileDialog.getOpenFileNames(self, "PDF files to process", self.w.last_dir(),
-                                                "PDF files (*.pdf);;All files (*)")
+        files, _ = QFileDialog.getOpenFileNames(self, tr("PDF files to process"), self.w.last_dir(),
+                                                file_filter("pdf"))
         if not files:
             return
-        out = QFileDialog.getExistingDirectory(self, "Output folder", str(Path(files[0]).parent))
+        out = QFileDialog.getExistingDirectory(self, tr("Output folder"), str(Path(files[0]).parent))
         if not out:
             return
         self.w.run_tokens(["run", "--sequence", str(seq), "--out-dir", out, "--suffix", "imposed", *files],
@@ -289,14 +333,19 @@ class SequencePanel(QWidget):
 
 
 class MainWindow(QMainWindow):
-    def __init__(self):
+    def __init__(self, state: dict | None = None):
+        """STATE (from export_state) carries the document over when the window is
+        built again, for instance in another language."""
         super().__init__()
         self.setWindowTitle("py-imposition")
         self.setAcceptDrops(True)
         self.settings = QSettings("py-imposition", "py-imposition")
-        self._tmpdir = tempfile.TemporaryDirectory(prefix="py-imposition-")
+        if state:
+            self._tmpdir = state["tmpdir"]
+        else:
+            self._tmpdir = tempfile.TemporaryDirectory(prefix="py-imposition-")
         self.tmp = Path(self._tmpdir.name)
-        self._id = 0
+        self._id = state["id"] if state else 0
         self.original: Path | None = None
         self.source: Path | None = None
         self.undo_stack: list[Path] = []
@@ -325,33 +374,33 @@ class MainWindow(QMainWindow):
     # ----------------------------------------------------------------- construction
 
     def _build_toolbar(self):
-        tb = QToolBar("Preferences")
+        tb = QToolBar(tr("Preferences"))
         tb.setObjectName("prefs")
         self.addToolBar(tb)
-        self.a_open = QAction("Open…", self, shortcut=QKeySequence.StandardKey.Open, triggered=self.open_dialog)
+        self.a_open = QAction(tr("Open…"), self, shortcut=QKeySequence.StandardKey.Open, triggered=self.open_dialog)
         tb.addAction(self.a_open)
-        self.a_save = QAction("Save document…", self, shortcut=QKeySequence.StandardKey.Save,
+        self.a_save = QAction(tr("Save document…"), self, shortcut=QKeySequence.StandardKey.Save,
                               triggered=self.save_document)
         tb.addAction(self.a_save)
-        self.a_undo = QAction("Undo apply", self, shortcut=QKeySequence.StandardKey.Undo, triggered=self.undo)
+        self.a_undo = QAction(tr("Undo apply"), self, shortcut=QKeySequence.StandardKey.Undo, triggered=self.undo)
         tb.addAction(self.a_undo)
         tb.addSeparator()
-        tb.addWidget(QLabel(" Units "))
+        tb.addWidget(QLabel(tr(" Units ")))
         self.units = QComboBox()
         self.units.addItems(["cm", "mm", "in", "pt"])
         tb.addWidget(self.units)
-        tb.addWidget(QLabel("  Registration "))
+        tb.addWidget(QLabel(tr("  Registration ")))
         self.registration = QComboBox()
         self.registration.addItems(["black", "cmyk", "all"])
-        self.registration.setToolTip("Colour of crop marks and registration-coloured text")
+        self.registration.setToolTip(tr("Colour of crop marks and registration-coloured text"))
         tb.addWidget(self.registration)
-        tb.addWidget(QLabel("  Bleeds "))
+        tb.addWidget(QLabel(tr("  Bleeds ")))
         self.bleed = QComboBox()
         self.bleed.addItems(["use", "ignore"])
-        self.bleed.setToolTip("Use page bleed boxes when imposing, or impose the visible page only")
+        self.bleed.setToolTip(tr("Use page bleed boxes when imposing, or impose the visible page only"))
         tb.addWidget(self.bleed)
-        self.pdfx = QCheckBox("PDF/X")
-        self.pdfx.setToolTip("Keep a TrimBox when bleeds are removed")
+        self.pdfx = QCheckBox(tr("PDF/X"))
+        self.pdfx.setToolTip(tr("Keep a TrimBox when bleeds are removed"))
         tb.addWidget(self.pdfx)
         for w in (self.units, self.registration, self.bleed):
             w.currentIndexChanged.connect(lambda _: self.schedule())
@@ -363,22 +412,22 @@ class MainWindow(QMainWindow):
         self.tree.setMinimumWidth(190)
         listed = set()
         for cat, names in CATEGORIES:
-            top = QTreeWidgetItem([cat])
+            top = QTreeWidgetItem([tr(cat)])
             top.setFlags(Qt.ItemFlag.ItemIsEnabled)
             f = top.font(0)
             f.setBold(True)
             top.setFont(0, f)
             for n in names:
                 if n in COMMANDS:
-                    it = QTreeWidgetItem([TITLES.get(n, n)])
+                    it = QTreeWidgetItem([tr(TITLES.get(n, n))])
                     it.setData(0, Qt.ItemDataRole.UserRole, n)
-                    it.setToolTip(0, f"{n}: {COMMANDS[n].help}")
+                    it.setToolTip(0, f"{n}: {tr(COMMANDS[n].help)}")
                     top.addChild(it)
                     listed.add(n)
             self.tree.addTopLevelItem(top)
-        others = sorted(set(COMMANDS) - listed)
+        others = sorted(set(COMMANDS) - listed - NOT_IN_WINDOW)
         if others:
-            top = QTreeWidgetItem(["Other"])
+            top = QTreeWidgetItem([tr("Other")])
             for n in others:
                 it = QTreeWidgetItem([n])
                 it.setData(0, Qt.ItemDataRole.UserRole, n)
@@ -400,24 +449,24 @@ class MainWindow(QMainWindow):
         scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         scroll.setWidget(self.stack)
 
-        self.b_preview = QPushButton("Preview")
-        self.b_preview.setToolTip("Run the command on the current document and show the result (F5)")
+        self.b_preview = QPushButton(tr("Preview"))
+        self.b_preview.setToolTip(tr("Run the command on the current document and show the result (F5)"))
         self.b_preview.clicked.connect(self.preview)
-        self.b_apply = QPushButton("Apply")
-        self.b_apply.setToolTip("Make the result the current document, to continue with another command "
-                                "(Ctrl+Enter)")
+        self.b_apply = QPushButton(tr("Apply"))
+        self.b_apply.setToolTip(tr("Make the result the current document, to continue with another command "
+                                "(Ctrl+Enter)"))
         self.b_apply.clicked.connect(self.apply)
-        self.b_save_result = QPushButton("Save result…")
+        self.b_save_result = QPushButton(tr("Save result…"))
         self.b_save_result.clicked.connect(self.save_result)
-        self.b_reset = QPushButton("Defaults")
-        self.b_reset.setToolTip("Reset this command's options")
+        self.b_reset = QPushButton(tr("Defaults"))
+        self.b_reset.setToolTip(tr("Reset this command's options"))
         self.b_reset.clicked.connect(lambda: self.form(self.current).reset())
-        self.b_add = QPushButton("Add to sequence")
+        self.b_add = QPushButton(tr("Add to sequence"))
         self.b_add.clicked.connect(lambda: self.seq.add_current())
-        self.auto = QCheckBox("Auto preview")
+        self.auto = QCheckBox(tr("Auto preview"))
         self.auto.setChecked(True)
-        self.auto.setToolTip("Preview automatically after changing options")
-        self.b_stop = QPushButton("Stop")
+        self.auto.setToolTip(tr("Preview automatically after changing options"))
+        self.b_stop = QPushButton(tr("Stop"))
         self.b_stop.clicked.connect(self.stop)
         self.b_stop.setEnabled(False)
 
@@ -442,8 +491,8 @@ class MainWindow(QMainWindow):
         ml.addLayout(actions)
 
         # previews
-        self.src_pane = PdfPane("Document")
-        self.res_pane = PdfPane("Result")
+        self.src_pane = PdfPane(tr("Document"))
+        self.res_pane = PdfPane(tr("Result"))
         self.res_pane.output_selected.connect(self._show_output)
         previews = QSplitter(Qt.Orientation.Horizontal)
         previews.addWidget(self.src_pane)
@@ -460,7 +509,7 @@ class MainWindow(QMainWindow):
 
     def _build_docks(self):
         self.seq = SequencePanel(self)
-        d1 = QDockWidget("Sequence", self)
+        d1 = QDockWidget(tr("Sequence"), self)
         d1.setObjectName("sequence")
         d1.setWidget(self.seq)
         self.addDockWidget(Qt.DockWidgetArea.BottomDockWidgetArea, d1)
@@ -468,7 +517,7 @@ class MainWindow(QMainWindow):
         self.logbox.setReadOnly(True)
         self.logbox.setFont(QFont("monospace"))
         self.logbox.setMaximumBlockCount(5000)
-        d2 = QDockWidget("Log", self)
+        d2 = QDockWidget(tr("Log"), self)
         d2.setObjectName("log")
         d2.setWidget(self.logbox)
         self.addDockWidget(Qt.DockWidgetArea.BottomDockWidgetArea, d2)
@@ -477,26 +526,35 @@ class MainWindow(QMainWindow):
         self.docks = (d1, d2)
 
     def _build_menus(self):
-        m = self.menuBar().addMenu("&File")
+        m = self.menuBar().addMenu(tr("&File"))
         m.addAction(self.a_open)
         m.addAction(self.a_save)
-        m.addAction(QAction("Save result…", self, shortcut="Ctrl+Shift+S", triggered=self.save_result))
-        m.addAction(QAction("Revert to original", self, triggered=self.revert))
+        m.addAction(QAction(tr("Save result…"), self, shortcut="Ctrl+Shift+S", triggered=self.save_result))
+        m.addAction(QAction(tr("Revert to original"), self, triggered=self.revert))
         m.addSeparator()
-        m.addAction(QAction("Quit", self, shortcut=QKeySequence.StandardKey.Quit, triggered=self.close))
-        m = self.menuBar().addMenu("&Run")
-        m.addAction(QAction("Preview", self, shortcut="F5", triggered=self.preview))
-        m.addAction(QAction("Apply", self, shortcut="Ctrl+Return", triggered=self.apply))
+        m.addAction(QAction(tr("Quit"), self, shortcut=QKeySequence.StandardKey.Quit, triggered=self.close))
+        m = self.menuBar().addMenu(tr("&Run"))
+        m.addAction(QAction(tr("Preview"), self, shortcut="F5", triggered=self.preview))
+        m.addAction(QAction(tr("Apply"), self, shortcut="Ctrl+Return", triggered=self.apply))
         m.addAction(self.a_undo)
-        m.addAction(QAction("Stop", self, shortcut="Esc", triggered=self.stop))
+        m.addAction(QAction(tr("Stop"), self, shortcut="Esc", triggered=self.stop))
         m.addSeparator()
-        m.addAction(QAction("Copy command line", self, triggered=self.copy_command_line))
-        m = self.menuBar().addMenu("&View")
+        m.addAction(QAction(tr("Copy command line"), self, triggered=self.copy_command_line))
+        m = self.menuBar().addMenu(tr("&View"))
         for d in self.docks:
             m.addAction(d.toggleViewAction())
-        m = self.menuBar().addMenu("&Help")
-        m.addAction(QAction("Command-line help for this command", self, triggered=self.show_cli_help))
-        m.addAction(QAction("About", self, triggered=self.about))
+        m = self.menuBar().addMenu(tr("&Settings"))
+        lang = m.addMenu(tr("Language of the interface"))
+        group = QActionGroup(self)
+        for code, name in interface.names().items():
+            act = QAction(name, self, checkable=True)
+            act.setChecked(code == interface.code())
+            act.triggered.connect(lambda _=False, c=code: self.change_language(c))
+            group.addAction(act)
+            lang.addAction(act)
+        m = self.menuBar().addMenu(tr("&Help"))
+        m.addAction(QAction(tr("Command-line help for this command"), self, triggered=self.show_cli_help))
+        m.addAction(QAction(tr("About"), self, triggered=self.about))
 
     # ----------------------------------------------------------------- settings
 
@@ -525,6 +583,10 @@ class MainWindow(QMainWindow):
 
     def closeEvent(self, event):
         self.runner.stop()
+        self.save_settings()
+        super().closeEvent(event)
+
+    def save_settings(self):
         self.settings.setValue("geometry", self.saveGeometry())
         self.settings.setValue("state", self.saveState())
         for k, v in self.prefs().items():
@@ -534,7 +596,53 @@ class MainWindow(QMainWindow):
         self.settings.setValue("sequence", json.dumps(self.seq.steps()))
         for name, form in self.forms.items():
             self.settings.setValue(f"forms/{name}", json.dumps(form.tokens()))
-        super().closeEvent(event)
+        self.settings.sync()
+
+    def export_state(self) -> dict:
+        """What a new window needs to carry on with the same document."""
+        return {"tmpdir": self._tmpdir, "id": self._id, "original": self.original, "source": self.source,
+                "undo": list(self.undo_stack)}
+
+    def adopt_state(self, state: dict):
+        self.original = state["original"]
+        self.undo_stack = state["undo"]
+        if state["source"]:
+            self.set_source(state["source"])
+
+    # ----------------------------------------------------------------- language
+
+    def change_language(self, code: str):
+        """Use CODE for the interface, keep it in the configuration file, and
+        build the window again in that language."""
+        if code == interface.code():
+            return
+        if not interface.use(code):
+            QMessageBox.warning(self, tr("Language of the interface"),
+                                tr("The language of the interface could not be changed: {error}",
+                                   error=interface.error()))
+            interface.use(config.get("interface"))
+            return
+        try:
+            config.set("interface", code)
+        except OSError as e:
+            self.status(tr("Could not keep the setting: {error}", error=e), error=True)
+        interface.translate_argparse()
+        install_qt_translations()
+        self.runner.stop()
+        self.save_settings()
+        state = self.export_state()
+        self._tmpdir = None  # (the new window keeps the temporary files)
+        new = MainWindow(state)
+        new.adopt_state(state)
+        new.restoreGeometry(self.saveGeometry())
+        new.show()
+        app = QApplication.instance()
+        app.setProperty("main_window_id", id(new))
+        _WINDOWS.append(new)
+        self.hide()
+        self.deleteLater()
+        if self in _WINDOWS:
+            _WINDOWS.remove(self)
 
     def last_dir(self) -> str:
         return self.settings.value("last_dir", str(Path.home()))
@@ -552,7 +660,7 @@ class MainWindow(QMainWindow):
 
     def pref_tokens(self) -> list[str]:
         p = self.prefs()
-        out = ["--units", p["units"]]
+        out = ["--interface", interface.code(), "--units", p["units"]]
         if p["registration"] != "black":
             out += ["--registration", p["registration"]]
         if p["bleed"] != "use":
@@ -601,9 +709,10 @@ class MainWindow(QMainWindow):
         self.current = name
         f = self.form(name)
         self.stack.setCurrentWidget(f)
-        self.cmd_title.setText(TITLES.get(name, name))
+        self.cmd_title.setText(tr(TITLES.get(name, name)))
         previewable = name not in NO_PREVIEW
-        self.b_preview.setText({"info": "Show info", "run": "Run", "watch": "Start watching"}.get(name, "Preview"))
+        self.b_preview.setText(tr({"info": N_("Show info"), "run": N_("Run"),
+                                   "watch": N_("Start watching")}.get(name, N_("Preview"))))
         self.b_apply.setEnabled(previewable)
         self.b_save_result.setEnabled(previewable)
         self._form_changed()
@@ -654,14 +763,14 @@ class MainWindow(QMainWindow):
         if with_input:
             if cmd.needs_input is True:
                 if not self.source:
-                    self.status("Open a PDF first (File ▸ Open, or drop a file on the window)", error=True)
+                    self.status(tr("Open a PDF first (File ▸ Open, or drop a file on the window)"), error=True)
                     return
                 args.append(str(self.source))
             elif cmd.needs_input == "optional" and self.source:
                 args.append(str(self.source))
             elif name == "replay":
                 if not self.source:
-                    self.status("Open a PDF first", error=True)
+                    self.status(tr("Open a PDF first"), error=True)
                     return
                 args.append(str(self.source))
         self._out_base = None
@@ -672,9 +781,9 @@ class MainWindow(QMainWindow):
         self._job_key = self._pending_key
         self.b_stop.setEnabled(True)
         if not quiet:
-            self.status(f"Running {self._job_label}…")
+            self.status(tr('Running {job_label}…', job_label=self._job_label))
         else:
-            self.statusBar().showMessage(f"Previewing {self._job_label}…")
+            self.statusBar().showMessage(tr('Previewing {job_label}…', job_label=self._job_label))
         self.runner.start(args, purpose)
 
     def key(self):
@@ -692,7 +801,7 @@ class MainWindow(QMainWindow):
         self._apply_after = False
         self.run_tokens(tokens, purpose, quiet=quiet)
         if purpose == "watch" and self.runner.busy():
-            self.b_preview.setText("Stop watching")
+            self.b_preview.setText(tr("Stop watching"))
 
     def apply(self):
         if self.current in NO_PREVIEW:
@@ -713,13 +822,13 @@ class MainWindow(QMainWindow):
         self.runner.stop()
         self.b_stop.setEnabled(False)
         if was == "watch":
-            self.b_preview.setText("Start watching")
-        self.status("Stopped")
+            self.b_preview.setText(tr("Start watching"))
+        self.status(tr("Stopped"))
 
     def job_finished(self, purpose: str, code: int, out: str, err: str):
         self.b_stop.setEnabled(False)
         if purpose == "watch":
-            self.b_preview.setText("Start watching")
+            self.b_preview.setText(tr("Start watching"))
         if code != 0:
             lines = [ln for ln in err.strip().splitlines() if ln.strip()]
             msg = lines[-1] if lines else f"failed (exit code {code})"
@@ -727,12 +836,12 @@ class MainWindow(QMainWindow):
             self._apply_after = False
             return
         if purpose == "info":
-            self.show_text("Imposition info", out)
-            self.status("Done")
+            self.show_text(tr("Imposition info"), out)
+            self.status(tr("Done"))
             return
         if purpose == "batch":
-            n = sum(1 for ln in out.splitlines() if WROTE_RE.match(ln.strip()))
-            self.status(f"Processed: {n} file(s) written")
+            n = len(wrote_paths(out))
+            self.status(tr('Processed: {number} file(s) written', number=n))
             return
         files = []
         if self._out_base is not None:
@@ -741,20 +850,18 @@ class MainWindow(QMainWindow):
             else:
                 files = sorted(self._out_base.parent.glob(self._out_base.stem + "-*.pdf"))
         if not files:
-            for ln in out.splitlines():
-                m = WROTE_RE.match(ln.strip())
-                if m and m.group(1).endswith(".pdf"):
-                    files.append(Path(m.group(1)))
+            files = [f for f in wrote_paths(out) if f.suffix == ".pdf"]
         if not files:
-            self.status(f"{self._job_label}: done (no PDF produced)")
+            self.status(tr('{job_label}: done (no PDF produced)', job_label=self._job_label))
             return
         self.result_files = files
         self.result_key = self._job_key
         names = [self._suffix(f) or "result" for f in files]
         self.res_pane.set_outputs(names)
         self.res_pane.load(files[0])
-        warn = [ln for ln in err.splitlines() if ln.startswith("warning:")]
-        self.status(f"{self._job_label}: done" + (f" — {len(warn)} warning(s), see Log" if warn else ""),
+        warn = [ln for ln in err.splitlines() if ln.startswith(warning_prefix())]
+        self.status(ntr("{label}: done — {count} warning, see Log", "{label}: done — {count} warnings, see Log",
+                        len(warn), label=self._job_label) if warn else tr("{label}: done", label=self._job_label),
                     error=False)
         if self._apply_after:
             self._apply_after = False
@@ -771,15 +878,15 @@ class MainWindow(QMainWindow):
 
     def _apply_result(self):
         if len(self.result_files) != 1:
-            QMessageBox.information(self, "Apply",
-                                    "This command produced several documents. Use “Save result…” to save them.")
+            QMessageBox.information(self, tr("Apply"),
+                                    tr("This command produced several documents. Use “Save result…” to save them."))
             return
         new = self.tmp / f"document-{self.next_id()}.pdf"
         shutil.copyfile(self.result_files[0], new)
         if self.source:
             self.undo_stack.append(self.source)
         self.set_source(new)
-        self.status(f"Applied {self.current}. The result is now the current document.")
+        self.status(tr('Applied {current}. The result is now the current document.', current=self.current))
 
     # ----------------------------------------------------------------- documents
 
@@ -790,43 +897,47 @@ class MainWindow(QMainWindow):
         self.res_pane.set_outputs([])
         self.res_pane.clear("")
         steps = len(self.undo_stack)
-        note = f"{steps} command(s) applied" if steps else ""
+        note = ntr("{count} command applied", "{count} commands applied", steps) if steps else ""
         self.src_pane.load(path, note)
         name = self.original.name if self.original else (path.name if path else "")
-        self.setWindowTitle(f"py-imposition — {name}" + (" (modified)" if steps else "") if name else "py-imposition")
+        if name:
+            self.setWindowTitle(tr("py-imposition — {name} (modified)", name=name) if steps
+                                else f"py-imposition — {name}")
+        else:
+            self.setWindowTitle("py-imposition")
         self._form_changed()
 
     def open_path(self, path: Path):
         if not path.is_file():
-            self.status(f"{path} not found", error=True)
+            self.status(tr('{path} not found', path=path), error=True)
             return
         self.settings.setValue("last_dir", str(path.parent))
         self.original = path
         self.undo_stack = []
         self.set_source(path)
-        self.status(f"Opened {path}")
+        self.status(tr('Opened {path}', path=path))
 
     def open_dialog(self):
-        path, _ = QFileDialog.getOpenFileName(self, "Open PDF", self.last_dir(), "PDF files (*.pdf);;All files (*)")
+        path, _ = QFileDialog.getOpenFileName(self, tr("Open PDF"), self.last_dir(), file_filter("pdf"))
         if path:
             self.open_path(Path(path))
 
     def undo(self):
         if not self.undo_stack:
-            self.status("Nothing to undo", error=True)
+            self.status(tr("Nothing to undo"), error=True)
             return
         self.set_source(self.undo_stack.pop())
-        self.status("Undone")
+        self.status(tr("Undone"))
 
     def revert(self):
         if self.original:
             self.undo_stack = []
             self.set_source(self.original)
-            self.status("Reverted to the original document")
+            self.status(tr("Reverted to the original document"))
 
     def _save_target(self, title: str, suggested: str) -> Path | None:
         path, _ = QFileDialog.getSaveFileName(self, title, str(Path(self.last_dir()) / suggested),
-                                              "PDF files (*.pdf)")
+                                              tr("PDF files (*.pdf)"))
         if not path:
             return None
         p = Path(path)
@@ -837,20 +948,20 @@ class MainWindow(QMainWindow):
 
     def save_document(self):
         if not self.source:
-            self.status("Nothing to save", error=True)
+            self.status(tr("Nothing to save"), error=True)
             return
         stem = self.original.stem if self.original else "document"
         p = self._save_target("Save document", f"{stem}-imposed.pdf")
         if p:
             if p.resolve() == self.source.resolve():
-                self.status("That is the file currently open", error=True)
+                self.status(tr("That is the file currently open"), error=True)
                 return
             shutil.copyfile(self.source, p)
-            self.status(f"Saved {p}")
+            self.status(tr('Saved {page}', page=p))
 
     def save_result(self):
         if not self.result_files:
-            self.status("No result yet: click Preview first", error=True)
+            self.status(tr("No result yet: click Preview first"), error=True)
             return
         stem = self.original.stem if self.original else "document"
         p = self._save_target("Save result", f"{stem}-{self.current}.pdf")
@@ -903,13 +1014,12 @@ class MainWindow(QMainWindow):
         dlg.exec()
 
     def show_cli_help(self):
-        self.show_text(f"py-imposition {self.current} --help", self.parsers[self.current].format_help())
+        self.show_text(tr('py-imposition {current} --help', current=self.current), self.parsers[self.current].format_help())
 
     def copy_command_line(self):
         QApplication.clipboard().setText(self.cmd_line.text())
-        self.status("Command line copied")
+        self.status(tr("Command line copied"))
 
     def about(self):
-        QMessageBox.about(self, "About py-imposition",
-                          f"<b>py-imposition {__version__}</b><p>A PDF imposition toolkit.</p>"
-                          "<p>Licensed under the GNU General Public License, version 3 or later.</p>")
+        QMessageBox.about(self, tr("About py-imposition"),
+                          tr('<b>py-imposition {version}</b><p>A PDF imposition toolkit.</p><p>Licensed under the GNU General Public License, version 3 or later.</p>', version=__version__))

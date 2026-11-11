@@ -9,6 +9,7 @@ accepted as whole specs.
 from __future__ import annotations
 
 import re
+from .interface import tr
 
 _NUM = r"(?:LAST(?:-\d+)?|\d+)"
 
@@ -22,10 +23,10 @@ def page_number(token: str, n: int) -> int:
             return n
         if rest.startswith("-") and rest[1:].isdigit():
             return n - int(rest[1:])
-        raise ValueError(f"invalid page number {token!r}")
+        raise ValueError(tr('invalid page number {token!r}', token=token))
     if t.isdigit():
         return int(t)
-    raise ValueError(f"invalid page number {token!r}")
+    raise ValueError(tr('invalid page number {token!r}', token=token))
 
 
 def _split_range(token: str) -> tuple[str, str] | None:
@@ -69,7 +70,7 @@ def parse_pages(spec: str | None, n: int, *, allow_out_of_range: bool = False,
             if not 1 <= p <= n:
                 if allow_out_of_range:
                     continue
-                raise ValueError(f"page {p} is out of range (document has {n} pages)")
+                raise ValueError(tr('page {page} is out of range (document has {number} pages)', page=p, number=n))
             out.append(p - 1)
     if keep_order:
         return out
@@ -84,7 +85,7 @@ def filter_parity(indices: list[int], parity: str | None) -> list[int]:
         return [i for i in indices if i % 2 == 0]
     if parity == "even":
         return [i for i in indices if i % 2 == 1]
-    raise ValueError(f"invalid parity {parity!r}")
+    raise ValueError(tr('invalid parity {parity!r}', parity=parity))
 
 
 def select(spec: str | None, n: int, parity: str | None = None) -> list[int]:

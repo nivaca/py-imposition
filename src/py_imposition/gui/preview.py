@@ -11,6 +11,8 @@ from PySide6.QtWidgets import (
     QComboBox, QHBoxLayout, QLabel, QMenu, QSizePolicy, QSpinBox, QToolButton, QVBoxLayout, QWidget,
 )
 
+from ..interface import ntr, tr
+
 
 class PdfPane(QWidget):
     """A titled PDF viewer with page navigation and zoom controls."""
@@ -33,7 +35,7 @@ class PdfPane(QWidget):
 
         self.page = QSpinBox()
         self.page.setMinimum(1)
-        self.page.setPrefix("page ")
+        self.page.setPrefix(tr("page "))
         self.page.setEnabled(False)
         self.page.valueChanged.connect(self._jump)
 
@@ -45,15 +47,15 @@ class PdfPane(QWidget):
         self.view.pageNavigator().currentPageChanged.connect(self._page_changed)
 
         zoom = QToolButton()
-        zoom.setText("Zoom")
-        zoom.setToolTip("Fit the page or its width, or zoom in and out (also Ctrl+wheel)")
+        zoom.setText(tr("Zoom"))
+        zoom.setToolTip(tr("Fit the page or its width, or zoom in and out (also Ctrl+wheel)"))
         zoom.setPopupMode(QToolButton.ToolButtonPopupMode.InstantPopup)
         menu = QMenu(zoom)
-        menu.addAction("Fit page", lambda: self.set_zoom("page"))
-        menu.addAction("Fit width", lambda: self.set_zoom("width"))
+        menu.addAction(tr("Fit page"), lambda: self.set_zoom("page"))
+        menu.addAction(tr("Fit width"), lambda: self.set_zoom("width"))
         menu.addSeparator()
-        menu.addAction("Zoom in", lambda: self.zoom_by(1.25))
-        menu.addAction("Zoom out", lambda: self.zoom_by(1 / 1.25))
+        menu.addAction(tr("Zoom in"), lambda: self.zoom_by(1.25))
+        menu.addAction(tr("Zoom out"), lambda: self.zoom_by(1 / 1.25))
         zoom.setMenu(menu)
 
         top = QHBoxLayout()
@@ -87,8 +89,8 @@ class PdfPane(QWidget):
         self.page.blockSignals(False)
         size = self.doc.pagePointSize(0) if n else None
         dims = f"{size.width() / 72 * 2.54:.1f} × {size.height() / 72 * 2.54:.1f} cm" if size else ""
-        self.info.setText(f"{path.name} — {n} page{'s' if n != 1 else ''}{', ' + dims if dims else ''}"
-                          + (f" — {note}" if note else ""))
+        self.info.setText(ntr("{name} — {count} page", "{name} — {count} pages", n, name=path.name)
+                          + (", " + dims if dims else "") + (" — " + note if note else ""))
         self.info.setToolTip(self.info.text())
         self.view.setZoomMode(self.view.zoomMode())
 

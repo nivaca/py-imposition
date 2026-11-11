@@ -1,10 +1,11 @@
 # py-imposition
 
-A command-line PDF imposition toolkit. It covers the feature set of the Quite
-Imposing Plus plug-in for Acrobat without needing Acrobat: booklets, n-up,
-step and repeat, page shuffling, trimming and shifting, creep, bleeds, page
-numbers and stamps, masking tape, manual imposition, variable data merge,
-split/merge (partials), automation sequences and hot folders.
+*(Español: [README_es.md](README_es.md))*
+
+A command-line PDF imposition toolkit: booklets, n-up, step and repeat, page
+shuffling, trimming and shifting, creep, bleeds, page numbers and stamps,
+masking tape, manual imposition, variable data merge, split/merge (partials),
+automation sequences and hot folders.
 
 Every command reads a PDF and writes a new one. Commands can be chained by
 running them one after another, or saved as a **sequence** and run in a
@@ -15,30 +16,75 @@ single go. There is also a graphical interface with live previews.
 The window, making a perfect-bound booklet in 16-page signatures from the
 example book ([`docs/example/memman.pdf`](docs/example/README.md)):
 
-![Making a booklet in the window](docs/img/gui_booklet.png)
+![Making a booklet in the window](docs/img/gui_booklet_en.png)
 
 4-up on A3 with crop marks:
 
-![n-up pages](docs/img/gui_nup.png)
+![n-up pages](docs/img/gui_nup_en.png)
 
 Step and repeat (business cards):
 
-![Step and repeat](docs/img/gui_step-repeat.png)
+![Step and repeat](docs/img/gui_step-repeat_en.png)
 
 Adding page numbers, with a sequence of commands ready in the Sequence panel:
 
-![Text and numbers, and a sequence](docs/img/gui_text.png)
+![Text and numbers, and a sequence](docs/img/gui_text_en.png)
 
 The command line:
 
-![The command line](docs/img/cli.png)
+![The command line](docs/img/cli_en.png)
 
 These pictures are made by `uv run python tools/screenshots.py` (see
 [Development](#development)).
 
 ## Installation
 
-You need Python 3.15+ and [uv](https://docs.astral.sh/uv/).
+There are three ways to install it: the AppImage (nothing to install), the
+Fedora package, or from the source.
+
+### AppImage (any Linux)
+
+Download `py-imposition-VERSION-x86_64.AppImage` from the
+[releases](https://github.com/nivaca/py-imposition/releases), make it
+executable, and run it. It holds its own Python, Qt and everything else, and
+runs on Linux with glibc 2.34 or later (Ubuntu 22.04, Debian 12, Fedora 35 and
+later).
+
+```bash
+chmod +x py-imposition-*-x86_64.AppImage
+./py-imposition-*-x86_64.AppImage                    # the window
+./py-imposition-*-x86_64.AppImage booklet in.pdf     # the command line
+./py-imposition-*-x86_64.AppImage cli --help         # the list of commands
+```
+
+A first argument that is a command (`booklet`, `nup`…), an option, or `cli`
+runs the command line; anything else, or nothing, opens the window. Tools
+such as AppImageLauncher or Gear Lever add it to the applications menu.
+
+### Fedora (Copr)
+
+```bash
+sudo dnf copr enable nivaca/py-imposition
+sudo dnf install py-imposition
+```
+
+This installs `py-imposition`, `py-imposition-gui`, a menu entry (also
+offered for opening PDF files) and the icons, using Fedora's own Python,
+pikepdf, reportlab and PySide6. Updates come with `sudo dnf upgrade`. The
+packages are built and signed by
+[Copr](https://copr.fedorainfracloud.org/coprs/nivaca/py-imposition/).
+
+Each release also has the RPM itself, signed with the author's key, and that
+key (`RPM-GPG-KEY-py-imposition`):
+
+```bash
+sudo rpm --import RPM-GPG-KEY-py-imposition
+sudo dnf install ./py-imposition-*.noarch.rpm
+```
+
+### From the source
+
+You need Python 3.12+ and [uv](https://docs.astral.sh/uv/).
 
 ```bash
 git clone <repo-url> py-imposition
@@ -149,7 +195,8 @@ The GUI offers every command of the CLI:
   over. *Save document* saves the current document, and *Save result* saves
   the last result.
 - **Preferences** (units, registration colour, bleed handling, PDF/X) are
-  on the toolbar and apply to every command.
+  on the toolbar and apply to every command. The language is under
+  *Settings ▸ Language of the interface*.
 - **Sequence panel:**
   - Collect steps from the form (*Add current*), or reorder them by dragging.
   - Load steps from a document's recorded commands (*From document*, i.e.
@@ -163,6 +210,31 @@ The GUI offers every command of the CLI:
   run, and the *Log* tab shows each command line and its output.
 - Drop a PDF on the window to open it. Window layout, preferences, the
   options of each command and the sequence are remembered between sessions.
+
+## The language of the interface
+
+py-imposition speaks English or Spanish: the help of every command and
+option, its messages, and the window's menus, buttons, labels and help. The
+results (the PDFs) are the same in both.
+
+- **To choose the language for good:** run `py-imposition interface es` (or
+  `en`), or use *Settings ▸ Language of the interface* in the window. The
+  window changes at once.
+- **Running `py-imposition interface` with no language** lists the available
+  languages and shows the one in use.
+- **For one run only:** add `--interface es` to any command.
+
+The choice is kept in a small configuration file, `config.toml`, in
+`~/.config/py-imposition/` (Linux), `~/Library/Application
+Support/py-imposition/` (macOS) or `%APPDATA%\py-imposition\` (Windows);
+`$PY_IMPOSITION_CONFIG` names another folder. Both the command line and the
+window read it.
+
+The translations are in `src/py_imposition/locale/es.xml`, with one `<text>`
+for each text of the program, giving the English (`<en>`) and its
+translation (`<tr>`). To add another language, make a file for it (`fr.xml`,
+for example); what it doesn't translate is shown in English. Qt's own
+dialogs, such as file choosers, follow the same language.
 
 ## General conventions
 
@@ -189,6 +261,7 @@ choose whichever fits more) or `as-is`.
 | `--bleed use\|ignore` | use pages' bleed boxes when imposing (default), or impose the visible page only |
 | `--pdfx` | when bleeds are removed, keep a TrimBox (PDF/X) |
 | `-q` | no warnings |
+| `--interface en\|es` | the language of the interface, for this run only (see [The language of the interface](#the-language-of-the-interface)) |
 
 **Page boxes and bleeds.** Imposition lines up each page's *trim box*. If a
 bleed box is defined, artwork shows beyond the trim. Bleeds are clipped so
@@ -229,7 +302,7 @@ Places pages left to right, top to bottom, on larger sheets.
 | `--scale none\|fit\|PERCENT` | 100%, fit exactly cols × rows (based on the first page), or a percentage |
 | `--paper`, `--orientation best` | sheet size; `best` chooses tall or wide to fit more pages |
 | `--trim` | remove unused space at the edge of each sheet |
-| `--margin…`, `--spacing`, `--hspace "0 40"`, `--vspace` | margins, and spacing between columns and rows. Lists repeat, as in the manual's advanced spacing. |
+| `--margin…`, `--spacing`, `--hspace "0 40"`, `--vspace` | margins, and spacing between columns and rows. Lists repeat. |
 | `--align top-left\|…\|center` | where pages sit on sheets that aren't full |
 | `--align-sheets-independently`, `--align-rows` | align each sheet on its own; align short rows too |
 | `--mirror h\|v\|hv` | mirror margins and alignment on even (back) sheets |
@@ -292,7 +365,7 @@ usually followed by `nup`.
   book and stretches to any length (`--rule "4 1 2 3"`).
 - `--repeat cut-single`, `--repeat cut-double`: cut stacks printed on one or
   both sides. With `--consecutive A` and `--restart-after B` they make the
-  manual's "advanced stacks (A,B)", e.g. numbered ticket books.
+  "advanced stacks (A,B)", e.g. numbered ticket books.
 
 ```bash
 # 4-up saddle-stitched booklet: shuffle, then 2 x 2 n-up
@@ -512,7 +585,7 @@ thick border, a large page number, and rules 20 mm and 1 in from each edge.
 
 ### Information and automation
 
-#### `info` — Imposition Info / Page monitor
+#### `info` — Imposition info
 
 Shows page sizes (grouped), rotation, trim and bleed margins, UserUnit,
 annotations, and the commands recorded in the file. Add `--json` for
@@ -553,44 +626,14 @@ py-imposition watch incoming/ --sequence booklet.toml [--out DIR] [--done DIR] [
 Each PDF dropped into the folder is processed when it stops growing. Results
 go to `out/`, and inputs move to `done/` (or to `errors/`, with a log file).
 
-## Mapping from Quite Imposing
-
-| Quite Imposing | py-imposition |
-|---|---|
-| Create booklet | `booklet` |
-| n-Up Pages / Step And Repeat / Join Two Pages | `nup` / `step-repeat` / `join` |
-| Shuffle Pages For Imposing / Shuffle Even/Odd / Reverse | `shuffle` / `evenodd` / `reverse` |
-| Trim And Shift / Creep / Tile / Adjust Page Sizes | `trim-shift` / `creep` / `tile` / `resize` |
-| Page tools (duplicate, delete, move, rotate) | `duplicate`, `delete`, `move`, `rotate` |
-| Define bleeds | `bleed` |
-| Insert Pages (blank, from file, intervals, conditions) | `insert` |
-| Create Sample Document | `sample` |
-| Stick On Text and Numbers / PDF Pages / Masking Tape | `text` / `stick-pdf` / `mask` |
-| Peel Off Text / Masking Tape / Registration Marks | `peel --what text\|tape\|marks` |
-| Manual Imposition | `manual` (layout file) |
-| Variable data merge | `merge-data` |
-| Split/merge (partials) | `split` |
-| Imposition Info, Page monitor | `info` |
-| Automation sequences, Remember/Playback Action | `run` (sequence files) |
-| Imposition by example | `replay` |
-| Quite Hot Imposing hot folders | `watch` |
-| Imposition Preferences | `--units`, `--registration`, `--bleed`, `--pdfx` |
-| Using backgrounds | `--background` on `nup`, `step-repeat`; `background` in `manual` layouts |
-
-Not carried over, because they only exist because of Acrobat's interface:
-the control panel and dialogs, the Shuffle Assistant (use `booklet` or
-`shuffle` rules), interactive drawing of masking tape (use coordinates),
-Protected Mode, Enfocus Switch integration, and the demo mode.
-
 ## Notes and limitations
 
-- As in the original, links, bookmarks and form fields don't survive
+- Links, bookmarks and form fields don't survive
   imposition. Annotations are not carried onto imposed sheets.
 - Text uses the standard PDF fonts (not embedded) or TrueType fonts
   (embedded). OpenType/CFF fonts are not supported.
 - With `trim-shift --mode original` or `bleed --outside` you may uncover
-  content outside the original page, or find nothing there. This is the same
-  caveat the original manual gives.
+  content outside the original page, or find nothing there.
 
 ## Development
 
@@ -599,8 +642,10 @@ uv sync --all-extras
 uv run pytest            # GUI tests run headless (QT_QPA_PLATFORM=offscreen) or are skipped without PySide6
 ```
 
-The tests check page orders against the worked examples in the Quite
-Imposing manual and run every command end to end. The code lives in
+The tests check page orders against worked examples of standard
+impositions and run every command end to end. `tests/test_interface.py`
+also checks that every text of the program has its Spanish translation, and
+that no translation is left unused. The code lives in
 `src/py_imposition/`:
 
 | File | Contents |
@@ -615,23 +660,27 @@ Imposing manual and run every command end to end. The code lives in
 | `common.py`, `runner.py` | command framework and CLI |
 | `gui/` | the PySide6 interface: `forms.py` (option forms built from the CLI parser), `preview.py` (PDF viewer), `window.py` (main window, sequence panel, process runner) |
 | `install.py` | `py-imposition-install`: the menu entry on Linux, Windows and macOS |
+| `interface.py`, `locale/` | the language of the interface: `tr()` translates its texts; `locale/es.xml` holds the Spanish |
+| `config.py` | the configuration file (`config.toml`): the language of the interface |
 | `icons/` | the icon: `py-imposition.svg` and every size made from it |
 
 ### Tools
 
 ```bash
-uv run python tools/screenshots.py [-o docs/img] [--only booklet,nup,step-repeat,text,cli] [--scale 2] [--dark]
+uv run python tools/screenshots.py [-o docs/img] [--only booklet,nup,step-repeat,text,cli] [--langs en,es] [--scale 2] [--dark]
 uv run python tools/icons.py [--dry-run]
 ```
 
-- `tools/screenshots.py` makes the pictures of this README in `docs/img/`:
-  - **The window** (`gui_<command>.png`) runs headless with Qt's offscreen
+- `tools/screenshots.py` makes the pictures of this README and of
+  `README_es.md` in `docs/img/`, in English and in Spanish
+  (`<shot>_en.png`, `<shot>_es.png`):
+  - **The window** (`gui_<command>_<lang>.png`) runs headless with Qt's offscreen
     platform. Nothing appears on screen, and the size and scale (2× by
     default, sharp on high-resolution screens) don't depend on your display.
     Each shot uses settings of its own in a temporary folder, so your
     settings and sequence are untouched. The example documents are made with
     `py-imposition sample`.
-  - **The command line** (`cli.png`) is a real session: the commands are run
+  - **The command line** (`cli_<lang>.png`) is a real session: the commands are run
     and their output is drawn like a terminal.
   - It needs only the `gui` extra.
 - `tools/icons.py` makes every icon afresh from
@@ -642,6 +691,34 @@ uv run python tools/icons.py [--dry-run]
 
   Each size is drawn by Inkscape (the Flatpak or the one on the `PATH`),
   and the `.ico` is assembled with Pillow.
+
+### Releasing
+
+Every release is made with `tools/release.py`, which publishes it on GitHub
+and Codeberg and, with `--rpm`, on Copr:
+
+```bash
+# 1. bump the version in pyproject.toml, src/py_imposition/__init__.py and the spec:
+rpmdev-bumpspec -n 0.5 -c "What changed" -u "Nicolas Vaughan <nivaca@fastmail.com>" packaging/py-imposition.spec
+# 2. commit, then:
+uv run python tools/release.py --rpm --notes-file NOTES.md     # --dry-run to see the plan first
+```
+
+It shows its plan and asks before running it:
+
+1. it runs the tests;
+2. it makes the wheel, the source package, the AppImage
+   (`tools/bundle-appimage.py`) and the signed RPM (`packaging/build-rpm.sh
+   --sign`; gpg asks for the passphrase);
+3. it tags the version and pushes `main` and the tag to both forges;
+4. it makes the GitHub and Codeberg releases with all the files (the wheel,
+   the source package, the AppImage, the RPM and its public key);
+5. it sends the signed source RPM to Copr, which builds it for each Fedora.
+
+`packaging/COPR.org` has the one-time setup (tools, the Copr token, the
+project) and the details. The pieces can also be run on their own:
+`uv run python tools/bundle-appimage.py` writes the AppImage to `dist/`, and
+`packaging/build-rpm.sh [--sign]` writes the RPMs to `build/rpm/`.
 
 ## License
 

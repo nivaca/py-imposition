@@ -12,14 +12,28 @@ from . import (  # noqa: F401  (importing registers the commands)
 )
 from .common import COMMANDS, Context, ImpositionError
 from .runner import build_parser, make_context, record, save_result, strip_io
+from . import interface
+from .interface import ntr, tr
 
-__version__ = "0.3"
+__version__ = "0.4"
 
 __all__ = ["main", "COMMANDS", "Context", "ImpositionError", "__version__"]
 
 
+def interface_option(argv: list[str]) -> str | None:
+    """The value of --interface in ARGV (needed before the parser is built)."""
+    for i, tok in enumerate(argv):
+        if tok == "--interface" and i + 1 < len(argv):
+            return argv[i + 1]
+        if tok.startswith("--interface="):
+            return tok.split("=", 1)[1]
+    return None
+
+
 def main(argv: list[str] | None = None) -> int:
     argv = list(sys.argv[1:] if argv is None else argv)
+    interface.use_configured(interface_option(argv))
+    interface.translate_argparse()
     # "py-imposition file.pdf [options]" -> booklet with the default settings
     first = next((t for t in argv if not t.startswith("-")), None)
     if first and first not in COMMANDS and first.lower().endswith(".pdf"):
@@ -36,7 +50,7 @@ def main(argv: list[str] | None = None) -> int:
         pdf = None
         if inp is not None:
             if not inp.is_file():
-                raise ImpositionError(f"{inp} not found")
+                raise ImpositionError(tr('{inp} not found', inp=inp))
             pdf = Pdf.open(inp)
         result = cmd.run(pdf, ns, ctx)
         if result is None:  # command handled its own output (info, run, watch...)
@@ -48,12 +62,12 @@ def main(argv: list[str] | None = None) -> int:
             out = Path(f"{stem}-{ns.command}.pdf")
         paths = save_result(result, out)
     except ImpositionError as e:
-        print(f"error: {e}", file=sys.stderr)
+        print(tr('error: {error}', error=e), file=sys.stderr)
         return 1
     for p in paths:
         try:
             n = len(Pdf.open(p).pages)
-            print(f"Wrote {p} ({n} page{'s' if n != 1 else ''})")
+            print(ntr('Wrote {path} ({count} page)', 'Wrote {path} ({count} pages)', n, path=p))
         except Exception:
-            print(f"Wrote {p}")
+            print(tr("Wrote {path}", path=p))
     return 0

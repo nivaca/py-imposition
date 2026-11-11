@@ -14,6 +14,7 @@ from . import pdfutil as pu
 from .common import Context, ImpositionError, command
 from .pagesel import parse_pages
 from .stamp import POSITIONS, Overlay, TextSpec, draw_text, invert, parse_color, resolve_font
+from .interface import tr
 
 FIELDS_HELP = """\
 Fields file (TOML). Column values are written as {Column Name}:
@@ -60,24 +61,24 @@ Fields file (TOML). Column values are written as {Column Name}:
 
 
 def _merge_args(p):
-    p.add_argument("--data", required=True, type=Path, help="data source: CSV/TSV with a header row")
-    p.add_argument("--fields", required=True, type=Path, help="fields file (TOML); see the description")
-    p.add_argument("--separator", default="auto", help="column separator: auto, ',', ';', 'tab'")
-    p.add_argument("--encoding", default="utf-8-sig", help="text encoding of the data (default: utf-8-sig)")
+    p.add_argument("--data", required=True, type=Path, help=tr("data source: CSV/TSV with a header row"))
+    p.add_argument("--fields", required=True, type=Path, help=tr("fields file (TOML); see the description"))
+    p.add_argument("--separator", default="auto", help=tr("column separator: auto, ',', ';', 'tab'"))
+    p.add_argument("--encoding", default="utf-8-sig", help=tr("text encoding of the data (default: utf-8-sig)"))
     p.add_argument("--master", action="store_true",
-                   help="the document is a master copied once per record (otherwise records are added to "
-                        "successive groups of pages)")
+                   help=tr("the document is a master copied once per record (otherwise records are added to "
+                        "successive groups of pages)"))
     p.add_argument("--pages-per-record", type=int, default=1, metavar="N",
-                   help="without --master: pages used by each record (default: 1)")
-    p.add_argument("--strict", action="store_true", help="fail if records and pages don't match exactly")
-    p.add_argument("--records", default="all", metavar="RANGE", help="records to use, e.g. 1-10")
+                   help=tr("without --master: pages used by each record (default: 1)"))
+    p.add_argument("--strict", action="store_true", help=tr("fail if records and pages don't match exactly"))
+    p.add_argument("--records", default="all", metavar="RANGE", help=tr("records to use, e.g. 1-10"))
 
 
 def read_data(path: Path, sep: str, encoding: str) -> tuple[list[str], list[dict[str, str]]]:
     try:
         text = path.read_text(encoding=encoding)
     except (OSError, UnicodeDecodeError) as e:
-        raise ImpositionError(f"cannot read data source {path}: {e}") from None
+        raise ImpositionError(tr('cannot read data source {path}: {error}', path=path, error=e)) from None
     if sep == "auto":
         try:
             dialect = csv.Sniffer().sniff(text.splitlines()[0] if text else ",", delimiters=",;\t")
@@ -88,7 +89,7 @@ def read_data(path: Path, sep: str, encoding: str) -> tuple[list[str], list[dict
         delim = {"tab": "\t", "\\t": "\t"}.get(sep, sep)
     rows = list(csv.reader(io.StringIO(text), delimiter=delim))
     if not rows:
-        raise ImpositionError("data source is empty")
+        raise ImpositionError(tr("data source is empty"))
     header = [h.strip() for h in rows[0]]
     records = []
     for r in rows[1:]:
@@ -106,7 +107,7 @@ def fill(template: str, record: dict[str, str], header: list[str]) -> str:
         for h in header:
             if h.lower() == key.lower():
                 return record[h]
-        raise ImpositionError(f"unknown column {{{key}}} (columns: {', '.join(header)})")
+        raise ImpositionError(tr('unknown column {{{key}}} (columns: {items})', key=key, items=', '.join(header)))
 
     return re.sub(r"\{([^{}]+)\}", rep, template)
 
@@ -159,15 +160,16 @@ def draw_block(c, blk: dict, record, header, ctx: Context, warnings: list[str], 
         tw = stringWidth(text, ln["font"], fs)
         if tw > w:
             if ln["overflow"] == "fail":
-                raise ImpositionError(f"record {rec_no}: line too long for the block: {text!r}")
+                raise ImpositionError(tr('record {rec_no}: line too long for the block: {text!r}', rec_no=rec_no, text=text))
             if ln["overflow"] == "scale":
                 new = fs * w / tw
                 if new / fs * 100 < warn_below:
-                    warnings.append(f"record {rec_no}: text scaled to {new / fs:.0%}: {text!r}")
+                    warnings.append(tr("record {record}: text scaled to {percent}: {text!r}", record=rec_no,
+                                         percent=f"{new / fs:.0%}", text=text))
                 fs = new
                 tw = w
             else:
-                warnings.append(f"record {rec_no}: text cut off: {text!r}")
+                warnings.append(tr("record {record}: text cut off: {text!r}", record=rec_no, text=text))
                 while text and stringWidth(text, ln["font"], fs) > w:
                     text = text[:-1]
                 tw = stringWidth(text, ln["font"], fs)
@@ -190,10 +192,10 @@ def merge_data(pdf: Pdf, a, ctx: Context):
     try:
         fields = tomllib.loads(a.fields.read_text())
     except (OSError, tomllib.TOMLDecodeError) as e:
-        raise ImpositionError(f"cannot read fields file {a.fields}: {e}") from None
+        raise ImpositionError(tr('cannot read fields file {fields}: {error}', fields=a.fields, error=e)) from None
     texts, pics, blocks = fields.get("text", []), fields.get("picture", []), fields.get("block", [])
     if not (texts or pics or blocks):
-        raise ImpositionError("fields file defines no [[text]], [[picture]] or [[block]]")
+        raise ImpositionError(tr("fields file defines no [[text]], [[picture]] or [[block]]"))
     base = Path(a.fields).parent
     n = len(pdf.pages)
     if a.master:
@@ -207,12 +209,12 @@ def merge_data(pdf: Pdf, a, ctx: Context):
     else:
         per = a.pages_per_record
         if per < 1:
-            raise ImpositionError("--pages-per-record must be at least 1")
+            raise ImpositionError(tr("--pages-per-record must be at least 1"))
         groups = -(-n // per)
         if a.strict and (n % per or groups != len(records)):
-            raise ImpositionError(f"{len(records)} records but {n} pages in groups of {per}")
+            raise ImpositionError(tr('{count} records but {number} pages in groups of {per}', count=len(records), number=n, per=per))
         if len(records) > groups:
-            ctx.warn(f"{len(records) - groups} record(s) have no pages and are ignored")
+            ctx.warn(tr('{count} record(s) have no pages and are ignored', count=len(records) - groups))
             records = records[:groups]
         doc = pdf
     warnings: list[str] = []
@@ -233,7 +235,7 @@ def merge_data(pdf: Pdf, a, ctx: Context):
             for t in t_here:
                 pos = t.get("position", "top-left")
                 if pos not in POSITIONS:
-                    raise ImpositionError(f"invalid position {pos!r}")
+                    raise ImpositionError(tr('invalid position {pos!r}', pos=pos))
                 draw_text(c, TextSpec(fill(t["template"], rec, header), resolve_font(t.get("font", "Helvetica")),
                                       float(t.get("size", 12)), parse_color(t.get("color", "black"), ctx), pos,
                                       ctx.L(t.get("x", 0)), ctx.L(t.get("y", 0)), int(t.get("rotation", 0))), box)
@@ -257,9 +259,9 @@ def merge_data(pdf: Pdf, a, ctx: Context):
         try:
             pno = int(val)
         except ValueError:
-            raise ImpositionError(f"picture column {p['column']!r} must hold a page number, got {val!r}") from None
+            raise ImpositionError(tr('picture column {page!r} must hold a page number, got {val!r}', page=p['column'], val=val)) from None
         if not 1 <= pno <= len(src.pages):
-            raise ImpositionError(f"picture page {pno} not in {fpath}")
+            raise ImpositionError(tr('picture page {pno} not in {fpath}', pno=pno, fpath=fpath))
         spage = src.pages[pno - 1].obj
         geom = pu.geometry(spage, use_bleed=False)
         w, h = geom.size(int(p.get("rotate", 0)))

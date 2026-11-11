@@ -1,4 +1,4 @@
-"""Imposition Info / Page monitor: report page sizes, boxes, bleeds and recorded commands."""
+"""Imposition info: report page sizes, boxes, bleeds and recorded commands."""
 
 from __future__ import annotations
 
@@ -8,15 +8,17 @@ import shlex
 from pikepdf import Pdf
 
 from . import pdfutil as pu
-from .common import Context, command
+from . import config, interface
+from .common import Context, ImpositionError, command
 from .units import UNITS
+from .interface import N_, ntr, tr
 
 
 def _info_args(p):
-    p.add_argument("--json", action="store_true", help="machine-readable output")
-    p.add_argument("--all-pages", action="store_true", help="list every page instead of grouping runs")
+    p.add_argument("--json", action="store_true", help=tr("machine-readable output"))
+    p.add_argument("--all-pages", action="store_true", help=tr("list every page instead of grouping runs"))
     p.add_argument("--report-units", choices=["cm", "mm", "in", "pt"], default=None,
-                   help="units for the report (default: --units)")
+                   help=tr("units for the report (default: --units)"))
 
 
 def page_info(page, idx: int) -> dict:
@@ -43,7 +45,7 @@ def page_info(page, idx: int) -> dict:
 
 
 @command("info", "show page sizes, boxes, bleeds and recorded commands", _info_args,
-         description="Imposition Info / Page monitor.")
+         description=N_("Show the size, boxes and bleeds of the pages, and the commands recorded in the document."))
 def info(pdf: Pdf, a, ctx: Context):
     pages = [page_info(p.obj, i) for i, p in enumerate(pdf.pages)]
     history = pu.get_history(pdf)
@@ -56,7 +58,7 @@ def info(pdf: Pdf, a, ctx: Context):
     def sz(w, h):
         return f"{w / f:.4g} x {h / f:.4g} {u}"
 
-    print(f"{ctx.input_path}: {len(pages)} page{'s' if len(pages) != 1 else ''}")
+    print(ntr('{path}: {count} page', '{path}: {count} pages', len(pages), path=ctx.input_path))
     groups: list[list[dict]] = []
     for p in pages:
         key = (round(p["size"][0], 2), round(p["size"][1], 2), p["rotate"], p["bleed_margins"] and
@@ -68,21 +70,50 @@ def info(pdf: Pdf, a, ctx: Context):
             groups.append([p])
     for g in groups:
         p = g[0]
-        rng = f"page {p['page']}" if len(g) == 1 else f"pages {p['page']}-{g[-1]['page']}"
+        rng = tr("page {page}", page=p["page"]) if len(g) == 1 else \
+            tr("pages {first}-{last}", first=p["page"], last=g[-1]["page"])
         line = f"  {rng}: {sz(*p['size'])}"
         if p["rotate"]:
-            line += f", rotated {p['rotate']}°"
+            line += tr(", rotated {degrees}°", degrees=p["rotate"])
         if p["bleed_margins"]:
             bm = p["bleed_margins"]
-            line += f"; trim {sz(*p['trim_size'])}, bleed L{bm[0] / f:.3g} B{bm[1] / f:.3g} " \
-                    f"R{bm[2] / f:.3g} T{bm[3] / f:.3g} {u}"
+            line += tr("; trim {size}, bleed L{left} B{bottom} R{right} T{top} {unit}",
+                       size=sz(*p["trim_size"]), left=f"{bm[0] / f:.3g}", bottom=f"{bm[1] / f:.3g}",
+                       right=f"{bm[2] / f:.3g}", top=f"{bm[3] / f:.3g}", unit=u)
         if p["user_unit"] != 1:
             line += f", UserUnit {p['user_unit']:g}"
         if p["annotations"]:
-            line += f", {p['annotations']} annotation(s)"
+            line += ntr(", {count} annotation", ", {count} annotations", p["annotations"])
         print(line)
     if history:
-        print("Recorded commands (replay with 'replay --from'):")
+        print(tr("Recorded commands (replay with 'replay --from'):"))
         for k, step in enumerate(history, 1):
             print(f"  {k}. {shlex.join(step)}")
     return None
+
+
+def _interface_args(p):
+    p.add_argument("language", nargs="?", choices=sorted(interface.names()),
+                   help=tr("the language to keep for the interface; without it, show the languages and the "
+                           "one in use"))
+
+
+@command("interface", "show or choose the language of the interface", _interface_args, needs_input=False,
+         description=N_("The language of the help, the messages and the window. The choice is kept in the "
+                        "configuration file; --interface CODE changes it for one run only."))
+def choose_interface(pdf, a, ctx: Context):
+    names = interface.names()
+    if a.language is None:
+        current = interface.code()
+        print(tr("Languages of the interface:"))
+        for code, name in names.items():
+            print(f"  {'*' if code == current else ' '} {code}  {name}")
+        print(tr("Configuration file: {path}", path=config.config_path()))
+        return None
+    if not interface.use(a.language):
+        raise ImpositionError(tr("the language {code} cannot be used: {error}", code=a.language,
+                                 error=interface.error()))
+    path = config.set("interface", a.language)
+    print(tr("The interface is now in {name} (kept in {path}).", name=names[a.language], path=path))
+    return None
+

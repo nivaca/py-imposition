@@ -1,0 +1,17 @@
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name=py-imposition
+GenericName=PDF imposition
+GenericName[es]=Imposición de PDF
+Comment=Impose PDF pages: booklets, n-up, step and repeat and more
+Comment[es]=Imponer páginas PDF: folletos, n-up, paso y repetición y más
+Keywords=imposition;booklet;n-up;PDF;printing;prepress;
+Keywords[es]=imposición;folleto;n-up;PDF;impresión;preimpresión;
+Categories=Office;Publishing;
+Icon=py-imposition
+Exec=py-imposition-gui %f
+MimeType=application/pdf;
+Terminal=false
+StartupNotify=true
+StartupWMClass=py-imposition

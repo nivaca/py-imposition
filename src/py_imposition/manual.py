@@ -10,6 +10,7 @@ from pikepdf import Pdf
 from . import pdfutil as pu
 from .common import Context, ImpositionError, command, get_mark_style
 from .impose import Backgrounds, draw_background
+from .interface import tr
 
 LAYOUT_HELP = """\
 Layout file (TOML) example:
@@ -35,13 +36,13 @@ Layout file (TOML) example:
 
 
 def _manual_args(p):
-    p.add_argument("--layout", required=True, type=Path, help="layout file (TOML); see the description")
+    p.add_argument("--layout", required=True, type=Path, help=tr("layout file (TOML); see the description"))
     p.add_argument("--mark-offset", default="10pt", metavar="LEN")
     p.add_argument("--mark-length", default="20pt", metavar="LEN")
     p.add_argument("--mark-width", default="0.5pt", metavar="LEN")
     p.add_argument("--mark-white-background", action="store_true")
     p.add_argument("--smart-marks", action="store_true",
-                   help="drop crop mark segments that would overlap pages")
+                   help=tr("drop crop mark segments that would overlap pages"))
 
 
 def mirror_corner(corner: str, sides: str) -> str:
@@ -68,13 +69,13 @@ def manual(pdf: Pdf, a, ctx: Context):
     try:
         spec = tomllib.loads(a.layout.read_text())
     except (OSError, tomllib.TOMLDecodeError) as e:
-        raise ImpositionError(f"cannot read layout {a.layout}: {e}") from None
+        raise ImpositionError(tr('cannot read layout {layout}: {error}', layout=a.layout, error=e)) from None
     places = spec.get("place") or []
     if not places:
-        raise ImpositionError("layout has no [[place]] entries")
+        raise ImpositionError(tr("layout has no [[place]] entries"))
     sides = spec.get("sides", "single")
     if sides not in ("single", "double-h", "double-v"):
-        raise ImpositionError("sides must be single, double-h or double-v")
+        raise ImpositionError(tr("sides must be single, double-h or double-v"))
     bg = None
     if spec.get("background"):
         bgpath = Path(spec["background"])
@@ -98,14 +99,14 @@ def manual(pdf: Pdf, a, ctx: Context):
         side = p.get("side", "front")
         sheet = int(p.get("sheet", 1)) - 1
         if not 0 <= sheet < per_cycle_sheets:
-            raise ImpositionError(f"place.sheet {sheet + 1} is outside 1..{per_cycle_sheets}")
+            raise ImpositionError(tr('place.sheet {sheet} is outside 1..{per_cycle_sheets}', sheet=sheet + 1, per_cycle_sheets=per_cycle_sheets))
         base = dict(corner=p.get("corner", "top-left"), x=ctx.L(p.get("x", 0)), y=ctx.L(p.get("y", 0)),
                     scale=float(p.get("scale", 100)) / 100, rotate=int(p.get("rotate", 0)) % 360,
                     marks=bool(p.get("crop_marks", default_marks)), page=p.get("page"))
         if side not in ("front", "back", "both"):
-            raise ImpositionError("place.side must be front, back or both")
+            raise ImpositionError(tr("place.side must be front, back or both"))
         if side in ("back", "both") and not double:
-            raise ImpositionError("back placements need sides = double-h or double-v")
+            raise ImpositionError(tr("back placements need sides = double-h or double-v"))
         if side in ("front", "both"):
             slots.append(dict(base, sheet=sheet * (2 if double else 1)))
         if side in ("back", "both"):
@@ -127,7 +128,7 @@ def manual(pdf: Pdf, a, ctx: Context):
             if sl["page"] is not None:
                 idx = int(sl["page"]) - 1
                 if not 0 <= idx < n:
-                    raise ImpositionError(f"page {sl['page']} is out of range")
+                    raise ImpositionError(tr('page {sl} is out of range', sl=sl['page']))
             else:
                 if next_page >= n:
                     continue
@@ -158,7 +159,7 @@ def manual(pdf: Pdf, a, ctx: Context):
         if not repeat or not consumed or next_page >= n:
             break
     if next_page < n and not repeat:
-        ctx.warn(f"{n - next_page} page(s) were not placed (repeat = false)")
+        ctx.warn(tr('{number} page(s) were not placed (repeat = false)', number=n - next_page))
     for k in sorted(sheets):
         canvas, rects = sheets[k]
         if rects:

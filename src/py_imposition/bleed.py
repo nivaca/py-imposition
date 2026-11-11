@@ -8,31 +8,32 @@ from . import pdfutil as pu
 from .common import Context, ImpositionError, add_page_args, command
 from .pagesel import select
 from .pagetools import normalized
+from .interface import N_, tr
 
 
 def _bleed_args(p):
     add_page_args(p)
     p.add_argument("--mode", choices=["all", "except-fold", "edges", "from-crop", "remove", "generate-only"],
                    default="all",
-                   help="all: same bleed on every edge; except-fold: no bleed on the binding edge; edges: "
+                   help=tr("all: same bleed on every edge; except-fold: no bleed on the binding edge; edges: "
                         "per-edge amounts; from-crop: trim = crop box, bleed = media box; remove: delete bleeds; "
-                        "generate-only: keep existing boxes and just generate bleed content (default: all)")
-    p.add_argument("--amount", default="3mm", metavar="LEN", help="bleed for all/except-fold (default: 3mm)")
+                        "generate-only: keep existing boxes and just generate bleed content (default: all)"))
+    p.add_argument("--amount", default="3mm", metavar="LEN", help=tr("bleed for all/except-fold (default: 3mm)"))
     for e in ("left", "right", "top", "bottom"):
-        p.add_argument(f"--{e}", default="0", metavar="LEN", help=f"{e} bleed with --mode edges")
+        p.add_argument(f"--{e}", default="0", metavar="LEN", help=tr('bleed on the {edge} edge with --mode edges', edge=e))
     p.add_argument("--outside", action="store_true",
-                   help="take the bleed from outside the visible area (previously cropped content); "
-                        "otherwise the bleed is inside the visible page")
-    p.add_argument("--show", action="store_true", help="make the whole bleed area visible (crop box = bleed box)")
+                   help=tr("take the bleed from outside the visible area (previously cropped content); "
+                        "otherwise the bleed is inside the visible page"))
+    p.add_argument("--show", action="store_true", help=tr("make the whole bleed area visible (crop box = bleed box)"))
     p.add_argument("--direction", choices=["left", "right"], default="left",
-                   help="binding edge for --mode except-fold (default: left)")
+                   help=tr("binding edge for --mode except-fold (default: left)"))
     p.add_argument("--generate", choices=["none", "mirror", "scale"], default="none",
-                   help="fill the bleed area: mirror the page edges, or scale the trim area up (default: none)")
+                   help=tr("fill the bleed area: mirror the page edges, or scale the trim area up (default: none)"))
 
 
 @command("bleed", "define page bleeds (trim and bleed boxes)", _bleed_args,
-         description="Define bleeds: set TrimBox/BleedBox so imposition lines up the trim area and lets "
-                     "artwork run beyond it. Can generate missing bleed content by mirroring or scaling.")
+         description=N_("Define bleeds: set TrimBox/BleedBox so imposition lines up the trim area and lets "
+                     "artwork run beyond it. Can generate missing bleed content by mirroring or scaling."))
 def bleed(pdf: Pdf, a, ctx: Context):
     sel = select(a.pages, len(pdf.pages), a.parity)
     imp = pu.Importer(pdf)
@@ -68,12 +69,12 @@ def bleed(pdf: Pdf, a, ctx: Context):
                 want = pu.expand(cb, l, b, r, t)
                 bl = want if a.generate != "none" else pu.intersect(want, mb)
                 if bl != want:
-                    ctx.warn(f"page {i + 1}: bleed limited to the media box (use --generate to create it)")
+                    ctx.warn(tr('page {index}: bleed limited to the media box (use --generate to create it)', index=i + 1))
             else:
                 trim = (cb[0] + l, cb[1] + b, cb[2] - r, cb[3] - t)
                 bl = cb
                 if trim[2] <= trim[0] or trim[3] <= trim[1]:
-                    raise ImpositionError(f"page {i + 1}: bleed larger than the page")
+                    raise ImpositionError(tr('page {index}: bleed larger than the page', index=i + 1))
         if a.generate != "none":
             generate(pdf, imp, page, trim, bl, a.generate)
             if bl[0] < mb[0] or bl[1] < mb[1] or bl[2] > mb[2] or bl[3] > mb[3]:

@@ -18,6 +18,7 @@ from pikepdf import Pdf
 from . import pdfutil as pu
 from .common import Context, ImpositionError, add_page_args, command
 from .pagesel import parse_pages, select
+from .interface import N_, tr
 
 STANDARD_FONTS = [
     "Helvetica", "Helvetica-Bold", "Helvetica-Oblique", "Helvetica-BoldOblique",
@@ -56,16 +57,15 @@ def resolve_font(name: str) -> str:
             except (OSError, subprocess.SubprocessError):
                 found = None
         if not found or not Path(found).is_file():
-            raise ImpositionError(f"font {name!r} not found; use a standard font "
-                                  f"({', '.join(STANDARD_FONTS[:4])}...) or a .ttf path")
+            raise ImpositionError(tr('font {name!r} not found; use a standard font ({items}...) or a .ttf path', name=name, items=', '.join(STANDARD_FONTS[:4])))
         path = Path(found)
     if path.suffix.lower() not in (".ttf", ".ttc"):
-        raise ImpositionError(f"font file {path} is not TrueType (.ttf); only TrueType fonts can be embedded")
+        raise ImpositionError(tr('font file {path} is not TrueType (.ttf); only TrueType fonts can be embedded', path=path))
     rl_name = "F_" + re.sub(r"\W", "_", path.stem)
     try:
         pdfmetrics.registerFont(TTFont(rl_name, str(path)))
     except Exception as e:
-        raise ImpositionError(f"cannot use font {path}: {e}") from None
+        raise ImpositionError(tr('cannot use font {path}: {error}', path=path, error=e)) from None
     _registered[name] = rl_name
     return rl_name
 
@@ -95,8 +95,7 @@ def parse_color(spec: str, ctx: Context):
     named = getattr(colors, s, None)
     if named is not None and isinstance(named, colors.Color):
         return named
-    raise ImpositionError(f"invalid colour {spec!r} (black, red, #ff0000, rgb:255,0,0, cmyk:0,100,100,0, "
-                          "gray:50, registration)")
+    raise ImpositionError(tr('invalid colour {spec!r} (black, red, #ff0000, rgb:255,0,0, cmyk:0,100,100,0, gray:50, registration)', spec=spec))
 
 
 # --------------------------------------------------------------------------- fields
@@ -251,28 +250,28 @@ def invert(m: pu.Matrix) -> pu.Matrix:
 def _text_args(p):
     add_page_args(p)
     p.add_argument("--text", default=None,
-                   help="text to add; [#] is the number, and fields like [Doc:NumPages], [Page], [Date], "
+                   help=tr("text to add; [#] is the number, and fields like [Doc:NumPages], [Page], [Date], "
                         "[Date:mdy], [Time], [DateTime], [File:Name], [File:Path], [File:Folder], [Doc:Title], "
-                        "[Computer] are replaced. Use \\n for a new line. Default: '[#]'")
+                        "[Computer] are replaced. Use \\n for a new line. Default: '[#]'"))
     p.add_argument("--start", default="1",
-                   help="first number; leading zeros are kept (e.g. 00098 for Bates numbering) (default: 1)")
-    p.add_argument("--repeat-each", type=int, default=1, metavar="N", help="repeat each number N times")
-    p.add_argument("--increase-by", type=int, default=1, metavar="N", help="step between numbers (may be negative)")
+                   help=tr("first number; leading zeros are kept (e.g. 00098 for Bates numbering) (default: 1)"))
+    p.add_argument("--repeat-each", type=int, default=1, metavar="N", help=tr("repeat each number N times"))
+    p.add_argument("--increase-by", type=int, default=1, metavar="N", help=tr("step between numbers (may be negative)"))
     p.add_argument("--every", type=int, default=1, metavar="N",
-                   help="add text only every N-th page (numbers don't advance on skipped pages)")
-    p.add_argument("--position", choices=POSITIONS, default="bottom-center", help="(default: bottom-center)")
-    p.add_argument("--offset-x", default="0", metavar="LEN", help="horizontal offset from the position")
+                   help=tr("add text only every N-th page (numbers don't advance on skipped pages)"))
+    p.add_argument("--position", choices=POSITIONS, default="bottom-center", help=tr("(default: bottom-center)"))
+    p.add_argument("--offset-x", default="0", metavar="LEN", help=tr("horizontal offset from the position"))
     p.add_argument("--offset-y", default="1cm", metavar="LEN",
-                   help="vertical offset (to the text baseline) from the position (default: 1cm)")
+                   help=tr("vertical offset (to the text baseline) from the position (default: 1cm)"))
     p.add_argument("--mirror-odd-even", action="store_true",
-                   help="swap left and right positions on even pages (outside corners of a book)")
-    p.add_argument("--font", default="Helvetica", help="standard PDF font name, TrueType file, or installed "
-                                                        "font name (embedded) (default: Helvetica)")
-    p.add_argument("--size", type=float, default=10, help="point size (default: 10)")
+                   help=tr("swap left and right positions on even pages (outside corners of a book)"))
+    p.add_argument("--font", default="Helvetica", help=tr("standard PDF font name, TrueType file, or installed "
+                                                        "font name (embedded) (default: Helvetica)"))
+    p.add_argument("--size", type=float, default=10, help=tr("point size (default: 10)"))
     p.add_argument("--color", default="black",
-                   help="black, red, #rrggbb, rgb:R,G,B, cmyk:C,M,Y,K (percent), gray:P, or registration")
+                   help=tr("black, red, #rrggbb, rgb:R,G,B, cmyk:C,M,Y,K (percent), gray:P, or registration"))
     p.add_argument("--rotation", type=int, choices=[0, 90, 180, 270], default=0,
-                   help="text rotation, counterclockwise")
+                   help=tr("text rotation, counterclockwise"))
 
 
 def format_number(start: str, value: int) -> str:
@@ -281,8 +280,8 @@ def format_number(start: str, value: int) -> str:
 
 
 @command("text", "stick on text and page numbers", _text_args,
-         description="Stick On Text and Numbers: page numbers, Bates numbers, labels and fields. "
-                     "Remove later with 'peel --what text'.")
+         description=N_("Stick On Text and Numbers: page numbers, Bates numbers, labels and fields. "
+                     "Remove later with 'peel --what text'."))
 def stick_text(pdf: Pdf, a, ctx: Context):
     n = len(pdf.pages)
     rng = parse_pages(a.pages, n)
@@ -290,9 +289,9 @@ def stick_text(pdf: Pdf, a, ctx: Context):
     try:
         start = int(a.start)
     except ValueError:
-        raise ImpositionError("--start must be a whole number") from None
+        raise ImpositionError(tr("--start must be a whole number")) from None
     if a.repeat_each < 1 or a.every < 1:
-        raise ImpositionError("--repeat-each and --every must be at least 1")
+        raise ImpositionError(tr("--repeat-each and --every must be at least 1"))
     font = resolve_font(a.font)
     color = parse_color(a.color, ctx)
     ov = Overlay(pdf)
@@ -326,24 +325,24 @@ def stick_text(pdf: Pdf, a, ctx: Context):
 
 
 def _stickpdf_args(p):
-    p.add_argument("--file", required=True, help="PDF whose pages are added")
+    p.add_argument("--file", required=True, help=tr("PDF whose pages are added"))
     p.add_argument("--source-pages", default="all", metavar="RANGE",
-                   help="pages of --file to use; they cycle over the target pages (default: all)")
+                   help=tr("pages of --file to use; they cycle over the target pages (default: all)"))
     add_page_args(p, "target pages")
-    p.add_argument("--position", choices=POSITIONS, default="center", help="(default: center)")
+    p.add_argument("--position", choices=POSITIONS, default="center", help=tr("(default: center)"))
     p.add_argument("--offset-x", default="0", metavar="LEN",
-                   help="horizontal offset, measured in the natural direction from the position")
-    p.add_argument("--offset-y", default="0", metavar="LEN", help="vertical offset")
+                   help=tr("horizontal offset, measured in the natural direction from the position"))
+    p.add_argument("--offset-y", default="0", metavar="LEN", help=tr("vertical offset"))
     sc = p.add_mutually_exclusive_group()
-    sc.add_argument("--scale", type=float, default=100, help="percentage (default: 100)")
-    sc.add_argument("--fit", metavar="WxH", help="scale to fit this box")
-    p.add_argument("--stretch", action="store_true", help="with --fit: don't preserve the aspect ratio")
-    p.add_argument("--rotate", type=int, choices=[0, 90, 180, 270], default=0, help="clockwise rotation")
-    p.add_argument("--under", action="store_true", help="place behind the page content")
+    sc.add_argument("--scale", type=float, default=100, help=tr("percentage (default: 100)"))
+    sc.add_argument("--fit", metavar="WxH", help=tr("scale to fit this box"))
+    p.add_argument("--stretch", action="store_true", help=tr("with --fit: don't preserve the aspect ratio"))
+    p.add_argument("--rotate", type=int, choices=[0, 90, 180, 270], default=0, help=tr("clockwise rotation"))
+    p.add_argument("--under", action="store_true", help=tr("place behind the page content"))
 
 
 @command("stick-pdf", "stick pages of another PDF onto pages", _stickpdf_args,
-         description="Stick On PDF Pages: add a logo, stamp or advert from another PDF.")
+         description=N_("Stick On PDF Pages: add a logo, stamp or advert from another PDF."))
 def stick_pdf(pdf: Pdf, a, ctx: Context):
     src = pu.open_source(a.file)
     sidx = parse_pages(a.source_pages, len(src.pages), keep_order=True)
@@ -385,21 +384,21 @@ def stick_pdf(pdf: Pdf, a, ctx: Context):
 def _mask_args(p):
     add_page_args(p)
     p.add_argument("--rect", action="append", required=True, metavar="X,Y,W,H",
-                   help="area to cover, measured from --origin of the visible page; repeatable")
+                   help=tr("area to cover, measured from --origin of the visible page; repeatable"))
     p.add_argument("--origin", choices=["bottom-left", "top-left"], default="bottom-left",
-                   help="corner the --rect coordinates are measured from (default: bottom-left)")
-    p.add_argument("--color", default="white", help="tape colour (default: white)")
+                   help=tr("corner the --rect coordinates are measured from (default: bottom-left)"))
+    p.add_argument("--color", default="white", help=tr("tape colour (default: white)"))
 
 
 @command("mask", "stick masking tape over areas of pages", _mask_args,
-         description="Stick On Masking Tape: cover areas (e.g. old page numbers) with opaque rectangles. "
-                     "Remove later with 'peel --what tape'.")
+         description=N_("Stick On Masking Tape: cover areas (e.g. old page numbers) with opaque rectangles. "
+                     "Remove later with 'peel --what tape'."))
 def mask(pdf: Pdf, a, ctx: Context):
     rects = []
     for r in a.rect:
         parts = [p for p in re.split(r"[,\s]+", r.strip()) if p]
         if len(parts) != 4:
-            raise ImpositionError(f"--rect needs X,Y,W,H, got {r!r}")
+            raise ImpositionError(tr('--rect needs X,Y,W,H, got {value!r}', value=r))
         rects.append([ctx.L(p) for p in parts])
     color = parse_color(a.color, ctx)
     ov = Overlay(pdf)
@@ -467,14 +466,14 @@ def peel_object(pdf: Pdf, obj, tags: set[str], seen: set) -> int:
 
 def _peel_args(p):
     p.add_argument("--what", choices=["text", "tape", "marks", "pdf", "bleed", "all"], default="text",
-                   help="text (Stick On Text), tape (masking tape), marks (crop marks/frames), pdf "
-                        "(stuck-on PDF pages), bleed (generated bleed), or all (default: text)")
+                   help=tr("text (Stick On Text), tape (masking tape), marks (crop marks/frames), pdf "
+                        "(stuck-on PDF pages), bleed (generated bleed), or all (default: text)"))
     add_page_args(p)
 
 
 @command("peel", "peel off stuck-on text, tape, marks or PDF pages", _peel_args,
-         description="Peel Off Text and Numbers / Masking Tape / Registration Marks added by this tool, "
-                     "even after further imposition.")
+         description=N_("Peel Off Text and Numbers / Masking Tape / Registration Marks added by this tool, "
+                     "even after further imposition."))
 def peel(pdf: Pdf, a, ctx: Context):
     tags = {"text": {pu.TAG_TEXT}, "tape": {pu.TAG_TAPE}, "marks": {pu.TAG_MARKS},
             "pdf": {pu.TAG_PDF}, "bleed": {pu.TAG_BLEED}}.get(a.what)
@@ -485,7 +484,7 @@ def peel(pdf: Pdf, a, ctx: Context):
     for i in select(a.pages, len(pdf.pages), a.parity):
         total += peel_object(pdf, pdf.pages[i].obj, tags, seen)
     if total == 0:
-        ctx.warn(f"nothing to peel off ({a.what})")
+        ctx.warn(tr('nothing to peel off ({what})', what=a.what))
     return pdf
 
 
@@ -493,20 +492,20 @@ def peel(pdf: Pdf, a, ctx: Context):
 
 
 def _sample_args(p):
-    p.add_argument("--paper", default="a4", help="page size: paper name or WxH (default: a4)")
+    p.add_argument("--paper", default="a4", help=tr("page size: paper name or WxH (default: a4)"))
     p.add_argument("--orientation", choices=["tall", "wide", "as-is"], default="tall")
-    p.add_argument("--count", type=int, default=8, help="number of pages (default: 8)")
+    p.add_argument("--count", type=int, default=8, help=tr("number of pages (default: 8)"))
 
 
 @command("sample", "create a sample document for testing impositions", _sample_args, needs_input=False,
-         description="Create Sample Document: grey pages with a thick border, a large page number and "
-                     "rules 20 mm and 1 inch from each edge.")
+         description=N_("Create Sample Document: grey pages with a thick border, a large page number and "
+                     "rules 20 mm and 1 inch from each edge."))
 def sample(pdf, a, ctx: Context):
     from reportlab.lib.units import inch, mm
     from reportlab.pdfgen import canvas as rlcanvas
 
     if a.count < 1:
-        raise ImpositionError("--count must be at least 1")
+        raise ImpositionError(tr("--count must be at least 1"))
     w, h = ctx.paper(a.paper, a.orientation)
     buf = io.BytesIO()
     c = rlcanvas.Canvas(buf, pagesize=(w, h))

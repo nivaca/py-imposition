@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import re
 from fractions import Fraction
+from .interface import tr
 
 UNITS = {
     "pt": 1.0,
@@ -38,7 +39,7 @@ PAPER_SIZES: dict[str, tuple[float, float]] = {
     "b4": (708.66, 1000.63),
     "b5": (498.9, 708.66),
     "sra3": (907.09, 1275.59),
-    "max": (14400, 14400),  # 200 x 200 inches, the PDF/Acrobat limit
+    "max": (14400, 14400),  # 200 x 200 inches, the largest page size PDF viewers accept
 }
 
 _LEN_RE = re.compile(r"^\s*([-+]?[0-9./]+)\s*([a-z\"]*)\s*$", re.I)
@@ -50,15 +51,15 @@ def parse_length(value: str | float | int, unit: str | None = None) -> float:
         return float(value) * UNITS[unit or DEFAULT_UNIT]
     m = _LEN_RE.match(str(value))
     if not m:
-        raise ValueError(f"invalid length: {value!r}")
+        raise ValueError(tr('invalid length: {value!r}', value=value))
     num, suffix = m.groups()
     suffix = suffix.lower() or (unit or DEFAULT_UNIT)
     if suffix not in UNITS:
-        raise ValueError(f"unknown unit {suffix!r} in {value!r} (use pt, mm, cm or in)")
+        raise ValueError(tr('unknown unit {suffix!r} in {value!r} (use pt, mm, cm or in)', suffix=suffix, value=value))
     try:
         n = float(Fraction(num))
     except (ValueError, ZeroDivisionError):
-        raise ValueError(f"invalid number in {value!r}") from None
+        raise ValueError(tr('invalid number in {value!r}', value=value)) from None
     return n * UNITS[suffix]
 
 
@@ -66,7 +67,7 @@ def parse_length_list(value: str, unit: str | None = None) -> list[float]:
     """Parse a space/comma separated list of lengths ("0 40", "1cm,2cm")."""
     parts = [p for p in re.split(r"[\s,]+", value.strip()) if p]
     if not parts:
-        raise ValueError("empty list of lengths")
+        raise ValueError(tr("empty list of lengths"))
     return [parse_length(p, unit) for p in parts]
 
 
@@ -89,7 +90,7 @@ def parse_paper(spec: str, unit: str | None = None) -> tuple[float, float]:
         u = hu or wu or unit
         return parse_length(w + (wu or u or ""), unit), parse_length(h + (hu or u or ""), unit)
     raise ValueError(
-        f"unknown paper size {spec!r}; use one of {', '.join(sorted(PAPER_SIZES))} or WxH like 21x29.7cm"
+        tr('unknown paper size {spec!r}; use one of {items} or WxH like 21x29.7cm', spec=spec, items=', '.join(sorted(PAPER_SIZES)))
     )
 
 

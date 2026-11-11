@@ -18,26 +18,31 @@ from PySide6.QtWidgets import (
 )
 
 from ..common import COMMANDS
-from ..runner import build_parser
+from ..interface import N_, tr
+from ..runner import build_parser, translate_paragraphs
 
 # Options handled elsewhere in the window (input/output files, global preferences).
-SKIP = {"help", "output", "units", "registration", "bleed", "pdfx", "quiet", "version"}
+SKIP = {"help", "output", "units", "registration", "bleed", "pdfx", "quiet", "version", "interface"}
 PREFERENCE_DESTS = {"units", "registration", "bleed", "pdfx"}
 
 FILE_DESTS = {"file", "evens", "background", "layout", "fields", "data", "sequence", "example"}
 DIR_DESTS = {"out_dir", "folder", "out", "done", "errors"}
 SAVE_DESTS = {"export"}
-FILTERS = {
-    "data": "Data files (*.csv *.tsv *.txt);;All files (*)",
-    "layout": "TOML files (*.toml);;All files (*)",
-    "fields": "TOML files (*.toml);;All files (*)",
-    "sequence": "TOML files (*.toml);;All files (*)",
-    "export": "TOML files (*.toml);;All files (*)",
-}
-PDF_FILTER = "PDF files (*.pdf);;All files (*)"
+def file_filter(kind: str) -> str:
+    """The file-dialog filter for KIND (pdf, toml, data), in the language in use."""
+    every = tr("All files (*)")
+    if kind == "data":
+        return tr("Data files (*.csv *.tsv *.txt)") + ";;" + every
+    if kind == "toml":
+        return tr("TOML files (*.toml)") + ";;" + every
+    return tr("PDF files (*.pdf)") + ";;" + every
 
-GROUP_TITLES = {"positional arguments": "Files", "options": "Options", "marks": "Marks",
-                "background": "Background"}
+
+FILTERS = {"data": "data", "layout": "toml", "fields": "toml", "sequence": "toml", "export": "toml"}
+
+# argparse's group titles (translated by argparse or by the commands) -> what the form shows
+GROUP_TITLES = {"positional arguments": N_("Files"), "options": N_("Options"), "marks": N_("Marks"),
+                "background": N_("Background")}
 
 
 def subparsers() -> dict[str, argparse.ArgumentParser]:
@@ -195,7 +200,7 @@ class TextField(Field):
         super().__init__(action, parent)
         self.edit = QLineEdit(self)
         if action.default not in (None, argparse.SUPPRESS):
-            self.edit.setPlaceholderText(f"default: {action.default}")
+            self.edit.setPlaceholderText(tr('default: {default}', default=action.default))
         elif action.metavar:
             self.edit.setPlaceholderText(str(action.metavar))
         if action.type is int:
@@ -226,7 +231,7 @@ class PathField(TextField):
     def __init__(self, action, parent=None, mode: str = "open"):
         super().__init__(action, parent)
         self.mode = mode
-        btn = QPushButton("Browse…", self)
+        btn = QPushButton(tr("Browse…"), self)
         btn.clicked.connect(self.browse)
         self.lay.addWidget(btn)
 
@@ -236,10 +241,10 @@ class PathField(TextField):
             path = QFileDialog.getExistingDirectory(self, pretty(self.dest), start)
         elif self.mode == "save":
             path, _ = QFileDialog.getSaveFileName(self, pretty(self.dest), start,
-                                                  FILTERS.get(self.dest, PDF_FILTER))
+                                                  file_filter(FILTERS.get(self.dest, "pdf")))
         else:
             path, _ = QFileDialog.getOpenFileName(self, pretty(self.dest), start,
-                                                  FILTERS.get(self.dest, PDF_FILTER))
+                                                  file_filter(FILTERS.get(self.dest, "pdf")))
         if path:
             self.edit.setText(path)
 
@@ -257,13 +262,13 @@ class ListField(Field):
         lay.setContentsMargins(0, 0, 0, 0)
         lay.addWidget(self.edit, 1)
         if files:
-            btn = QPushButton("Add…", self)
+            btn = QPushButton(tr("Add…"), self)
             btn.clicked.connect(self.add_files)
             lay.addWidget(btn, 0, Qt.AlignmentFlag.AlignTop)
         self.edit.textChanged.connect(self.changed.emit)
 
     def add_files(self):
-        paths, _ = QFileDialog.getOpenFileNames(self, pretty(self.dest), str(Path.home()), PDF_FILTER)
+        paths, _ = QFileDialog.getOpenFileNames(self, pretty(self.dest), str(Path.home()), file_filter("pdf"))
         for p in paths:
             self.edit.appendPlainText(p)
 
@@ -326,15 +331,16 @@ class CommandForm(QWidget):
 
         outer = QVBoxLayout(self)
         outer.setContentsMargins(0, 0, 0, 0)
-        desc = QLabel(clean_help(self.command.description or self.command.help).split("\n\n")[0])
+        text = translate_paragraphs(self.command.description or self.command.help)
+        desc = QLabel(clean_help(text).split("\n\n")[0])
         desc.setWordWrap(True)
         desc.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse)
         outer.addWidget(desc)
-        long_help = (self.command.description or "").split("\n\n", 1)
+        long_help = text.split("\n\n", 1)
         if len(long_help) > 1:
             ex = QLabel(f"<pre>{_escape(long_help[1])}</pre>")
             ex.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse)
-            box = QGroupBox("Reference")
+            box = QGroupBox(tr("Reference"))
             box.setCheckable(True)
             box.setChecked(False)
             bl = QVBoxLayout(box)
@@ -348,7 +354,8 @@ class CommandForm(QWidget):
             actions = [a for a in group._group_actions if self._wanted(a)]
             if not actions:
                 continue
-            box = QGroupBox(GROUP_TITLES.get(group.title, (group.title or "").capitalize()))
+            titles = {tr(k): tr(v) for k, v in GROUP_TITLES.items()}
+            box = QGroupBox(titles.get(group.title, (group.title or "").capitalize()))
             form = QFormLayout(box)
             form.setFieldGrowthPolicy(QFormLayout.FieldGrowthPolicy.AllNonFixedFieldsGrow)
             for action in actions:

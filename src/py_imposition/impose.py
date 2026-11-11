@@ -13,6 +13,7 @@ from .common import (
     add_sides_args, arrange_sides, command, get_margins, get_mark_style, max_page_size, parse_align,
 )
 from .units import PAPER_SIZES
+from .interface import N_, tr
 
 EPS = 1e-6
 
@@ -44,7 +45,7 @@ def booklet_order(count: int, binding: str = "perfect", signature: int = 4, pad_
         sigs = [(0, total)]
     elif binding == "perfect":
         if signature < 4 or signature % 4:
-            raise ImpositionError("signature size (pages per fold) must be a positive multiple of 4")
+            raise ImpositionError(tr("signature size (pages per fold) must be a positive multiple of 4"))
         sigs = []
         start = 0
         while start < count:
@@ -76,7 +77,7 @@ def booklet_order(count: int, binding: str = "perfect", signature: int = 4, pad_
                 sides += [front, back]
         return [tuple(p if p is not None and p < count else None for p in side) for side in sides]
     else:
-        raise ImpositionError(f"unknown binding {binding!r}")
+        raise ImpositionError(tr('unknown binding {binding!r}', binding=binding))
 
     for start, size in sigs:
         for l, r in signature_sides(size, direction):
@@ -86,35 +87,35 @@ def booklet_order(count: int, binding: str = "perfect", signature: int = 4, pad_
 
 def _booklet_args(p):
     p.add_argument("--binding", choices=["perfect", "saddle", "continuous", "cut-stack"], default="perfect",
-                   help="perfect: separate folded signatures, stacked; saddle: all sheets nested and folded "
+                   help=tr("perfect: separate folded signatures, stacked; saddle: all sheets nested and folded "
                         "together; continuous: pages in order 1,2 | 3,4 (not folded); cut-stack: sheets are "
-                        "cut in half and the stacks placed one on the other (default: perfect)")
+                        "cut in half and the stacks placed one on the other (default: perfect)"))
     p.add_argument("--signature", "--pages-per-fold", dest="signature", type=int, default=4, metavar="N",
-                   help="pages per signature for perfect binding; multiple of 4 (default: 4)")
+                   help=tr("pages per signature for perfect binding; multiple of 4 (default: 4)"))
     p.add_argument("--pad-last", choices=["full", "multiple-of-4"], default="full",
-                   help="perfect binding: pad a short last signature to full length or just to a multiple of 4")
-    p.add_argument("--single-sided", action="store_true", help="cut-stack: single-sided stacks")
+                   help=tr("perfect binding: pad a short last signature to full length or just to a multiple of 4"))
+    p.add_argument("--single-sided", action="store_true", help=tr("cut-stack: single-sided stacks"))
     p.add_argument("--direction", choices=["left", "right"], default="left",
-                   help="binding edge: left (left-to-right books) or right (right-to-left) (default: left)")
+                   help=tr("binding edge: left (left-to-right books) or right (right-to-left) (default: left)"))
     add_paper_args(p, default="legal", default_orientation="wide", extra_choices=("auto",))
     add_margin_args(p, "margin", "space at the edge of the sheet")
-    p.add_argument("--gutter", default="0", metavar="LEN", help="space between the two pages (default: 0)")
+    p.add_argument("--gutter", default="0", metavar="LEN", help=tr("space between the two pages (default: 0)"))
     sc = p.add_mutually_exclusive_group()
-    sc.add_argument("--no-auto-scale", action="store_true", help="shrink pages that don't fit, never enlarge")
+    sc.add_argument("--no-auto-scale", action="store_true", help=tr("shrink pages that don't fit, never enlarge"))
     sc.add_argument("--no-scale", action="store_true",
-                    help="place pages at 100%%; fail if they don't fit")
+                    help=tr("place pages at 100%%; fail if they don't fit"))
     p.add_argument("--align", choices=["center", "fold", "spine"], default="center",
-                   help="center pages in their half of the sheet, or pull them to the fold/spine (default: center)")
+                   help=tr("center pages in their half of the sheet, or pull them to the fold/spine (default: center)"))
     add_sides_args(p)
     add_mark_args(p, frames=False)
 
 
 @command("booklet", "create a 2-up booklet", _booklet_args,
-         description="Reorder pages and place them two per sheet side for folding into a booklet.")
+         description=N_("Reorder pages and place them two per sheet side for folding into a booklet."))
 def booklet(pdf: Pdf, a, ctx: Context):
     count = len(pdf.pages)
     if count == 0:
-        raise ImpositionError("document has no pages")
+        raise ImpositionError(tr("document has no pages"))
     order = booklet_order(count, a.binding, a.signature, a.pad_last, a.direction, a.single_sided)
     maxw, maxh = max_page_size(pdf, ctx)
     ml, mb, mr, mt = get_margins(a, ctx)
@@ -126,13 +127,12 @@ def booklet(pdf: Pdf, a, ctx: Context):
     cw = (W - ml - mr - gutter) / 2
     ch = H - mb - mt
     if cw <= 0 or ch <= 0:
-        raise ImpositionError("margins and gutter leave no room for pages")
+        raise ImpositionError(tr("margins and gutter leave no room for pages"))
     s = min(cw / maxw, ch / maxh)
     if a.no_scale:
         if s < 1 - 1e-4:
             raise ImpositionError(
-                f"pages ({maxw:.1f}x{maxh:.1f}pt) don't fit at 100% in {cw:.1f}x{ch:.1f}pt cells; "
-                "choose a larger paper or allow scaling")
+                tr("pages ({maxw:.1f}x{maxh:.1f}pt) don't fit at 100% in {cw:.1f}x{ch:.1f}pt cells; choose a larger paper or allow scaling", maxw=maxw, maxh=maxh, cw=cw, ch=ch))
         s = 1.0
     elif a.no_auto_scale:
         s = min(s, 1.0)
@@ -297,7 +297,7 @@ class Backgrounds:
         self.pdf = pu.open_source(path)
         idx = parse_pages(pages, len(self.pdf.pages), keep_order=True)
         if not idx:
-            raise ImpositionError("background selection is empty")
+            raise ImpositionError(tr("background selection is empty"))
         self.idx = idx
         self.mode = mode
         self.repeat_last = repeat_last or len(idx)
@@ -325,39 +325,39 @@ def draw_background(canvas: pu.Canvas, imp: pu.Importer, bg: Dictionary, W: floa
 
 
 def _add_bg_args(p):
-    g = p.add_argument_group("background")
-    g.add_argument("--background", metavar="PDF", help="impose onto pages of this PDF instead of blank sheets "
-                                                       "(sets the sheet size)")
-    g.add_argument("--background-pages", default="all", metavar="RANGE", help="background pages to use")
+    g = p.add_argument_group(tr("background"))
+    g.add_argument("--background", metavar="PDF", help=tr("impose onto pages of this PDF instead of blank sheets "
+                                                       "(sets the sheet size)"))
+    g.add_argument("--background-pages", default="all", metavar="RANGE", help=tr("background pages to use"))
     g.add_argument("--background-mode", choices=["repeat", "once", "repeat-last"], default="repeat",
-                   help="repeat the backgrounds, use them once, or repeat only the last N (default: repeat)")
+                   help=tr("repeat the backgrounds, use them once, or repeat only the last N (default: repeat)"))
     g.add_argument("--background-repeat-last", type=int, default=1, metavar="N",
-                   help="with --background-mode repeat-last: how many pages to repeat")
+                   help=tr("with --background-mode repeat-last: how many pages to repeat"))
 
 
 def _add_layout_args(p, nup: bool):
     add_paper_args(p, default="a4" if not nup else "a4", default_orientation="best" if nup else "best")
-    p.add_argument("--cols", type=int, default=None, help="columns per sheet (maximum, or exact with --scale fit)")
-    p.add_argument("--rows", type=int, default=None, help="rows per sheet (maximum, or exact with --scale fit)")
+    p.add_argument("--cols", type=int, default=None, help=tr("columns per sheet (maximum, or exact with --scale fit)"))
+    p.add_argument("--rows", type=int, default=None, help=tr("rows per sheet (maximum, or exact with --scale fit)"))
     p.add_argument("--scale", default="none", metavar="MODE",
-                   help="'none' (100%%), 'fit' (scale so exactly --cols x --rows fit, based on the first page) "
-                        "or a percentage like 50 (default: none)")
+                   help=tr("'none' (100%%), 'fit' (scale so exactly --cols x --rows fit, based on the first page) "
+                        "or a percentage like 50 (default: none)"))
     p.add_argument("--trim", action="store_true",
-                   help="remove unused space at the edge of each sheet (sheet shrinks to the pages plus margins)")
+                   help=tr("remove unused space at the edge of each sheet (sheet shrinks to the pages plus margins)"))
     add_margin_args(p, "margin", "margin")
     p.add_argument("--spacing", default="0", metavar="LEN",
-                   help="space between rows and columns (default: 0)")
+                   help=tr("space between rows and columns (default: 0)"))
     p.add_argument("--hspace", default=None, metavar="LIST",
-                   help="horizontal spacing between columns; a list like '0 40' repeats (overrides --spacing)")
+                   help=tr("horizontal spacing between columns; a list like '0 40' repeats (overrides --spacing)"))
     p.add_argument("--vspace", default=None, metavar="LIST",
-                   help="vertical spacing between rows; a list repeats (overrides --spacing)")
+                   help=tr("vertical spacing between rows; a list repeats (overrides --spacing)"))
     p.add_argument("--align", choices=ALIGN_CHOICES, default="top-left",
-                   help="where pages sit on sheets that aren't full (default: top-left)")
+                   help=tr("where pages sit on sheets that aren't full (default: top-left)"))
     p.add_argument("--align-sheets-independently", action="store_true",
-                   help="align each sheet on its own instead of matching all sheets")
-    p.add_argument("--align-rows", action="store_true", help="also align each row horizontally (short rows)")
+                   help=tr("align each sheet on its own instead of matching all sheets"))
+    p.add_argument("--align-rows", action="store_true", help=tr("also align each row horizontally (short rows)"))
     p.add_argument("--mirror", choices=["none", "h", "v", "hv"], default="none",
-                   help="mirror margins and alignment on even (back) sheets: horizontally, vertically or both")
+                   help=tr("mirror margins and alignment on even (back) sheets: horizontally, vertically or both"))
     add_mark_args(p)
     _add_bg_args(p)
 
@@ -368,18 +368,18 @@ def _scale_value(a, items_geom, AW, AH, hspace, vspace) -> float:
         return 1.0
     if mode == "fit":
         if not (a.cols and a.rows):
-            raise ImpositionError("--scale fit needs both --cols and --rows")
+            raise ImpositionError(tr("--scale fit needs both --cols and --rows"))
         w, h = items_geom.size()
         gw = sum(_gap(hspace, k) for k in range(a.cols - 1))
         gh = sum(_gap(vspace, k) for k in range(a.rows - 1))
         s = min((AW - gw) / (a.cols * w), (AH - gh) / (a.rows * h))
         if s <= 0:
-            raise ImpositionError("margins/spacing leave no room for pages")
+            raise ImpositionError(tr("margins/spacing leave no room for pages"))
         return s
     try:
         return float(mode.rstrip("%")) / 100
     except ValueError:
-        raise ImpositionError(f"invalid --scale {a.scale!r}") from None
+        raise ImpositionError(tr('invalid --scale {scale!r}', scale=a.scale)) from None
 
 
 def _spacing(a, ctx):
@@ -446,16 +446,16 @@ def render(out: Pdf, imp: pu.Importer, sheets_rows, spec: SheetSpec, a, ctx: Con
 def _nup_args(p):
     _add_layout_args(p, nup=True)
     p.add_argument("--flow", choices=["normal", "double", "double-flip"], default="normal",
-                   help="normal: fill each sheet in turn; double: alternate front/back sheets with backs "
-                        "mirrored; double-flip: as double, with backs upside down (default: normal)")
+                   help=tr("normal: fill each sheet in turn; double: alternate front/back sheets with backs "
+                        "mirrored; double-flip: as double, with backs upside down (default: normal)"))
 
 
 @command("nup", "place several pages on each sheet (n-up)", _nup_args,
-         description="Combine pages onto larger sheets in rows and columns, with margins, spacing, "
-                     "alignment, crop marks and backgrounds.")
+         description=N_("Combine pages onto larger sheets in rows and columns, with margins, spacing, "
+                     "alignment, crop marks and backgrounds."))
 def nup(pdf: Pdf, a, ctx: Context):
     if not len(pdf.pages):
-        raise ImpositionError("document has no pages")
+        raise ImpositionError(tr("document has no pages"))
     bg = Backgrounds(a.background, a.background_pages, a.background_mode, a.background_repeat_last, ctx) \
         if a.background else None
     hspace, vspace = _spacing(a, ctx)
@@ -467,13 +467,13 @@ def nup(pdf: Pdf, a, ctx: Context):
     for W, H in _sheet_sizes(a, ctx, bg):
         AW, AH = W - l - r, H - b - t
         if AW <= 0 or AH <= 0:
-            raise ImpositionError("margins leave no room on the sheet")
+            raise ImpositionError(tr("margins leave no room on the sheet"))
         s = _scale_value(a, geoms[0], AW, AH, hspace, vspace)
         items = [Item.make(p.obj, g, s) for p, g in zip(pdf.pages, geoms)]
         need_w = max(i.w for i in items)
         need_h = max(i.h for i in items)
         if need_w > AW + EPS or need_h > AH + EPS:
-            ctx.warn(f"some pages are larger than the sheet; enlarging sheet to fit")
+            ctx.warn(tr('some pages are larger than the sheet; enlarging sheet to fit'))
             W, H = max(W, need_w + l + r), max(H, need_h + b + t)
             AW, AH = W - l - r, H - b - t
         if a.flow == "normal":
@@ -592,14 +592,14 @@ def step_rows(page, geom, s, AW, AH, a, hspace, vspace, allow_rotate: bool, back
 def _step_args(p):
     _add_layout_args(p, nup=False)
     p.add_argument("--rotate", action="store_true",
-                   help="allow rows of rotated copies when that fits more on a sheet (not with scaling)")
+                   help=tr("allow rows of rotated copies when that fits more on a sheet (not with scaling)"))
 
 
 @command("step-repeat", "fill sheets with copies of each page", _step_args,
-         description="Step And Repeat: each output sheet holds as many copies of one source page as fit.")
+         description=N_("Step And Repeat: each output sheet holds as many copies of one source page as fit."))
 def step_repeat(pdf: Pdf, a, ctx: Context):
     if not len(pdf.pages):
-        raise ImpositionError("document has no pages")
+        raise ImpositionError(tr("document has no pages"))
     bg = Backgrounds(a.background, a.background_pages, a.background_mode, a.background_repeat_last, ctx) \
         if a.background else None
     hspace, vspace = _spacing(a, ctx)
@@ -607,7 +607,7 @@ def step_repeat(pdf: Pdf, a, ctx: Context):
     l, b, r, t = margins
     allow_rotate = a.rotate
     if allow_rotate and str(a.scale).lower() not in ("none", "100", "100%"):
-        ctx.warn("--rotate is ignored when pages are scaled")
+        ctx.warn(tr("--rotate is ignored when pages are scaled"))
         allow_rotate = False
     out = Pdf.new()
     imp = pu.Importer(out)
@@ -625,11 +625,11 @@ def step_repeat(pdf: Pdf, a, ctx: Context):
                 best = (cnt, W, H, rows)
         cnt, W, H, rows = best
         if cnt == 0:
-            raise ImpositionError(f"page {n + 1} does not fit on the sheet")
+            raise ImpositionError(tr('page {number} does not fit on the sheet', number=n + 1))
         if chosen is None:
             chosen = (W, H)
         elif (W, H) != chosen and not a.trim:
-            ctx.warn("pages of different sizes chose different sheet orientations")
+            ctx.warn(tr("pages of different sizes chose different sheet orientations"))
         spec = SheetSpec(W, H, margins, parse_align(a.align), a.align_rows, hspace, vspace)
         render(out, imp, [rows], spec, a, ctx, bg, a.mirror, True, a.trim, sheet_numbers=[n])
     return out
@@ -641,14 +641,14 @@ def step_repeat(pdf: Pdf, a, ctx: Context):
 def _join_args(p):
     g = p.add_mutually_exclusive_group()
     g.add_argument("--first", default="1", metavar="PAGE",
-                   help="join this page with the next one (default: 1)")
-    g.add_argument("--all", action="store_true", help="join every pair of pages (1+2, 3+4, ...)")
+                   help=tr("join this page with the next one (default: 1)"))
+    g.add_argument("--all", action="store_true", help=tr("join every pair of pages (1+2, 3+4, ...)"))
     p.add_argument("--valign", choices=["top", "middle", "bottom"], default="bottom",
-                   help="vertical alignment when heights differ (default: bottom)")
+                   help=tr("vertical alignment when heights differ (default: bottom)"))
 
 
 @command("join", "join two pages side by side into one", _join_args,
-         description="Join Two Pages: make a spread from two pages, with no change to margins.")
+         description=N_("Join Two Pages: make a spread from two pages, with no change to margins."))
 def join(pdf: Pdf, a, ctx: Context):
     from .pagesel import page_number
     n = len(pdf.pages)
@@ -657,7 +657,7 @@ def join(pdf: Pdf, a, ctx: Context):
     else:
         f = page_number(a.first, n) - 1
         if not 0 <= f < n - 1:
-            raise ImpositionError("--first must leave a following page to join")
+            raise ImpositionError(tr("--first must leave a following page to join"))
         pairs = [(f, f + 1)]
     joined = {p[0]: p for p in pairs}
     skip = {p[1] for p in pairs}
@@ -676,7 +676,7 @@ def join(pdf: Pdf, a, ctx: Context):
         (w1, h1), (w2, h2) = g1.size(), g2.size()
         W, H = w1 + w2, max(h1, h2)
         if W > 14400:
-            raise ImpositionError("joined page would exceed the 200 inch PDF limit")
+            raise ImpositionError(tr("joined page would exceed the 200 inch PDF limit"))
         c = pu.new_sheet(out, W, H)
         pu.place_page(c, imp, p1, g1, 0, (H - h1) * av, 1.0)
         pu.place_page(c, imp, p2, g2, w1, (H - h2) * av, 1.0)

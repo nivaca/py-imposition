@@ -3,10 +3,12 @@
 the command line.
 
     uv run python tools/screenshots.py [-o FOLDER] [--only booklet,nup,...]
-                                       [--scale 2] [--dark] [--size 1500x940]
+                                       [--langs en,es] [--scale 2] [--dark]
+                                       [--size 1500x940]
 
-It writes FOLDER/gui_<command>.png and FOLDER/cli.png (by default in
-docs/img/, where the README takes them from), at SCALE times the size on
+It writes FOLDER/gui_<command>_<lang>.png and FOLDER/cli_<lang>.png, in each
+language of the interface (by default in docs/img/, where README.md takes the
+English ones and README_es.md the Spanish ones), at SCALE times the size on
 the screen (2 by default, sharp on screens of high resolution).
 
 * The window runs in a process of its own with Qt's "offscreen" platform:
@@ -73,6 +75,14 @@ SHOTS = {
 }
 KINDS = list(SHOTS) + ["cli"]
 
+# The user's own texts in the examples, in each language (the commands stay the same)
+LOCAL = {"es": {"Page [#] of [Doc:NumPages]": "Página [#] de [Doc:NumPages]"}}
+
+
+def localize(tokens: list[str], lang: str) -> list[str]:
+    table = LOCAL.get(lang, {})
+    return [table.get(t, t) for t in tokens]
+
 # The command-line session (run in a temporary folder holding a copy of EXAMPLE)
 SESSION = [
     ["info", "memman.pdf"],
@@ -94,28 +104,39 @@ def say(text: str):
     print(text, flush=True)
 
 
+def settings_folder(folder: Path, lang: str) -> Path:
+    """A configuration folder of its own, with the interface in LANG."""
+    cfg = folder / "py-imposition-config"
+    cfg.mkdir(parents=True, exist_ok=True)
+    (cfg / "config.toml").write_text(f'[parameters]\ninterface = "{lang}"\n', encoding="utf-8")
+    return cfg
+
+
 def environment(folder: Path, scale: float) -> dict:
     env = dict(os.environ)
     env.update(QT_QPA_PLATFORM="offscreen", QT_SCALE_FACTOR=f"{scale:g}", XDG_CONFIG_HOME=str(folder / "config"),
-               PYTHONDONTWRITEBYTECODE="1")
+               PY_IMPOSITION_CONFIG=str(folder / "py-imposition-config"), PYTHONDONTWRITEBYTECODE="1")
     env.pop("QT_SCREEN_SCALE_FACTORS", None)
     env.pop("QT_AUTO_SCREEN_SCALE_FACTOR", None)
     return env
 
 
 def cli_run(args: list[str], cwd: Path) -> subprocess.CompletedProcess:
+    """Run the command line with the settings of CWD (see settings_folder)."""
     return subprocess.run([sys.executable, "-m", "py_imposition", *args], cwd=cwd, capture_output=True, text=True,
-                          env=dict(os.environ, PYTHONPATH=str(ROOT / "src")))
+                          env=dict(os.environ, PYTHONPATH=str(ROOT / "src"),
+                                   PY_IMPOSITION_CONFIG=str(cwd / "py-imposition-config")))
 
 
 # ---------------------------------------------------------------------------
 #  The window
 
 
-def gui(kind: str, out: Path, scale: float, size: tuple[int, int], dark: bool):
+def gui(kind: str, lang: str, out: Path, scale: float, size: tuple[int, int], dark: bool):
     """The window, in a process of its own (offscreen, with its own settings)."""
-    folder = Path(tempfile.mkdtemp(prefix=f"py-imposition-shot-{kind}-"))
+    folder = Path(tempfile.mkdtemp(prefix=f"py-imposition-shot-{kind}-{lang}-"))
     try:
+        settings_folder(folder, lang)
         shot = SHOTS[kind]
         if "sample" in shot:
             doc = folder / "cards.pdf"
@@ -150,11 +171,15 @@ def gui_child(kind: str, doc: str, out: str, size: str, dark: bool):
     from PySide6.QtCore import QCoreApplication, Qt
     from PySide6.QtWidgets import QApplication
 
+    from py_imposition import interface
     from py_imposition.gui import app_icon
-    from py_imposition.gui.window import MainWindow
+    from py_imposition.gui.window import MainWindow, install_qt_translations
 
+    interface.use_configured()  # (the language of this shot's settings)
+    interface.translate_argparse()
     QCoreApplication.setOrganizationName("py-imposition-screenshots")
     app = QApplication([sys.argv[0]])
+    install_qt_translations()
     app.setStyle("Fusion")
     if dark:
         app.setPalette(dark_palette())
@@ -167,8 +192,9 @@ def gui_child(kind: str, doc: str, out: str, size: str, dark: bool):
     w.auto.setChecked(False)
     w.open_path(Path(doc))
     w.select_command(shot["tokens"][0])
-    w.form(shot["tokens"][0]).set_tokens(shot["tokens"])
-    w.seq.set_steps(shot.get("sequence", []))
+    lang = interface.code()
+    w.form(shot["tokens"][0]).set_tokens(localize(shot["tokens"], lang))
+    w.seq.set_steps([localize(step, lang) for step in shot.get("sequence", [])])
     w.preview()
 
     def settle(seconds: float):
@@ -200,13 +226,15 @@ def gui_child(kind: str, doc: str, out: str, size: str, dark: bool):
 #  The command line
 
 
-def cli(out: Path, scale: float):
+def cli(lang: str, out: Path, scale: float):
     """Run SESSION in a temporary folder and draw it like a terminal."""
-    folder = Path(tempfile.mkdtemp(prefix="py-imposition-shot-cli-"))
+    folder = Path(tempfile.mkdtemp(prefix=f"py-imposition-shot-cli-{lang}-"))
     try:
+        settings_folder(folder, lang)
         shutil.copyfile(EXAMPLE, folder / EXAMPLE.name)
         lines: list[tuple[str, str]] = []  # (kind, text): prompt or output
         for args in SESSION:
+            args = localize(args, lang)
             lines.append(("prompt", "py-imposition " + shlex.join(args)))
             result = cli_run(args, folder)
             if result.returncode:
@@ -290,6 +318,7 @@ def main(argv=None):
     parser.add_argument("-o", "--output", type=Path, default=ROOT / "docs" / "img",
                         help="the folder of the images (default: docs/img)")
     parser.add_argument("--only", default=",".join(KINDS), help=f"which shots: {','.join(KINDS)}")
+    parser.add_argument("--langs", default="en,es", help="which languages of the interface (default: en,es)")
     parser.add_argument("--scale", type=float, default=SCALE, help="times the size on the screen (default: 2)")
     parser.add_argument("--size", default=f"{WINDOW[0]}x{WINDOW[1]}",
                         help=f"window size before the scale (default: {WINDOW[0]}x{WINDOW[1]})")
@@ -320,14 +349,20 @@ def main(argv=None):
         assert len(size) == 2 and min(size) > 200
     except (ValueError, AssertionError):
         raise SystemExit("--size must look like 1500x940") from None
+    from py_imposition import interface
+    langs = [lang for lang in args.langs.split(",") if lang]
+    for lang in langs:
+        if lang not in interface.names():
+            raise SystemExit(f"unknown language: {lang} (choose from {', '.join(interface.names())})")
     args.output.mkdir(parents=True, exist_ok=True)
-    for kind in kinds:
-        out = args.output / ("cli.png" if kind == "cli" else f"gui_{kind}.png")
-        say(f"{kind} -> {out}")
-        if kind == "cli":
-            cli(out, args.scale)
-        else:
-            gui(kind, out, args.scale, size, args.dark)
+    for lang in langs:
+        for kind in kinds:
+            out = args.output / (f"cli_{lang}.png" if kind == "cli" else f"gui_{kind}_{lang}.png")
+            say(f"{kind} ({lang}) -> {out}")
+            if kind == "cli":
+                cli(lang, out, args.scale)
+            else:
+                gui(kind, lang, out, args.scale, size, args.dark)
 
 
 if __name__ == "__main__":

@@ -9,34 +9,35 @@ from pikepdf import Pdf
 from . import pdfutil as pu
 from .common import Context, ImpositionError, command
 from .pagesel import page_number, parse_pages
+from .interface import N_, tr
 
 
 def _insert_args(p):
     src = p.add_mutually_exclusive_group(required=True)
-    src.add_argument("--blank", type=int, metavar="N", help="insert N blank pages")
-    src.add_argument("--file", metavar="PDF", help="insert pages from this PDF")
-    p.add_argument("--file-pages", default="all", metavar="RANGE", help="pages of --file to insert")
-    p.add_argument("--copies", type=int, default=1, help="copies of the inserted pages (default: 1)")
-    p.add_argument("--no-collate", action="store_true", help="copies as A A B B instead of A B A B")
+    src.add_argument("--blank", type=int, metavar="N", help=tr("insert N blank pages"))
+    src.add_argument("--file", metavar="PDF", help=tr("insert pages from this PDF"))
+    p.add_argument("--file-pages", default="all", metavar="RANGE", help=tr("pages of --file to insert"))
+    p.add_argument("--copies", type=int, default=1, help=tr("copies of the inserted pages (default: 1)"))
+    p.add_argument("--no-collate", action="store_true", help=tr("copies as A A B B instead of A B A B"))
     pos = p.add_mutually_exclusive_group()
-    pos.add_argument("--before", metavar="PAGE", help="insert before this page (e.g. 1, LAST)")
-    pos.add_argument("--after", metavar="PAGE", help="insert after this page (e.g. 3, LAST-1)")
-    pos.add_argument("--at", choices=["start", "end"], default=None, help="insert at the start or end (default)")
-    p.add_argument("--size", metavar="SIZE", help="blank page size (paper or WxH); default: size of a "
-                                                    "neighbouring page")
-    p.add_argument("--size-of", metavar="PAGE", help="blank pages the same size as this page")
+    pos.add_argument("--before", metavar="PAGE", help=tr("insert before this page (e.g. 1, LAST)"))
+    pos.add_argument("--after", metavar="PAGE", help=tr("insert after this page (e.g. 3, LAST-1)"))
+    pos.add_argument("--at", choices=["start", "end"], default=None, help=tr("insert at the start or end (default)"))
+    p.add_argument("--size", metavar="SIZE", help=tr("blank page size (paper or WxH); default: size of a "
+                                                    "neighbouring page"))
+    p.add_argument("--size-of", metavar="PAGE", help=tr("blank pages the same size as this page"))
     p.add_argument("--every", type=int, default=0, metavar="K",
-                   help="insert at intervals: insert, then skip K original pages, and repeat")
+                   help=tr("insert at intervals: insert, then skip K original pages, and repeat"))
     p.add_argument("--each-time", default="all", metavar="N|all",
-                   help="with --file and --every: insert the whole selection each time, or the next N pages")
+                   help=tr("with --file and --every: insert the whole selection each time, or the next N pages"))
     p.add_argument("--stop-when-exhausted", action="store_true",
-                   help="with --each-time N: stop when the file's pages run out instead of starting again")
+                   help=tr("with --each-time N: stop when the file's pages run out instead of starting again"))
     cond = p.add_mutually_exclusive_group()
     cond.add_argument("--if", dest="cond_if", metavar="COND",
-                      help="insert only if the page count meets COND: odd, even, lt:N, ge:N, multiple:N")
-    cond.add_argument("--unless", dest="cond_unless", metavar="COND", help="insert unless COND is met")
+                      help=tr("insert only if the page count meets COND: odd, even, lt:N, ge:N, multiple:N"))
+    cond.add_argument("--unless", dest="cond_unless", metavar="COND", help=tr("insert unless COND is met"))
     cond.add_argument("--until", dest="cond_until", metavar="COND",
-                      help="insert pages one at a time until COND is met (up to the number requested)")
+                      help=tr("insert pages one at a time until COND is met (up to the number requested)"))
 
 
 def check(cond: str, n: int) -> bool:
@@ -47,20 +48,20 @@ def check(cond: str, n: int) -> bool:
         return n % 2 == 0
     m = re.fullmatch(r"(lt|less-than|ge|at-least|multiple|multiple-of)\s*:\s*(\d+)", c)
     if not m:
-        raise ImpositionError(f"invalid condition {cond!r} (odd, even, lt:N, ge:N, multiple:N)")
+        raise ImpositionError(tr('invalid condition {cond!r} (odd, even, lt:N, ge:N, multiple:N)', cond=cond))
     kind, v = m.group(1), int(m.group(2))
     if kind in ("lt", "less-than"):
         return n < v
     if kind in ("ge", "at-least"):
         return n >= v
     if v <= 0:
-        raise ImpositionError("multiple:N needs N > 0")
+        raise ImpositionError(tr("multiple:N needs N > 0"))
     return n % v == 0
 
 
 @command("insert", "insert blank pages or pages from another PDF", _insert_args, needs_input="optional",
-         description="Insert Pages: blank pages or pages from a file, at a position, at intervals, or until a "
-                     "condition holds (e.g. --until multiple:4). Without an input PDF, creates a new document.")
+         description=N_("Insert Pages: blank pages or pages from a file, at a position, at intervals, or until a "
+                     "condition holds (e.g. --until multiple:4). Without an input PDF, creates a new document."))
 def insert(pdf: Pdf | None, a, ctx: Context):
     if pdf is None:
         pdf = Pdf.new()
@@ -73,7 +74,7 @@ def insert(pdf: Pdf | None, a, ctx: Context):
         items = [("file", j) for j in block]
     else:
         if a.blank is None or a.blank < 0:
-            raise ImpositionError("--blank must be zero or more")
+            raise ImpositionError(tr("--blank must be zero or more"))
         items = [("blank", None)] * (a.blank * max(a.copies, 1))
 
     def blank_size(near: int | None):
@@ -96,12 +97,12 @@ def insert(pdf: Pdf | None, a, ctx: Context):
     else:
         pos, after_mode = n, True
     if not 0 <= pos <= n:
-        raise ImpositionError("insertion page is out of range")
+        raise ImpositionError(tr("insertion page is out of range"))
 
     inserts: dict[int, list] = {}
     if a.every:
         if a.cond_if or a.cond_unless or a.cond_until:
-            raise ImpositionError("conditions can't be combined with --every")
+            raise ImpositionError(tr("conditions can't be combined with --every"))
         file_cursor = 0
         p = pos
         while True:
@@ -149,5 +150,5 @@ def insert(pdf: Pdf | None, a, ctx: Context):
         if idx < n:
             out.pages.append(pdf.pages[idx])
     if not len(out.pages):
-        raise ImpositionError("the result has no pages")
+        raise ImpositionError(tr("the result has no pages"))
     return out

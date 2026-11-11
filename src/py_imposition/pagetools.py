@@ -11,6 +11,7 @@ from pikepdf import Dictionary, Name, Page, Pdf
 from . import pdfutil as pu
 from .common import Context, ImpositionError, add_page_args, command
 from .pagesel import page_number, parse_pages, select
+from .interface import N_, tr
 
 EDGES = ("left", "bottom", "right", "top")
 
@@ -65,14 +66,14 @@ def parse_edge_amounts(values: list[str] | None, ctx: Context) -> dict[str, floa
     out = {e: 0.0 for e in EDGES}
     for v in values or []:
         if "=" not in v:
-            raise ImpositionError(f"expected EDGE=LENGTH, got {v!r}")
+            raise ImpositionError(tr('expected EDGE=LENGTH, got {value!r}', value=v))
         edge, amount = v.split("=", 1)
         edge = edge.strip().lower()
         amt = ctx.L(amount)
         targets = EDGES if edge == "all" else (edge,)
         for e in targets:
             if e not in out:
-                raise ImpositionError(f"unknown edge {edge!r} (left, right, top, bottom, all)")
+                raise ImpositionError(tr('unknown edge {edge!r} (left, right, top, bottom, all)', edge=edge))
             out[e] += amt
     return out
 
@@ -82,11 +83,11 @@ DIRS = {"left": (-1, 0), "right": (1, 0), "up": (0, 1), "down": (0, -1)}
 
 def parse_shift(value: str, ctx: Context) -> tuple[float, float]:
     if "=" not in value:
-        raise ImpositionError(f"expected DIRECTION=LENGTH, got {value!r}")
+        raise ImpositionError(tr('expected DIRECTION=LENGTH, got {value!r}', value=value))
     d, amount = value.split("=", 1)
     d = d.strip().lower()
     if d not in DIRS:
-        raise ImpositionError(f"unknown direction {d!r} (left, right, up, down)")
+        raise ImpositionError(tr('unknown direction {value!r} (left, right, up, down)', value=d))
     a = ctx.L(amount)
     return DIRS[d][0] * a, DIRS[d][1] * a
 
@@ -97,23 +98,23 @@ def parse_shift(value: str, ctx: Context) -> tuple[float, float]:
 def _trim_args(p):
     add_page_args(p)
     p.add_argument("--trim", action="append", metavar="EDGE=LEN",
-                   help="remove space from an edge (left/right/top/bottom/all); repeatable")
+                   help=tr("remove space from an edge (left/right/top/bottom/all); repeatable"))
     p.add_argument("--add", action="append", metavar="EDGE=LEN",
-                   help="add space around an edge (can make pages larger than the original); repeatable")
+                   help=tr("add space around an edge (can make pages larger than the original); repeatable"))
     p.add_argument("--same-size", metavar="SIZE",
-                   help="make every page this size (paper name or WxH), centred, cropping or padding")
-    p.add_argument("--shift", metavar="DIR=LEN", help="shift contents by a fixed amount: left/right/up/down")
+                   help=tr("make every page this size (paper name or WxH), centred, cropping or padding"))
+    p.add_argument("--shift", metavar="DIR=LEN", help=tr("shift contents by a fixed amount: left/right/up/down"))
     p.add_argument("--shift-variable", metavar="DIR=FIRST:LAST",
-                   help="shift by an amount varying from FIRST (first page) to LAST (last page), e.g. right=0:3mm")
+                   help=tr("shift by an amount varying from FIRST (first page) to LAST (last page), e.g. right=0:3mm"))
     p.add_argument("--mode", choices=["improved", "original"], default="improved",
-                   help="improved: never uncover cropped content, move contents; original: move the page origin "
-                        "and allow uncovering (default: improved)")
-    p.add_argument("--keep-bleed", action="store_true", help="keep bleed/trim margins the same after trimming")
+                   help=tr("improved: never uncover cropped content, move contents; original: move the page origin "
+                        "and allow uncovering (default: improved)"))
+    p.add_argument("--keep-bleed", action="store_true", help=tr("keep bleed/trim margins the same after trimming"))
 
 
 @command("trim-shift", "trim, extend, resize or shift page contents", _trim_args,
-         description="Trim And Shift: remove or add space at page edges, make pages the same size, "
-                     "and shift contents (e.g. for binding offsets).")
+         description=N_("Trim And Shift: remove or add space at page edges, make pages the same size, "
+                     "and shift contents (e.g. for binding offsets)."))
 def trim_shift(pdf: Pdf, a, ctx: Context):
     sel = select(a.pages, len(pdf.pages), a.parity)
     trims = parse_edge_amounts(a.trim, ctx)
@@ -125,7 +126,7 @@ def trim_shift(pdf: Pdf, a, ctx: Context):
         f, _, l = rng.partition(":")
         var = (d, ctx.L(f), ctx.L(l or f))
         if d.strip().lower() not in DIRS:
-            raise ImpositionError(f"unknown direction {d!r}")
+            raise ImpositionError(tr('unknown direction {value!r}', value=d))
     fixed = parse_shift(a.shift, ctx) if a.shift else (0.0, 0.0)
     imp = pu.Importer(pdf)
     for k, i in enumerate(sel):
@@ -138,7 +139,7 @@ def trim_shift(pdf: Pdf, a, ctx: Context):
             cx, cy = (new[0] + new[2]) / 2, (new[1] + new[3]) / 2
             new = (cx - same[0] / 2, cy - same[1] / 2, cx + same[0] / 2, cy + same[1] / 2)
         if new[2] - new[0] <= 1 or new[3] - new[1] <= 1:
-            raise ImpositionError(f"page {i + 1} would have no area left")
+            raise ImpositionError(tr('page {index} would have no area left', index=i + 1))
         dx, dy = fixed
         if var:
             d, f, l = var
@@ -172,28 +173,28 @@ def trim_shift(pdf: Pdf, a, ctx: Context):
 
 def _creep_args(p):
     p.add_argument("--scope", choices=["document", "signatures"], default="document",
-                   help="document: one folded booklet; signatures: separately folded signatures")
+                   help=tr("document: one folded booklet; signatures: separately folded signatures"))
     p.add_argument("--signature", type=int, default=16, metavar="N",
-                   help="pages per signature with --scope signatures (default: 16)")
+                   help=tr("pages per signature with --scope signatures (default: 16)"))
     g = p.add_mutually_exclusive_group(required=True)
-    g.add_argument("--thickness", metavar="LEN", help="paper thickness (e.g. 0.1mm)")
-    g.add_argument("--total", metavar="LEN", help="total shift for the most-shifted pages")
+    g.add_argument("--thickness", metavar="LEN", help=tr("paper thickness (e.g. 0.1mm)"))
+    g.add_argument("--total", metavar="LEN", help=tr("total shift for the most-shifted pages"))
     p.add_argument("--shift-most", choices=["inside", "outside"], default="inside",
-                   help="inside: centre pages move most (toward the spine); outside: outer pages move most "
-                        "(toward the fore-edge), e.g. for a centre spread (default: inside)")
+                   help=tr("inside: centre pages move most (toward the spine); outside: outer pages move most "
+                        "(toward the fore-edge), e.g. for a centre spread (default: inside)"))
     p.add_argument("--method", choices=["shift", "scale"], default="shift",
-                   help="shift contents, or scale them horizontally (default: shift)")
-    p.add_argument("--direction", choices=["left", "right"], default="left", help="binding edge (default: left)")
+                   help=tr("shift contents, or scale them horizontally (default: shift)"))
+    p.add_argument("--direction", choices=["left", "right"], default="left", help=tr("binding edge (default: left)"))
 
 
 @command("creep", "compensate for creep in folded booklets", _creep_args,
-         description="Creep pages for binding: shift (or squeeze) page contents so they line up "
-                     "after folding and trimming. Run before 'booklet'.")
+         description=N_("Creep pages for binding: shift (or squeeze) page contents so they line up "
+                     "after folding and trimming. Run before 'booklet'."))
 def creep(pdf: Pdf, a, ctx: Context):
     n = len(pdf.pages)
     sig = (-(-n // 4) * 4) if a.scope == "document" else a.signature
     if sig % 4:
-        raise ImpositionError("signature size must be a multiple of 4")
+        raise ImpositionError(tr("signature size must be a multiple of 4"))
     sheets = sig // 4
     if a.thickness:
         per = ctx.L(a.thickness)
@@ -230,29 +231,29 @@ def creep(pdf: Pdf, a, ctx: Context):
 def _resize_args(p):
     add_page_args(p)
     t = p.add_mutually_exclusive_group(required=True)
-    t.add_argument("--size", metavar="SIZE", help="target size: paper name or WxH")
-    t.add_argument("--percent", type=float, help="scale by a percentage, e.g. 200")
-    t.add_argument("--same-as", metavar="PAGE", help="make pages the size of this page")
+    t.add_argument("--size", metavar="SIZE", help=tr("target size: paper name or WxH"))
+    t.add_argument("--percent", type=float, help=tr("scale by a percentage, e.g. 200"))
+    t.add_argument("--same-as", metavar="PAGE", help=tr("make pages the size of this page"))
     p.add_argument("--orientation", choices=["as-is", "tall", "wide"], default="as-is",
-                   help="orientation of --size (default: as-is)")
+                   help=tr("orientation of --size (default: as-is)"))
     p.add_argument("--method", choices=["anamorphic", "proportional", "none"], default="proportional",
-                   help="anamorphic: stretch to fit; proportional: same scale both ways, then pad; "
-                        "none: no scaling, pad or crop (default: proportional)")
+                   help=tr("anamorphic: stretch to fit; proportional: same scale both ways, then pad; "
+                        "none: no scaling, pad or crop (default: proportional)"))
     p.add_argument("--rotate-to-fit", choices=["no", "cw", "ccw"], default="no",
-                   help="rotate pages 90° when that matches the target shape better")
+                   help=tr("rotate pages 90° when that matches the target shape better"))
     p.add_argument("--only", choices=["both", "enlarge", "shrink"], default="both",
-                   help="only enlarge or only shrink pages (default: both)")
+                   help=tr("only enlarge or only shrink pages (default: both)"))
     p.add_argument("--similar", metavar="LEN",
-                   help="only adjust pages whose size is within this distance of the target")
-    p.add_argument("--verify", action="store_true", help="don't change anything; fail if pages differ")
+                   help=tr("only adjust pages whose size is within this distance of the target"))
+    p.add_argument("--verify", action="store_true", help=tr("don't change anything; fail if pages differ"))
     p.add_argument("--keep-bleed", action="store_true",
-                   help="anamorphic: size the trim area and keep bleed margins the same")
+                   help=tr("anamorphic: size the trim area and keep bleed margins the same"))
     p.add_argument("--no-uncover", action="store_true",
-                   help="never reveal content previously cropped when adding space")
+                   help=tr("never reveal content previously cropped when adding space"))
 
 
 @command("resize", "adjust page sizes (scale, pad or crop to a size)", _resize_args,
-         description="Adjust Page Sizes: scale pages to a size or percentage, rotate to fit, verify sizes.")
+         description=N_("Adjust Page Sizes: scale pages to a size or percentage, rotate to fit, verify sizes."))
 def resize(pdf: Pdf, a, ctx: Context):
     n = len(pdf.pages)
     sel = select(a.pages, n, a.parity)
@@ -265,14 +266,14 @@ def resize(pdf: Pdf, a, ctx: Context):
     tol = ctx.L(a.similar) if a.similar else None
     if a.verify:
         if target is None:
-            raise ImpositionError("--verify needs --size or --same-as")
+            raise ImpositionError(tr("--verify needs --size or --same-as"))
         bad = []
         for i in sel:
             w, h = pu.visual_size(pdf.pages[i].obj, use_bleed=False)
             if abs(w - target[0]) > 0.5 or abs(h - target[1]) > 0.5:
-                bad.append(f"page {i + 1}: {w:.1f}x{h:.1f}pt")
+                bad.append(tr("page {page}: {width}x{height}pt", page=i + 1, width=f"{w:.1f}", height=f"{h:.1f}"))
         if bad:
-            raise ImpositionError("pages not the required size: " + "; ".join(bad))
+            raise ImpositionError(tr("pages not the required size: {pages}", pages="; ".join(bad)))
         return pdf
     imp = pu.Importer(pdf)
     for i in sel:
@@ -332,7 +333,7 @@ def resize(pdf: Pdf, a, ctx: Context):
                 del page["/ArtBox"]
         else:
             if pu.has_bleed(page):
-                ctx.warn(f"page {i + 1}: bleed removed by resizing")
+                ctx.warn(tr('page {index}: bleed removed by resizing', index=i + 1))
             page.MediaBox = pu.rect_array(new)
             page.CropBox = pu.rect_array(new)
             drop_bleed(page, ctx, new)
@@ -345,14 +346,14 @@ def resize(pdf: Pdf, a, ctx: Context):
 def _rotate_args(p):
     add_page_args(p)
     p.add_argument("--angle", type=float, required=True,
-                   help="clockwise angle in degrees; 90/180/270 set the page rotation, other values rotate "
-                        "the contents freely")
+                   help=tr("clockwise angle in degrees; 90/180/270 set the page rotation, other values rotate "
+                        "the contents freely"))
     p.add_argument("--only", choices=["all", "tall", "wide"], default="all",
-                   help="rotate only tall or only wide pages")
+                   help=tr("rotate only tall or only wide pages"))
     p.add_argument("--keep-size", action="store_true",
-                   help="free rotation: keep the original page size and bleed instead of enlarging")
+                   help=tr("free rotation: keep the original page size and bleed instead of enlarging"))
     p.add_argument("--crop-first", action="store_true",
-                   help="free rotation: crop to the visible page first so only blank background appears")
+                   help=tr("free rotation: crop to the visible page first so only blank background appears"))
 
 
 @command("rotate", "rotate pages by any angle", _rotate_args)
@@ -387,9 +388,9 @@ def rotate_pages(pdf: Pdf, a, ctx: Context):
 
 
 def _dup_args(p):
-    p.add_argument("--pages", default="all", metavar="RANGE", help="pages to duplicate (default: all)")
-    p.add_argument("--copies", type=int, required=True, help="number of extra copies")
-    p.add_argument("--no-collate", action="store_true", help="1 1 1 2 2 2 instead of 1 2 1 2 1 2")
+    p.add_argument("--pages", default="all", metavar="RANGE", help=tr("pages to duplicate (default: all)"))
+    p.add_argument("--copies", type=int, required=True, help=tr("number of extra copies"))
+    p.add_argument("--no-collate", action="store_true", help=tr("1 1 1 2 2 2 instead of 1 2 1 2 1 2"))
 
 
 @command("duplicate", "duplicate pages", _dup_args)
@@ -397,7 +398,7 @@ def duplicate(pdf: Pdf, a, ctx: Context):
     n = len(pdf.pages)
     sel = parse_pages(a.pages, n)
     if a.copies < 0:
-        raise ImpositionError("--copies must be zero or more")
+        raise ImpositionError(tr("--copies must be zero or more"))
     if a.no_collate:
         block = [i for i in sel for _ in range(a.copies + 1)]
     else:
@@ -410,7 +411,7 @@ def duplicate(pdf: Pdf, a, ctx: Context):
 
 
 def _del_args(p):
-    p.add_argument("--pages", required=True, metavar="RANGE", help="pages to delete")
+    p.add_argument("--pages", required=True, metavar="RANGE", help=tr("pages to delete"))
     p.add_argument("--parity", choices=["all", "odd", "even"], default="all")
 
 
@@ -418,16 +419,16 @@ def _del_args(p):
 def delete(pdf: Pdf, a, ctx: Context):
     sel = set(select(a.pages, len(pdf.pages), a.parity))
     if len(sel) >= len(pdf.pages):
-        raise ImpositionError("cannot delete every page")
+        raise ImpositionError(tr("cannot delete every page"))
     from .common import reorder
     return reorder(pdf, [i for i in range(len(pdf.pages)) if i not in sel])
 
 
 def _move_args(p):
-    p.add_argument("--pages", required=True, metavar="RANGE", help="pages to move")
+    p.add_argument("--pages", required=True, metavar="RANGE", help=tr("pages to move"))
     g = p.add_mutually_exclusive_group(required=True)
-    g.add_argument("--before", metavar="PAGE", help="move before this page (original numbering)")
-    g.add_argument("--after", metavar="PAGE", help="move after this page (original numbering)")
+    g.add_argument("--before", metavar="PAGE", help=tr("move before this page (original numbering)"))
+    g.add_argument("--after", metavar="PAGE", help=tr("move after this page (original numbering)"))
 
 
 @command("move", "move pages within the document", _move_args)
@@ -436,7 +437,7 @@ def move(pdf: Pdf, a, ctx: Context):
     sel = parse_pages(a.pages, n)
     target = page_number(a.before or a.after, n) - 1
     if target in sel:
-        raise ImpositionError("the target page is one of the pages being moved")
+        raise ImpositionError(tr("the target page is one of the pages being moved"))
     rest = [i for i in range(n) if i not in sel]
     pos = rest.index(target) + (1 if a.after else 0)
     from .common import reorder
@@ -448,17 +449,17 @@ def move(pdf: Pdf, a, ctx: Context):
 
 def _tile_args(p):
     g = p.add_mutually_exclusive_group()
-    g.add_argument("--grid", metavar="COLSxROWS", help="split each page into a grid, e.g. 2x1")
+    g.add_argument("--grid", metavar="COLSxROWS", help=tr("split each page into a grid, e.g. 2x1"))
     g.add_argument("--sizes", metavar="WIDTHS/HEIGHTS",
-                   help="exact tile sizes: a width list and a height list separated by '/', "
-                        "e.g. '4in 4.5in / 4in 3in' (lists repeat)")
+                   help=tr("exact tile sizes: a width list and a height list separated by '/', "
+                        "e.g. '4in 4.5in / 4in 3in' (lists repeat)"))
     g.add_argument("--undo-booklet", choices=["saddle", "perfect"],
-                   help="cut a 2-up booklet back into single pages in reading order")
-    p.add_argument("--signature", type=int, default=4, help="--undo-booklet perfect: pages per signature")
-    p.add_argument("--direction", choices=["left", "right"], default="left", help="--undo-booklet binding edge")
-    p.add_argument("--overlap", default="0", metavar="LEN", help="overlap between tiles")
-    p.add_argument("--overlap-bleed", action="store_true", help="make the overlap into bleed (trim/bleed boxes)")
-    p.add_argument("--only-wide", action="store_true", help="split only wide pages (e.g. reader's spreads)")
+                   help=tr("cut a 2-up booklet back into single pages in reading order"))
+    p.add_argument("--signature", type=int, default=4, help=tr("--undo-booklet perfect: pages per signature"))
+    p.add_argument("--direction", choices=["left", "right"], default="left", help=tr("--undo-booklet binding edge"))
+    p.add_argument("--overlap", default="0", metavar="LEN", help=tr("overlap between tiles"))
+    p.add_argument("--overlap-bleed", action="store_true", help=tr("make the overlap into bleed (trim/bleed boxes)"))
+    p.add_argument("--only-wide", action="store_true", help=tr("split only wide pages (e.g. reader's spreads)"))
 
 
 def _spans(total: float, sizes: list[float]) -> list[tuple[float, float]]:
@@ -466,7 +467,7 @@ def _spans(total: float, sizes: list[float]) -> list[tuple[float, float]]:
     while acc < total - 1e-6:
         s = sizes[k % len(sizes)]
         if s <= 0:
-            raise ImpositionError("tile sizes must be positive")
+            raise ImpositionError(tr("tile sizes must be positive"))
         seq.append(s)
         acc += s
         k += 1
@@ -479,13 +480,13 @@ def _spans(total: float, sizes: list[float]) -> list[tuple[float, float]]:
 
 
 @command("tile", "split pages into tiles (or undo a 2-up booklet)", _tile_args,
-         description="Tile Pages: split each page into smaller pages, optionally overlapping.")
+         description=N_("Tile Pages: split each page into smaller pages, optionally overlapping."))
 def tile(pdf: Pdf, a, ctx: Context):
     ov = ctx.L(a.overlap)
     if a.undo_booklet:
         a.grid, ov = "2x1", 0.0
     if not (a.grid or a.sizes):
-        raise ImpositionError("give --grid, --sizes or --undo-booklet")
+        raise ImpositionError(tr("give --grid, --sizes or --undo-booklet"))
     imp = pu.Importer(pdf)
     out_pages: list[Dictionary] = []
     for i in range(len(pdf.pages)):
@@ -498,7 +499,7 @@ def tile(pdf: Pdf, a, ctx: Context):
         if a.grid:
             m = re.fullmatch(r"\s*(\d+)\s*[x×]\s*(\d+)\s*", a.grid)
             if not m:
-                raise ImpositionError("--grid must look like 2x1")
+                raise ImpositionError(tr("--grid must look like 2x1"))
             cols, rows = int(m.group(1)), int(m.group(2))
             if a.overlap_bleed and ov:
                 xs = [(w * c / cols, w * (c + 1) / cols) for c in range(cols)]

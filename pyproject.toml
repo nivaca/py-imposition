@@ -1,6 +1,6 @@
 [project]
 name = "py-imposition"
-version = "0.2"
+version = "0.3"
 description = "PDF imposition toolkit: booklets, n-up, step and repeat, shuffling, bleeds, stamps, sequences and hot folders"
 readme = "README.md"
 license = "GPL-3.0-or-later"

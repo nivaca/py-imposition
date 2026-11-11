@@ -45,6 +45,36 @@ GROUP_TITLES = {"positional arguments": N_("Files"), "options": N_("Options"), "
                 "background": N_("Background")}
 
 
+# What to show in an empty field, by the option's metavar: an example of what
+# it takes (the metavar itself, LEN or RANGE, means little to a user).
+EXAMPLES = {
+    "LEN": N_("e.g. 5mm or 1.5cm"),
+    "RANGE": N_("e.g. 1-4,7 or LAST"),
+    "PAGE": N_("e.g. 3 or LAST-1"),
+    "N": N_("a number"), "K": N_("a number"), "A": N_("a number"), "B": N_("a number"),
+    "SIZE": N_("e.g. a4 or 21x29.7cm"),
+    "WxH": N_("e.g. 4x3cm"),
+    "COND": N_("e.g. multiple:4, odd or ge:8"),
+    "LIST": N_("e.g. 0 40"),
+    "PDF": N_("a PDF file"),
+    "EDGE=LEN": N_("e.g. left=1cm"),
+    "DIR=LEN": N_("e.g. right=3mm"),
+    "DIR=FIRST:LAST": N_("e.g. right=0:3mm"),
+    "COLSxROWS": N_("e.g. 2x1"),
+    "WIDTHS/HEIGHTS": N_("e.g. 4in 4.5in / 4in 3in"),
+    "PARTS": N_("e.g. 1..4 9..12; 5..8"),
+    "N=STEPS": N_("e.g. 2=nup --cols 2 --rows 2"),
+    "N=FILE": N_("e.g. 2=part2.toml"),
+    "X,Y,W,H": N_("e.g. 0,0,3cm,2cm"),
+}
+SIDES = ("top", "bottom", "left", "right")
+
+
+def example_for(action: argparse.Action) -> str:
+    text = EXAMPLES.get(str(action.metavar or ""))
+    return tr(text) if text else ""
+
+
 def subparsers() -> dict[str, argparse.ArgumentParser]:
     parser = build_parser()
     for action in parser._actions:
@@ -201,8 +231,8 @@ class TextField(Field):
         self.edit = QLineEdit(self)
         if action.default not in (None, argparse.SUPPRESS):
             self.edit.setPlaceholderText(tr('default: {default}', default=action.default))
-        elif action.metavar:
-            self.edit.setPlaceholderText(str(action.metavar))
+        else:
+            self.edit.setPlaceholderText(example_for(action))
         if action.type is int:
             self.edit.setValidator(QIntValidator(self.edit))
         self.edit.setToolTip(self.toolTip())
@@ -255,7 +285,9 @@ class ListField(Field):
     def __init__(self, action, parent=None, files: bool = False):
         super().__init__(action, parent)
         self.edit = QPlainTextEdit(self)
-        self.edit.setPlaceholderText("one per line" + (f" ({action.metavar})" if action.metavar else ""))
+        example = example_for(action)
+        self.edit.setPlaceholderText(tr("one per line, {example}", example=example) if example
+                                     else tr("one per line"))
         self.edit.setFixedHeight(70)
         self.edit.setToolTip(self.toolTip())
         lay = QHBoxLayout(self)
@@ -379,6 +411,12 @@ class CommandForm(QWidget):
             members = [by_action[a] for a in grp._group_actions if a in by_action]
             if len(members) > 1:
                 self._exclusive.append(members)
+        # --margin-top and the like: empty means "the same as --margin"
+        by_dest = {f.dest: f for f in self.fields}
+        for f in self.fields:
+            base, _, side = f.dest.rpartition("_")
+            if side in SIDES and base in by_dest and isinstance(f, TextField):
+                f.edit.setPlaceholderText(tr("same as {option}", option=by_dest[base].option))
         outer.addStretch(1)
 
     def _wanted(self, action: argparse.Action) -> bool:

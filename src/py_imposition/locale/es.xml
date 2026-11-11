@@ -2571,4 +2571,88 @@
     <en>mutually exclusive arguments must be optional</en>
     <tr>los argumentos mutuamente excluyentes deben ser opcionales</tr>
   </text>
+  <text>
+    <en>e.g. 5mm or 1.5cm</en>
+    <tr>p. ej. 5mm o 1.5cm</tr>
+  </text>
+  <text>
+    <en>e.g. 1-4,7 or LAST</en>
+    <tr>p. ej. 1-4,7 o LAST</tr>
+  </text>
+  <text>
+    <en>e.g. 3 or LAST-1</en>
+    <tr>p. ej. 3 o LAST-1</tr>
+  </text>
+  <text>
+    <en>a number</en>
+    <tr>un número</tr>
+  </text>
+  <text>
+    <en>e.g. a4 or 21x29.7cm</en>
+    <tr>p. ej. a4 o 21x29.7cm</tr>
+  </text>
+  <text>
+    <en>e.g. 4x3cm</en>
+    <tr>p. ej. 4x3cm</tr>
+  </text>
+  <text>
+    <en>e.g. multiple:4, odd or ge:8</en>
+    <tr>p. ej. multiple:4, odd o ge:8</tr>
+  </text>
+  <text>
+    <en>e.g. 0 40</en>
+    <tr>p. ej. 0 40</tr>
+  </text>
+  <text>
+    <en>a PDF file</en>
+    <tr>un archivo PDF</tr>
+  </text>
+  <text>
+    <en>e.g. left=1cm</en>
+    <tr>p. ej. left=1cm</tr>
+  </text>
+  <text>
+    <en>e.g. right=3mm</en>
+    <tr>p. ej. right=3mm</tr>
+  </text>
+  <text>
+    <en>e.g. right=0:3mm</en>
+    <tr>p. ej. right=0:3mm</tr>
+  </text>
+  <text>
+    <en>e.g. 2x1</en>
+    <tr>p. ej. 2x1</tr>
+  </text>
+  <text>
+    <en>e.g. 4in 4.5in / 4in 3in</en>
+    <tr>p. ej. 4in 4.5in / 4in 3in</tr>
+  </text>
+  <text>
+    <en>e.g. 1..4 9..12; 5..8</en>
+    <tr>p. ej. 1..4 9..12; 5..8</tr>
+  </text>
+  <text>
+    <en>e.g. 2=nup --cols 2 --rows 2</en>
+    <tr>p. ej. 2=nup --cols 2 --rows 2</tr>
+  </text>
+  <text>
+    <en>e.g. 2=part2.toml</en>
+    <tr>p. ej. 2=parte2.toml</tr>
+  </text>
+  <text>
+    <en>e.g. 0,0,3cm,2cm</en>
+    <tr>p. ej. 0,0,3cm,2cm</tr>
+  </text>
+  <text>
+    <en>one per line, {example}</en>
+    <tr>uno por línea, {example}</tr>
+  </text>
+  <text>
+    <en>one per line</en>
+    <tr>uno por línea</tr>
+  </text>
+  <text>
+    <en>same as {option}</en>
+    <tr>igual que {option}</tr>
+  </text>
 </interface>

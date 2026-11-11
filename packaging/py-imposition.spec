@@ -83,6 +83,9 @@ export HOME="$PWD/check-home" PY_IMPOSITION_CONFIG="$PWD/check-home/config" QT_Q
 * Wed Nov 11 2026 Nicolas Vaughan <nivaca@fastmail.com> - 0.4.1-1
 - The AppImage includes pikepdf and Pillow (0.4's did not run without them
   installed)
+- Empty fields in the window show an example of what they take, and the
+  command line above the options is readable in dark themes
+- Signed with a new key (236EF043AB7A4434A05CA4ECB5549099FC0D6464)
 
 * Wed Nov 11 2026 Nicolas Vaughan <nivaca@fastmail.com> - 0.4-1
 - First package: the command line and the window, in English or Spanish,

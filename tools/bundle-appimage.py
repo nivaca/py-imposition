@@ -104,6 +104,10 @@ for f in "$APPDIR"/opt/python*/lib/python*/site-packages/certifi/cacert.pem; do
 done
 #  (the AppImage cannot be written to)
 export PYTHONDONTWRITEBYTECODE=1
+#  Only what is inside the AppImage: not the user's site-packages, nor
+#  another Python's settings
+export PYTHONNOUSERSITE=1
+unset PYTHONPATH PYTHONHOME PYTHONSTARTUP VIRTUAL_ENV
 
 usage() {
     echo "Usage: ${SELF##*/} [file.pdf]            the window"
@@ -200,8 +204,12 @@ def make_appdir(appdir: Path, whl: Path):
         raise OSError(f"there is no Python in {appdir}")
     python = pythons[0]
     say(f"Installing py-imposition and its dependencies into {python.relative_to(appdir)} ...")
-    subprocess.run([str(python), "-m", "pip", "install", "--no-cache-dir", "--no-warn-script-location",
-                    "--disable-pip-version-check", "--quiet", f"{whl}[gui]"], check=True)
+    # Everything must go inside: pip must not see packages of the user's
+    # site-packages (or another environment) as already installed.
+    env = clean_env()
+    subprocess.run([str(python), "-s", "-m", "pip", "install", "--isolated", "--no-cache-dir",
+                    "--no-warn-script-location", "--disable-pip-version-check", "--quiet", f"{whl}[gui]"],
+                   check=True, env=env)
     site = next(appdir.glob("opt/python3*/lib/python3.*/site-packages"))
     for rel in PRUNE:
         path = site / rel
@@ -231,6 +239,39 @@ def make_appdir(appdir: Path, whl: Path):
     shutil.copytree(icons, appdir / "usr" / "share" / "icons" / "hicolor", dirs_exist_ok=True)
 
 
+def clean_env(**extra) -> dict:
+    """The environment without anything that would make a Python look outside its own folders."""
+    env = {k: v for k, v in os.environ.items()
+           if not k.startswith(("PYTHON", "PIP_", "VIRTUAL_ENV", "UV_", "CONDA"))}
+    env.update(PYTHONNOUSERSITE="1", **extra)
+    return env
+
+
+def check_imports(appdir: Path):
+    """Stop if the bundled Python can't import what the program needs, on its own."""
+    python = next(p for p in sorted(appdir.glob("opt/python3*/bin/python3.*")) if not p.name.endswith("-config"))
+    code = ("import pikepdf, reportlab, PIL, PySide6.QtPdfWidgets, py_imposition.gui.window; "
+            "print(pikepdf.__version__, reportlab.Version, PySide6.__version__)")
+    r = subprocess.run([str(python), "-s", "-c", code], capture_output=True, text=True,
+                       env=clean_env(QT_QPA_PLATFORM="offscreen", APPDIR=str(appdir)))
+    if r.returncode != 0:
+        raise OSError(f"the bundled Python cannot run the program:\n{r.stderr.strip()}")
+    say(f"Bundled pikepdf, reportlab, PySide6: {r.stdout.strip()}")
+
+
+def smoke_test(appimage: Path):
+    """Run the AppImage as a user with nothing installed would: an empty home folder."""
+    with tempfile.TemporaryDirectory() as home:
+        env = clean_env(HOME=home, XDG_CONFIG_HOME=f"{home}/.config", XDG_CACHE_HOME=f"{home}/.cache",
+                        XDG_DATA_HOME=f"{home}/.local/share", APPIMAGE_EXTRACT_AND_RUN="1")
+        for args in (["--version"], ["sample", "--count", "4", "-o", f"{home}/s.pdf"],
+                     ["booklet", "--paper", "a4", f"{home}/s.pdf", "-o", f"{home}/b.pdf"]):
+            r = subprocess.run([str(appimage), *args], capture_output=True, text=True, env=env, cwd=home)
+            if r.returncode != 0:
+                raise OSError(f"the AppImage failed ({' '.join(args)}):\n{(r.stderr or r.stdout).strip()}")
+    say("The AppImage runs on its own (empty home folder): --version, sample, booklet.")
+
+
 def open_to_all(appdir: Path):
     """Let everyone read the AppDir: folders 0755, files 0644, or 0755 if they can be run."""
     for folder, dirs, names in os.walk(appdir):
@@ -256,6 +297,7 @@ def bundle(output: Path, python: Path | None = None, appimagetool: Path | None =
                        stdout=subprocess.DEVNULL)
         appdir = tmp / "squashfs-root"
         make_appdir(appdir, wheel(tmp / "wheel"))
+        check_imports(appdir)
         open_to_all(appdir)
         # (without FUSE, as in a container, the tool runs extracted)
         env = dict(os.environ, ARCH=ARCH, APPIMAGE_EXTRACT_AND_RUN="1")
@@ -263,6 +305,7 @@ def bundle(output: Path, python: Path | None = None, appimagetool: Path | None =
         subprocess.run([str(appimagetool.resolve()), "--no-appstream", "--comp", "zstd", str(appdir),
                         str(tmp_out)], check=True, env=env, stdout=subprocess.DEVNULL)
     os.replace(tmp_out, path)
+    smoke_test(path)
     return path
 
 

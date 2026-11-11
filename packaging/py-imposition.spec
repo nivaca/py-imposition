@@ -10,7 +10,7 @@
 # Build with packaging/build-rpm.sh, which makes the source tarball.
 
 Name:           py-imposition
-Version:        0.4
+Version:        0.4.1
 Release:        1%{?dist}
 Summary:        PDF imposition toolkit: booklets, n-up, step and repeat and more
 
@@ -80,6 +80,10 @@ export HOME="$PWD/check-home" PY_IMPOSITION_CONFIG="$PWD/check-home/config" QT_Q
 %{_datadir}/icons/hicolor/*/apps/py-imposition.*
 
 %changelog
+* Wed Nov 11 2026 Nicolas Vaughan <nivaca@fastmail.com> - 0.4.1-1
+- The AppImage includes pikepdf and Pillow (0.4's did not run without them
+  installed)
+
 * Wed Nov 11 2026 Nicolas Vaughan <nivaca@fastmail.com> - 0.4-1
 - First package: the command line and the window, in English or Spanish,
   with a menu entry that also opens PDF files

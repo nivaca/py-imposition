@@ -1,69 +1,57 @@
-"""py-imposition: impose PDFs into 2-up booklets."""
+"""py-imposition: a PDF imposition toolkit."""
 
 from __future__ import annotations
 
-import argparse
 import sys
 from pathlib import Path
 
-from .imposition import PAPER_SIZES, Margins, Settings, impose
+from pikepdf import Pdf
 
-__all__ = ["impose", "Settings", "Margins", "main"]
+from . import (  # noqa: F401  (importing registers the commands)
+    bleed, datamerge, impose, info, insert, manual, pagetools, sequence, shuffle, split, stamp,
+)
+from .common import COMMANDS, Context, ImpositionError
+from .runner import build_parser, make_context, record, save_result, strip_io
 
-
-def _parser() -> argparse.ArgumentParser:
-    p = argparse.ArgumentParser(
-        prog="py-imposition",
-        description="Impose a PDF as a 2-up booklet (default: perfect binding, "
-        "4 pages per fold, left binding, Legal landscape, no margins/gutters, auto scale).",
-    )
-    p.add_argument("input", type=Path, help="source PDF")
-    p.add_argument("output", type=Path, nargs="?", help="output PDF (default: <input>-imposed.pdf)")
-    p.add_argument("--binding", choices=["perfect", "saddle"], default="perfect",
-                   help="perfect: stacked signatures; saddle: all sheets nested in one signature")
-    p.add_argument("--pages-per-fold", type=int, default=4, metavar="N",
-                   help="pages per signature for perfect binding, multiple of 4 (default: 4)")
-    p.add_argument("--direction", choices=["left", "right"], default="left",
-                   help="binding edge (default: left)")
-    p.add_argument("--paper", choices=sorted(PAPER_SIZES), default="legal")
-    p.add_argument("--orientation", choices=["landscape", "portrait"], default="landscape")
-    p.add_argument("--margin", type=float, default=0.0, metavar="CM",
-                   help="margin on all sides, in cm (default: 0)")
-    for side in ("top", "bottom", "left", "right"):
-        p.add_argument(f"--margin-{side}", type=float, metavar="CM",
-                       help=f"{side} margin in cm (overrides --margin)")
-    p.add_argument("--gutter", type=float, default=0.0, metavar="CM",
-                   help="space between the two pages at the fold, in cm (default: 0)")
-    p.add_argument("--no-auto-scale", dest="auto_scale", action="store_false",
-                   help="only shrink pages that don't fit; never enlarge")
-    p.add_argument("--align", choices=["center", "fold"], default="center",
-                   help="center pages in their half of the sheet, or push them against the fold "
-                   "(default: center)")
-    return p
+__all__ = ["main", "COMMANDS", "Context", "ImpositionError"]
 
 
 def main(argv: list[str] | None = None) -> int:
-    a = _parser().parse_args(argv)
-    if not a.input.is_file():
-        print(f"error: {a.input} not found", file=sys.stderr)
+    argv = list(sys.argv[1:] if argv is None else argv)
+    # "py-imposition file.pdf [options]" -> booklet with the default settings
+    first = next((t for t in argv if not t.startswith("-")), None)
+    if first and first not in COMMANDS and first.lower().endswith(".pdf"):
+        argv.insert(argv.index(first), "booklet")
+    parser = build_parser()
+    ns = parser.parse_args(argv)
+    if not ns.command:
+        parser.print_help()
         return 1
-    out = a.output or a.input.with_name(f"{a.input.stem}-imposed.pdf")
-    m = {s: getattr(a, f"margin_{s}") for s in ("top", "bottom", "left", "right")}
-    settings = Settings(
-        binding=a.binding,
-        pages_per_fold=a.pages_per_fold,
-        direction=a.direction,
-        paper=a.paper,
-        orientation=a.orientation,
-        margins=Margins(**{k: a.margin if v is None else v for k, v in m.items()}),
-        gutter=a.gutter,
-        auto_scale=a.auto_scale,
-        align=a.align,
-    )
+    cmd = COMMANDS[ns.command]
+    inp: Path | None = getattr(ns, "input", None)
+    ctx = make_context(ns, input_path=inp)
     try:
-        n = impose(a.input, out, settings)
-    except ValueError as e:
+        pdf = None
+        if inp is not None:
+            if not inp.is_file():
+                raise ImpositionError(f"{inp} not found")
+            pdf = Pdf.open(inp)
+        result = cmd.run(pdf, ns, ctx)
+        if result is None:  # command handled its own output (info, run, watch...)
+            return 0
+        record(pdf, result, strip_io(argv, ns))
+        out = ns.output
+        if out is None:
+            stem = inp.with_suffix("") if inp is not None else Path(ns.command)
+            out = Path(f"{stem}-{ns.command}.pdf")
+        paths = save_result(result, out)
+    except ImpositionError as e:
         print(f"error: {e}", file=sys.stderr)
         return 1
-    print(f"Wrote {out} ({n} sheet sides, {n // 2} sheets; print duplex, flip on short edge)")
+    for p in paths:
+        try:
+            n = len(Pdf.open(p).pages)
+            print(f"Wrote {p} ({n} page{'s' if n != 1 else ''})")
+        except Exception:
+            print(f"Wrote {p}")
     return 0

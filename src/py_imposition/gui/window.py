@@ -22,11 +22,12 @@ from .. import __version__
 from ..common import COMMANDS
 from .. import config, interface
 from ..interface import N_, ntr, tr
+from .basic import BasicPanel
 from .forms import CommandForm, file_filter, subparsers
 from .preview import PdfPane
 
 CATEGORIES = [
-    (N_("Impose"), ["booklet", "nup", "step-repeat", "join", "manual"]),
+    (N_("Impose"), ["impose", "booklet", "nup", "step-repeat", "join", "manual"]),
     (N_("Arrange pages"), ["shuffle", "evenodd", "reverse", "duplicate", "delete", "move", "insert", "split"]),
     (N_("Change pages"), ["trim-shift", "creep", "resize", "rotate", "tile", "bleed"]),
     (N_("Stick on / peel off"), ["text", "stick-pdf", "mask", "peel", "merge-data", "sample"]),
@@ -34,7 +35,7 @@ CATEGORIES = [
 ]
 
 TITLES = {
-    "booklet": N_("Create booklet"), "nup": N_("n-Up pages"), "step-repeat": N_("Step and repeat"), "join": N_("Join two pages"),
+    "impose": N_("Imposition"), "booklet": N_("Create booklet"), "nup": N_("n-Up pages"), "step-repeat": N_("Step and repeat"), "join": N_("Join two pages"),
     "manual": N_("Manual imposition"), "shuffle": N_("Shuffle pages"), "evenodd": N_("Even/odd pages"),
     "reverse": N_("Reverse pages"), "duplicate": N_("Duplicate pages"), "delete": N_("Delete pages"), "move": N_("Move pages"),
     "insert": N_("Insert pages"), "split": N_("Split / merge (partials)"), "trim-shift": N_("Trim and shift"),
@@ -377,6 +378,18 @@ class MainWindow(QMainWindow):
         tb = QToolBar(tr("Preferences"))
         tb.setObjectName("prefs")
         self.addToolBar(tb)
+        # Basic | Advanced
+        self.a_basic = QAction(tr("Basic"), self, checkable=True)
+        self.a_basic.setToolTip(tr("Basic mode: one imposition form with the usual options"))
+        self.a_advanced = QAction(tr("Advanced"), self, checkable=True)
+        self.a_advanced.setToolTip(tr("Advanced mode: every command and option, sequences and the log"))
+        modes = QActionGroup(self)
+        modes.setExclusive(True)
+        for act, mode in ((self.a_basic, "basic"), (self.a_advanced, "advanced")):
+            modes.addAction(act)
+            tb.addAction(act)
+            act.triggered.connect(lambda _=False, m=mode: self.set_mode(m))
+        tb.addSeparator()
         self.a_open = QAction(tr("Open…"), self, shortcut=QKeySequence.StandardKey.Open, triggered=self.open_dialog)
         tb.addAction(self.a_open)
         self.a_save = QAction(tr("Save document…"), self, shortcut=QKeySequence.StandardKey.Save,
@@ -384,24 +397,24 @@ class MainWindow(QMainWindow):
         tb.addAction(self.a_save)
         self.a_undo = QAction(tr("Undo apply"), self, shortcut=QKeySequence.StandardKey.Undo, triggered=self.undo)
         tb.addAction(self.a_undo)
-        tb.addSeparator()
-        tb.addWidget(QLabel(tr(" Units ")))
+        self._advanced_only = [tb.addSeparator()]
+        self._advanced_only.append(tb.addWidget(QLabel(tr(" Units "))))
         self.units = QComboBox()
         self.units.addItems(["cm", "mm", "in", "pt"])
-        tb.addWidget(self.units)
-        tb.addWidget(QLabel(tr("  Registration ")))
+        self._advanced_only.append(tb.addWidget(self.units))
+        self._advanced_only.append(tb.addWidget(QLabel(tr("  Registration "))))
         self.registration = QComboBox()
         self.registration.addItems(["black", "cmyk", "all"])
         self.registration.setToolTip(tr("Colour of crop marks and registration-coloured text"))
-        tb.addWidget(self.registration)
-        tb.addWidget(QLabel(tr("  Bleeds ")))
+        self._advanced_only.append(tb.addWidget(self.registration))
+        self._advanced_only.append(tb.addWidget(QLabel(tr("  Bleeds "))))
         self.bleed = QComboBox()
         self.bleed.addItems(["use", "ignore"])
         self.bleed.setToolTip(tr("Use page bleed boxes when imposing, or impose the visible page only"))
-        tb.addWidget(self.bleed)
+        self._advanced_only.append(tb.addWidget(self.bleed))
         self.pdfx = QCheckBox(tr("PDF/X"))
         self.pdfx.setToolTip(tr("Keep a TrimBox when bleeds are removed"))
-        tb.addWidget(self.pdfx)
+        self._advanced_only.append(tb.addWidget(self.pdfx))
         for w in (self.units, self.registration, self.bleed):
             w.currentIndexChanged.connect(lambda _: self.schedule())
         self.pdfx.toggled.connect(lambda _: self.schedule())
@@ -449,6 +462,12 @@ class MainWindow(QMainWindow):
         scroll.setWidgetResizable(True)
         scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         scroll.setWidget(self.stack)
+        self.basic = BasicPanel(self)
+        self.stack.addWidget(self.basic)
+        self.basic.changed.connect(self._form_changed)
+        self.mode = "advanced"
+        self._adv_command = "booklet"
+        self._docks_shown = [True, True]
 
         self.b_preview = QPushButton(tr("Preview"))
         self.b_preview.setToolTip(tr("Run the command on the current document and show the result (F5)"))
@@ -544,6 +563,9 @@ class MainWindow(QMainWindow):
         m = self.menuBar().addMenu(tr("&View"))
         for d in self.docks:
             m.addAction(d.toggleViewAction())
+        self.m_profiles = self.menuBar().addMenu(tr("&Profiles"))
+        self.basic.profiles_changed.connect(self._profiles_menu)
+        self._profiles_menu()
         m = self.menuBar().addMenu(tr("&Settings"))
         lang = m.addMenu(tr("Language of the interface"))
         group = QActionGroup(self)
@@ -579,8 +601,17 @@ class MainWindow(QMainWindow):
             self.seq.set_steps(steps)
         except (TypeError, ValueError):
             pass
+        try:
+            self.basic.set_tokens(json.loads(self.settings.value("basic/tokens", "[]")))
+        except (TypeError, ValueError):
+            pass
+        try:
+            self._docks_shown = [bool(v) for v in json.loads(self.settings.value("advanced/docks", "[true, true]"))]
+        except (TypeError, ValueError):
+            self._docks_shown = [True, True]
         last = self.settings.value("command", "booklet")
         self.select_command(last if last in COMMANDS else "booklet")
+        self.set_mode(self.settings.value("mode", "basic"))
 
     def closeEvent(self, event):
         self.runner.stop()
@@ -593,7 +624,11 @@ class MainWindow(QMainWindow):
         for k, v in self.prefs().items():
             self.settings.setValue(f"prefs/{k}", "true" if v is True else "false" if v is False else v)
         self.settings.setValue("auto_preview", "true" if self.auto.isChecked() else "false")
-        self.settings.setValue("command", self.current)
+        self.settings.setValue("mode", self.mode)
+        docks = self._docks_shown if self.mode == "basic" else [d.isVisible() for d in self.docks]
+        self.settings.setValue("advanced/docks", json.dumps(docks))
+        self.settings.setValue("command", self._adv_command if self.mode == "basic" else self.current)
+        self.settings.setValue("basic/tokens", json.dumps(self.basic.tokens()))
         self.settings.setValue("sequence", json.dumps(self.seq.steps()))
         for name, form in self.forms.items():
             self.settings.setValue(f"forms/{name}", json.dumps(form.tokens()))
@@ -672,7 +707,58 @@ class MainWindow(QMainWindow):
 
     # ----------------------------------------------------------------- commands and forms
 
+    # ----------------------------------------------------------------- basic / advanced
+
+    def set_mode(self, mode: str):
+        """Basic: the one imposition form and the previews. Advanced: everything."""
+        mode = "advanced" if mode == "advanced" else "basic"
+        (self.a_basic if mode == "basic" else self.a_advanced).setChecked(True)
+        basic = mode == "basic"
+        if basic and self.mode != "basic":
+            self._adv_command = self.current or self._adv_command
+            if self.isVisible():  # (at start-up, the saved visibility is used)
+                self._docks_shown = [d.isVisible() for d in self.docks]
+        self.mode = mode
+        self.tree.setVisible(not basic)
+        for act in self._advanced_only:
+            act.setVisible(not basic)
+        self.b_add.setVisible(not basic)
+        self.cmd_line.setVisible(not basic)
+        for d, shown in zip(self.docks, self._docks_shown):
+            d.setVisible(False if basic else shown)
+        if basic:
+            self.basic.units.setCurrentText(self.units.currentText())
+            self.current = "impose"
+            self.stack.setCurrentWidget(self.basic)
+            self.cmd_title.setText(tr("Imposition"))
+            self.b_preview.setText(tr("Preview"))
+            self.b_apply.setEnabled(True)
+            self.b_save_result.setEnabled(True)
+            self._form_changed()
+        else:
+            self.select_command(self._adv_command if self._adv_command in COMMANDS else "booklet")
+            self._activate(self.current)
+
+    def _profiles_menu(self):
+        m = self.m_profiles
+        m.clear()
+        shown = [n for n, p in sorted(self.basic.profiles().items(), key=lambda kv: kv[0].lower())
+                 if p.get("menu")]
+        for name in shown:
+            m.addAction(QAction(name, self, triggered=lambda _=False, n=name: self._use_profile(n)))
+        if not shown:
+            act = QAction(tr("(profiles marked “Show on Menu” appear here)"), self)
+            act.setEnabled(False)
+            m.addAction(act)
+
+    def _use_profile(self, name: str):
+        self.set_mode("basic")
+        self.basic.load_profile(name)
+        self.status(tr("Profile {name}", name=name))
+
     def form(self, name: str) -> CommandForm:
+        if name == "impose" and self.mode == "basic":
+            return self.basic  # (it answers like a command form)
         if name not in self.forms:
             f = CommandForm(name, self.parsers[name])
             saved = self.settings.value(f"forms/{name}")
@@ -707,6 +793,9 @@ class MainWindow(QMainWindow):
             self._activate(name)
 
     def _activate(self, name: str):
+        if self.mode == "basic":
+            self._adv_command = name
+            return
         self.current = name
         f = self.form(name)
         self.stack.setCurrentWidget(f)
@@ -728,6 +817,8 @@ class MainWindow(QMainWindow):
         return f.tokens()
 
     def _form_changed(self):
+        if not self.current:  # (still being built)
+            return
         tokens = self.form(self.current).tokens()
         cmd = COMMANDS[self.current]
         shown = list(tokens)

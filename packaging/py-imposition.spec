@@ -10,7 +10,7 @@
 # Build with packaging/build-rpm.sh, which makes the source tarball.
 
 Name:           py-imposition
-Version:        0.4.1
+Version:        0.5
 Release:        1%{?dist}
 Summary:        PDF imposition toolkit: booklets, n-up, step and repeat and more
 
@@ -80,6 +80,13 @@ export HOME="$PWD/check-home" PY_IMPOSITION_CONFIG="$PWD/check-home/config" QT_Q
 %{_datadir}/icons/hicolor/*/apps/py-imposition.*
 
 %changelog
+* Wed Nov 11 2026 Nicolas Vaughan <nivaca@fastmail.com> - 0.5-1
+- Basic mode in the window: one imposition form (layout, profiles, binding,
+  gutters, paper, margins, printer marks); a Basic | Advanced switch
+- The impose command: 2-, 4- and 8-up booklets, cut stacks, sequential and
+  step and repeat in one step, with trim, bleed and registration marks and
+  page information
+
 * Wed Nov 11 2026 Nicolas Vaughan <nivaca@fastmail.com> - 0.4.1-1
 - The AppImage includes pikepdf and Pillow (0.4's did not run without them
   installed)

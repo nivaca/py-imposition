@@ -2655,4 +2655,392 @@
     <en>same as {option}</en>
     <tr>igual que {option}</tr>
   </text>
+  <text>
+    <en>&amp;Profiles</en>
+    <tr>&amp;Perfiles</tr>
+  </text>
+  <text>
+    <en>(profiles marked “Show on Menu” appear here)</en>
+    <tr>(aquí aparecen los perfiles marcados con «Mostrar en el menú»)</tr>
+  </text>
+  <text>
+    <en>2-Up Booklet</en>
+    <tr>Folleto de 2</tr>
+  </text>
+  <text>
+    <en>2up-booklet: 2 pages side by side; 4up-booklet: 2 rows of 2; 8up-booklet: 2 rows of 4; cut-stacks: cut the sheets and stack the piles; sequential: pages in order; step-repeat: copies of each page (default: 2up-booklet)</en>
+    <tr>2up-booklet: 2 páginas una al lado de otra; 4up-booklet: 2 filas de 2; 8up-booklet: 2 filas de 4; cut-stacks: cortar los pliegos y apilar las pilas; sequential: páginas en orden; step-repeat: copias de cada página (por defecto: 2up-booklet)</tr>
+  </text>
+  <text>
+    <en>4-Up Booklet</en>
+    <tr>Folleto de 4</tr>
+  </text>
+  <text>
+    <en>8-Up Booklet</en>
+    <tr>Folleto de 8</tr>
+  </text>
+  <text>
+    <en>8up-booklet: space between the 2nd and 3rd columns (default: as --gutter-v)</en>
+    <tr>8up-booklet: espacio entre la 2.ª y la 3.ª columna (por defecto: como --gutter-v)</tr>
+  </text>
+  <text>
+    <en>&lt;new profile&gt;</en>
+    <tr>&lt;perfil nuevo&gt;</tr>
+  </text>
+  <text>
+    <en>Advanced</en>
+    <tr>Avanzado</tr>
+  </text>
+  <text>
+    <en>Advanced mode: every command and option, sequences and the log</en>
+    <tr>Modo avanzado: todas las órdenes y opciones, las secuencias y los mensajes</tr>
+  </text>
+  <text>
+    <en>Auto Scale</en>
+    <tr>Escala automática</tr>
+  </text>
+  <text>
+    <en>Auto-rotate</en>
+    <tr>Giro automático</tr>
+  </text>
+  <text>
+    <en>Autosize Media</en>
+    <tr>Ajustar el soporte a las páginas</tr>
+  </text>
+  <text>
+    <en>Basic</en>
+    <tr>Básico</tr>
+  </text>
+  <text>
+    <en>Basic mode: one imposition form with the usual options</en>
+    <tr>Modo básico: un único formulario de imposición con las opciones habituales</tr>
+  </text>
+  <text>
+    <en>Binding</en>
+    <tr>Encuadernación</tr>
+  </text>
+  <text>
+    <en>Bleed Marks</en>
+    <tr>Marcas de sangrado</tr>
+  </text>
+  <text>
+    <en>Bottom</en>
+    <tr>Inferior</tr>
+  </text>
+  <text>
+    <en>Columns</en>
+    <tr>Columnas</tr>
+  </text>
+  <text>
+    <en>Custom</en>
+    <tr>Personalizado</tr>
+  </text>
+  <text>
+    <en>Cut stacks</en>
+    <tr>Corte y apilado</tr>
+  </text>
+  <text>
+    <en>Delete</en>
+    <tr>Eliminar</tr>
+  </text>
+  <text>
+    <en>Delete profile</en>
+    <tr>Eliminar perfil</tr>
+  </text>
+  <text>
+    <en>Delete the profile {name}?</en>
+    <tr>¿Eliminar el perfil {name}?</tr>
+  </text>
+  <text>
+    <en>Double Sided</en>
+    <tr>A doble cara</tr>
+  </text>
+  <text>
+    <en>Fit to Media Size</en>
+    <tr>Ajustar al tamaño del soporte</tr>
+  </text>
+  <text>
+    <en>General</en>
+    <tr>General</tr>
+  </text>
+  <text>
+    <en>Gutters</en>
+    <tr>Medianiles</tr>
+  </text>
+  <text>
+    <en>Height</en>
+    <tr>Alto</tr>
+  </text>
+  <text>
+    <en>Horizontal</en>
+    <tr>Horizontal</tr>
+  </text>
+  <text>
+    <en>Impose a document in one step, with the usual layouts (2-, 4- and 8-up booklets, cut stacks, sequential, step and repeat), binding, gutters, paper, margins and printer marks. The window's basic mode runs this command.</en>
+    <tr>Imponer un documento en un solo paso, con las disposiciones habituales (folletos de 2, 4 y 8, corte y apilado, secuencial, paso y repetición), encuadernación, medianiles, papel, márgenes y marcas de impresión. El modo básico de la ventana ejecuta esta orden.</tr>
+  </text>
+  <text>
+    <en>Imposition</en>
+    <tr>Imposición</tr>
+  </text>
+  <text>
+    <en>Landscape</en>
+    <tr>Apaisada</tr>
+  </text>
+  <text>
+    <en>Layout</en>
+    <tr>Disposición</tr>
+  </text>
+  <text>
+    <en>Left</en>
+    <tr>Izquierda</tr>
+  </text>
+  <text>
+    <en>Margins</en>
+    <tr>Márgenes</tr>
+  </text>
+  <text>
+    <en>Marks where the pages are to be trimmed</en>
+    <tr>Marcas donde se han de cortar las páginas</tr>
+  </text>
+  <text>
+    <en>Name</en>
+    <tr>Nombre</tr>
+  </text>
+  <text>
+    <en>Name of the profile:</en>
+    <tr>Nombre del perfil:</tr>
+  </text>
+  <text>
+    <en>Page Information</en>
+    <tr>Información de página</tr>
+  </text>
+  <text>
+    <en>Paper</en>
+    <tr>Papel</tr>
+  </text>
+  <text>
+    <en>Perfect Binding</en>
+    <tr>Encuadernación encolada</tr>
+  </text>
+  <text>
+    <en>Portrait</en>
+    <tr>Vertical</tr>
+  </text>
+  <text>
+    <en>Printer Marks</en>
+    <tr>Marcas de impresión</tr>
+  </text>
+  <text>
+    <en>Profile {name}</en>
+    <tr>Perfil {name}</tr>
+  </text>
+  <text>
+    <en>Profiles</en>
+    <tr>Perfiles</tr>
+  </text>
+  <text>
+    <en>Registration Marks</en>
+    <tr>Marcas de registro</tr>
+  </text>
+  <text>
+    <en>Right</en>
+    <tr>Derecha</tr>
+  </text>
+  <text>
+    <en>Rows</en>
+    <tr>Filas</tr>
+  </text>
+  <text>
+    <en>Saddle-Stitching</en>
+    <tr>Grapado a caballete</tr>
+  </text>
+  <text>
+    <en>Save</en>
+    <tr>Guardar</tr>
+  </text>
+  <text>
+    <en>Save As</en>
+    <tr>Guardar como</tr>
+  </text>
+  <text>
+    <en>Save profile</en>
+    <tr>Guardar perfil</tr>
+  </text>
+  <text>
+    <en>Saved the profile {name}</en>
+    <tr>Se guardó el perfil {name}</tr>
+  </text>
+  <text>
+    <en>Sequential</en>
+    <tr>Secuencial</tr>
+  </text>
+  <text>
+    <en>Sheets per fold</en>
+    <tr>Pliegos por cuadernillo</tr>
+  </text>
+  <text>
+    <en>Show on Menu</en>
+    <tr>Mostrar en el menú</tr>
+  </text>
+  <text>
+    <en>Show this profile in the Profiles menu, for faster access</en>
+    <tr>Mostrar este perfil en el menú Perfiles, para acceder más rápido</tr>
+  </text>
+  <text>
+    <en>Shrink pages that are larger than their place on the sheet</en>
+    <tr>Reducir las páginas más grandes que su lugar en el pliego</tr>
+  </text>
+  <text>
+    <en>Size</en>
+    <tr>Tamaño</tr>
+  </text>
+  <text>
+    <en>Spread</en>
+    <tr>Separación central</tr>
+  </text>
+  <text>
+    <en>Step and Repeat</en>
+    <tr>Paso y repetición</tr>
+  </text>
+  <text>
+    <en>Targets at the sides of the sheet, for aligning plates</en>
+    <tr>Dianas en los lados del pliego, para alinear las planchas</tr>
+  </text>
+  <text>
+    <en>The document name, sheet number, date and time at the top left</en>
+    <tr>El nombre del documento, el número de pliego, la fecha y la hora arriba a la izquierda</tr>
+  </text>
+  <text>
+    <en>The outline of the bleed area of pages that have one</en>
+    <tr>El contorno del área de sangrado de las páginas que la tienen</tr>
+  </text>
+  <text>
+    <en>Top</en>
+    <tr>Superior</tr>
+  </text>
+  <text>
+    <en>Trim Marks</en>
+    <tr>Marcas de corte</tr>
+  </text>
+  <text>
+    <en>Turn each page 90° when that fits its place on the sheet better</en>
+    <tr>Girar cada página 90° cuando así encaja mejor en su lugar del pliego</tr>
+  </text>
+  <text>
+    <en>Type</en>
+    <tr>Tipo</tr>
+  </text>
+  <text>
+    <en>Vertical</en>
+    <tr>Vertical</tr>
+  </text>
+  <text>
+    <en>Width</en>
+    <tr>Ancho</tr>
+  </text>
+  <text>
+    <en>binding</en>
+    <tr>encuadernación</tr>
+  </text>
+  <text>
+    <en>booklets: how far the innermost pages move toward the spine, for the paper's thickness (default: 0)</en>
+    <tr>folletos: cuánto se desplazan hacia el lomo las páginas más interiores, por el grosor del papel (por defecto: 0)</tr>
+  </text>
+  <text>
+    <en>columns and rows must be at least 1</en>
+    <tr>las columnas y las filas deben ser al menos 1</tr>
+  </text>
+  <text>
+    <en>columns, for cut-stacks, sequential and step-repeat (default: 2)</en>
+    <tr>columnas, para cut-stacks, sequential y step-repeat (por defecto: 2)</tr>
+  </text>
+  <text>
+    <en>don't shrink pages that are larger than their cell</en>
+    <tr>no reducir las páginas más grandes que su celda</tr>
+  </text>
+  <text>
+    <en>gutters</en>
+    <tr>medianiles</tr>
+  </text>
+  <text>
+    <en>impose in one step: booklets, cut stacks, sequential or step and repeat</en>
+    <tr>imponer en un solo paso: folletos, corte y apilado, secuencial o paso y repetición</tr>
+  </text>
+  <text>
+    <en>layout</en>
+    <tr>disposición</tr>
+  </text>
+  <text>
+    <en>margin</en>
+    <tr>margen</tr>
+  </text>
+  <text>
+    <en>margins and gutters leave no room for pages</en>
+    <tr>los márgenes y los medianiles no dejan sitio para las páginas</tr>
+  </text>
+  <text>
+    <en>marks where the pages are to be trimmed</en>
+    <tr>marcas donde se han de cortar las páginas</tr>
+  </text>
+  <text>
+    <en>orientation of a named sheet size (default: landscape)</en>
+    <tr>orientación de un tamaño de pliego con nombre (por defecto: landscape)</tr>
+  </text>
+  <text>
+    <en>outline of the bleed area of pages that have one</en>
+    <tr>contorno del área de sangrado de las páginas que la tienen</tr>
+  </text>
+  <text>
+    <en>paper</en>
+    <tr>papel</tr>
+  </text>
+  <text>
+    <en>perfect binding: sheets in each folded stack (default: 1)</en>
+    <tr>encuadernación encolada: pliegos en cada cuadernillo plegado (por defecto: 1)</tr>
+  </text>
+  <text>
+    <en>print on one side only: fronts, then backs (booklets), or single-sided stacks</en>
+    <tr>imprimir por una sola cara: los anversos y luego los reversos (folletos), o pilas a una cara</tr>
+  </text>
+  <text>
+    <en>printer marks</en>
+    <tr>marcas de impresión</tr>
+  </text>
+  <text>
+    <en>rows, for cut-stacks, sequential and step-repeat (default: 2)</en>
+    <tr>filas, para cut-stacks, sequential y step-repeat (por defecto: 2)</tr>
+  </text>
+  <text>
+    <en>saddle: all sheets folded together and stapled; perfect: stacks of folded sheets, glued at the spine (default: perfect)</en>
+    <tr>saddle: todos los pliegos plegados juntos y grapados; perfect: pilas de pliegos plegados, encoladas por el lomo (por defecto: perfect)</tr>
+  </text>
+  <text>
+    <en>sheet size: a paper name or WxH, or 'auto' to fit the pages exactly (default: legal)</en>
+    <tr>tamaño del pliego: un nombre de papel o WxH, o 'auto' para ajustarse exactamente a las páginas (por defecto: legal)</tr>
+  </text>
+  <text>
+    <en>sheets per fold must be at least 1</en>
+    <tr>los pliegos por cuadernillo deben ser al menos 1</tr>
+  </text>
+  <text>
+    <en>space between columns (default: 0)</en>
+    <tr>espacio entre columnas (por defecto: 0)</tr>
+  </text>
+  <text>
+    <en>space between rows (default: 0)</en>
+    <tr>espacio entre filas (por defecto: 0)</tr>
+  </text>
+  <text>
+    <en>targets at the sides of the sheet, for aligning plates</en>
+    <tr>dianas en los lados del pliego, para alinear las planchas</tr>
+  </text>
+  <text>
+    <en>the document name, sheet number, date and time at the top left of each sheet</en>
+    <tr>el nombre del documento, el número de pliego, la fecha y la hora arriba a la izquierda de cada pliego</tr>
+  </text>
+  <text>
+    <en>turn pages 90° when that fits their cell better</en>
+    <tr>girar las páginas 90° cuando así encajan mejor en su celda</tr>
+  </text>
 </interface>

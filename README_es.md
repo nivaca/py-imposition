@@ -14,7 +14,12 @@ de una sola vez. Hay también una interfaz gráfica con vistas previas en vivo.
 
 ## Capturas de pantalla
 
-La ventana, haciendo un folleto de encuadernación encolada en cuadernillos de
+La ventana en modo básico: un único formulario de imposición, aquí un folleto
+de 4 grapado a caballete de [`docs/example/numbers-100.pdf`](docs/example/README.md):
+
+![Modo básico](docs/img/gui_basic_es.png)
+
+En modo avanzado, la ventana, haciendo un folleto de encuadernación encolada en cuadernillos de
 16 páginas a partir del libro de ejemplo
 ([`docs/example/memman.pdf`](docs/example/README.md)):
 
@@ -182,7 +187,37 @@ sufijo como `-fronts`/`-backs`.
 py-imposition-gui [file.pdf]        # o: uv run py-imposition-gui
 ```
 
-La interfaz gráfica ofrece todas las órdenes de la línea de órdenes:
+Un selector arriba a la izquierda de la ventana elige entre dos modos; la
+ventana recuerda el último.
+
+**El modo básico** es un único formulario de imposición con las opciones
+habituales, dispuesto como un diálogo de imposición corriente. Ejecuta la
+orden [`impose`](#impose--imposición):
+
+- **Disposición:** el tipo (folleto de 2, de 4 o de 8, corte y apilado,
+  secuencial, paso y repetición), y las columnas y filas de los tres últimos.
+- **Perfiles:** guardar los ajustes con un nombre (*Guardar*, *Guardar
+  como*), *Eliminarlos*, y marcar *Mostrar en el menú* para poner un perfil en
+  el menú *Perfiles* y acceder a él rápidamente.
+- **General:** las unidades.
+- **Encuadernación:** grapado a caballete o encuadernación encolada, los
+  pliegos por cuadernillo, el borde de encuadernación (izquierda o derecha) y
+  *A doble cara*.
+- **Medianiles:** vertical, horizontal, la separación central entre las
+  columnas del medio de un folleto de 8, y el corrimiento.
+- **Papel:** *Ajustar el soporte a las páginas* (el pliego se ajusta a las
+  páginas), o *Ajustar al tamaño del soporte* con un tamaño estándar o
+  personalizado y orientación vertical o apaisada; *Giro automático* y
+  *Escala automática* (reducir las páginas demasiado grandes).
+- **Márgenes:** superior, inferior, izquierdo y derecho.
+- **Marcas de impresión:** marcas de corte, de sangrado y de registro, e
+  información de página.
+
+Las opciones que no se aplican a la disposición elegida aparecen en gris. Las
+vistas previas, *Aplicar*, *Deshacer aplicación* y el guardado de documentos
+y resultados funcionan como en el modo avanzado.
+
+**El modo avanzado** ofrece todas las órdenes de la línea de órdenes:
 
 - **Las órdenes** aparecen a la izquierda, agrupadas como las secciones de
   más abajo.
@@ -288,6 +323,33 @@ vecinas, y las marcas de corte se alinean con el corte.
 ## Órdenes
 
 ### Imponer en pliegos
+
+#### `impose` — Imposición
+
+Todas las imposiciones habituales en una sola orden, con las opciones del modo
+básico de la ventana:
+
+| Opción | Descripción |
+|---|---|
+| `--layout 2up-booklet\|4up-booklet\|8up-booklet\|cut-stacks\|sequential\|step-repeat` | 2 páginas una al lado de otra; 2 filas de 2; 2 filas de 4; corte y apilado; páginas en orden; copias de cada página (por defecto: `2up-booklet`) |
+| `--cols`, `--rows` | la cuadrícula de corte y apilado, secuencial y paso y repetición (por defecto: 2 × 2) |
+| `--binding saddle\|perfect`, `--sheets-per-fold N` | grapado a caballete, o encuadernación encolada en cuadernillos de N pliegos plegados (por defecto: perfect, 1) |
+| `--direction left\|right`, `--single-sided` | el borde de encuadernación; imprimir por una sola cara |
+| `--gutter-v`, `--gutter-h`, `--spread`, `--creep` | espacio entre columnas y filas; entre las columnas del medio de un folleto de 8; corrimiento por el grosor del papel |
+| `--media SIZE\|auto`, `--orientation portrait\|landscape` | el pliego: un nombre de papel o WxH, o `auto` para ajustarse a las páginas (por defecto: Legal apaisado) |
+| `--auto-rotate`, `--no-auto-scale` | girar las páginas para que encajen en sus celdas; no reducir las páginas grandes |
+| `--margin…` | márgenes |
+| `--trim-marks`, `--bleed-marks`, `--registration-marks`, `--page-info` | marcas de impresión; la información de página es el nombre del documento, el número de pliego, la fecha y la hora |
+
+Los folletos de 4 y de 8 usan las disposiciones de plegado habituales: se
+pliega cada pliego y luego se encajan los pliegos plegados (grapado a
+caballete) o se apilan en grupos de `--sheets-per-fold` (encuadernación
+encolada).
+
+```bash
+py-imposition impose --layout 4up-booklet --binding saddle --media a3 --orientation portrait --trim-marks --margin 1.5 doc.pdf
+py-imposition impose --layout step-repeat --cols 2 --rows 5 --media a4 --orientation portrait --trim-marks cards.pdf
+```
 
 #### `booklet` — Crear folleto
 

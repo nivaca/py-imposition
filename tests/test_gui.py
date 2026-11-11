@@ -35,6 +35,7 @@ def window(app, tmp_path, monkeypatch):
     QSettings.setPath(QSettings.Format.NativeFormat, QSettings.Scope.UserScope, str(tmp_path / "config"))
     from py_imposition.gui.window import MainWindow
     w = MainWindow()
+    w.set_mode("advanced")  # (most tests drive the command forms)
     yield w
     try:
         w.runner.stop()
@@ -179,6 +180,100 @@ def test_change_language_keeps_the_document(app, window, tmp_path, monkeypatch):
         assert len(new.result_files) == 1
         new.change_language("en")
         assert winmod._WINDOWS[-1].b_preview.text() == "Preview"
+    finally:
+        interface.use("en")
+        interface.translate_argparse()
+        for w in list(winmod._WINDOWS):
+            w.runner.stop()
+            w.close()
+        winmod._WINDOWS.clear()
+
+
+# --------------------------------------------------------------------------- basic mode
+
+
+def test_basic_mode_switch(app, window):
+    window.set_mode("basic")
+    assert window.current == "impose" and window.form("impose") is window.basic
+    assert not window.tree.isVisibleTo(window) and not window.b_add.isVisibleTo(window)
+    assert not window.units.isVisibleTo(window)  # (the form has its own Units)
+    window.set_mode("advanced")
+    assert window.current != "impose" or window.form("impose") is not window.basic
+    assert window.tree.isVisibleTo(window)
+
+
+def test_basic_form_round_trip_and_enabling(app, window):
+    window.set_mode("basic")
+    b = window.basic
+    assert b.tokens() == ["impose"]  # the defaults: 2-up booklet, perfect, Legal landscape
+    assert not b.cols.isEnabled() and not b.spread.isEnabled() and b.sheets.isEnabled()
+    line = ["impose", "--layout", "8up-booklet", "--binding", "saddle", "--direction", "right", "--gutter-v",
+            "1", "--spread", "2", "--creep", "0.1", "--media", "a3", "--orientation", "portrait", "--auto-rotate",
+            "--margin-top", "1.5", "--trim-marks", "--registration-marks"]
+    b.set_tokens(line)
+    assert b.spread.isEnabled() and not b.sheets.isEnabled() and not b.cols.isEnabled()
+    assert namespace(b.tokens()) == namespace(line)
+    b.set_tokens(["impose", "--layout", "cut-stacks", "--cols", "3", "--rows", "2", "--single-sided",
+                  "--media", "20x30cm"])
+    assert b.cols.isEnabled() and not b.binding.isEnabled() and b.width.isEnabled()
+    assert namespace(b.tokens())["media"] == "20x30cm"
+
+
+def test_basic_units_convert(app, window):
+    window.set_mode("basic")
+    b = window.basic
+    b.units.setCurrentText("cm")
+    b.set_tokens(["impose", "--margin-top", "2.54"])
+    b.units.setCurrentText("in")
+    assert b.m_top.value() == pytest.approx(1.0)
+    assert window.units.currentText() == "in"
+    b.units.setCurrentText("cm")
+
+
+def test_basic_profiles(app, window, monkeypatch):
+    window.set_mode("basic")
+    b = window.basic
+    from PySide6.QtWidgets import QInputDialog, QMessageBox
+    monkeypatch.setattr(QInputDialog, "getText", lambda *a, **k: ("Cards", True))
+    monkeypatch.setattr(QMessageBox, "question", lambda *a, **k: QMessageBox.StandardButton.Yes)
+    b.set_tokens(["impose", "--layout", "step-repeat", "--cols", "4", "--rows", "5", "--trim-marks"])
+    b.save_profile(new_name=True)
+    assert "Cards" in b.profiles() and b.profile.currentData() == "Cards"
+    b.on_menu.setChecked(True)
+    assert any(a.text() == "Cards" for a in window.m_profiles.actions())
+    b.reset()
+    assert b.tokens() == ["impose"]
+    window._use_profile("Cards")
+    assert namespace(b.tokens())["layout"] == "step-repeat" and namespace(b.tokens())["cols"] == 4
+    b.delete_profile()
+    assert "Cards" not in b.profiles()
+
+
+def test_basic_preview(app, window, tmp_path):
+    example = Path(__file__).resolve().parent.parent / "docs" / "example" / "numbers-100.pdf"
+    window.auto.setChecked(False)
+    window.open_path(example)
+    window.set_mode("basic")
+    window.basic.set_tokens(["impose", "--layout", "4up-booklet", "--binding", "saddle", "--media", "a3",
+                             "--orientation", "portrait", "--trim-marks"])
+    window.preview()
+    wait(app, window)
+    assert len(window.result_files) == 1
+    assert window.res_pane.doc.pageCount() == 26  # 100 pages -> 104 -> 13 sheets, front and back
+
+
+def test_mode_survives_a_language_change(app, window, tmp_path, monkeypatch):
+    from py_imposition import config, interface
+    from py_imposition.gui import window as winmod
+    monkeypatch.setenv(config.ENV, str(tmp_path / "cfg"))
+    window.set_mode("basic")
+    window.basic.set_tokens(["impose", "--layout", "sequential", "--cols", "3", "--rows", "3"])
+    try:
+        window.change_language("es")
+        new = winmod._WINDOWS[-1]
+        assert new.mode == "basic" and new.a_basic.isChecked()
+        assert namespace(new.basic.tokens())["cols"] == 3
+        assert new.basic.layout_type.currentText() == "Secuencial"
     finally:
         interface.use("en")
         interface.translate_argparse()

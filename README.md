@@ -13,7 +13,12 @@ single go. There is also a graphical interface with live previews.
 
 ## Screenshots
 
-The window, making a perfect-bound booklet in 16-page signatures from the
+The window in basic mode: one imposition form, here a 4-up saddle-stitched
+booklet of [`docs/example/numbers-100.pdf`](docs/example/README.md):
+
+![Basic mode](docs/img/gui_basic_en.png)
+
+In advanced mode, the window, making a perfect-bound booklet in 16-page signatures from the
 example book ([`docs/example/memman.pdf`](docs/example/README.md)):
 
 ![Making a booklet in the window](docs/img/gui_booklet_en.png)
@@ -176,7 +181,35 @@ several documents (for example `--sides separate`) add a suffix such as
 py-imposition-gui [file.pdf]        # or: uv run py-imposition-gui
 ```
 
-The GUI offers every command of the CLI:
+A switch at the top left of the window chooses between two modes; the window
+remembers the last one.
+
+**Basic mode** is a single imposition form with the usual options, laid out
+like a common imposition dialog. It runs the [`impose`](#impose--imposition)
+command:
+
+- **Layout:** the type (2-, 4- or 8-up booklet, cut stacks, sequential, step
+  and repeat), and the columns and rows for the last three.
+- **Profiles:** save the settings under a name (*Save*, *Save As*), *Delete*
+  them, and tick *Show on Menu* to put a profile in the *Profiles* menu for
+  quick access.
+- **General:** the units.
+- **Binding:** saddle-stitching or perfect binding, the sheets per fold, the
+  binding edge (left or right) and *Double Sided*.
+- **Gutters:** vertical, horizontal, the spread between the middle columns of
+  an 8-up booklet, and the creep.
+- **Paper:** *Autosize Media* (the sheet fits the pages), or *Fit to Media
+  Size* with a standard or custom size and portrait or landscape;
+  *Auto-rotate* and *Auto Scale* (shrink pages that are too large).
+- **Margins:** top, bottom, left and right.
+- **Printer Marks:** trim marks, bleed marks, registration marks and page
+  information.
+
+Options that don't apply to the chosen layout are greyed out. The previews,
+*Apply*, *Undo apply* and the saving of documents and results work as in
+advanced mode.
+
+**Advanced mode** offers every command of the CLI:
 
 - **Commands** are listed on the left, grouped like the sections below.
 - **Options** for the selected command appear as a form generated from the
@@ -270,6 +303,32 @@ they never run into neighbouring pages, and crop marks align with the trim.
 ## Commands
 
 ### Imposing onto sheets
+
+#### `impose` — Imposition
+
+All the usual impositions in one command, with the options of the window's
+basic mode:
+
+| Option | Description |
+|---|---|
+| `--layout 2up-booklet\|4up-booklet\|8up-booklet\|cut-stacks\|sequential\|step-repeat` | 2 pages side by side; 2 rows of 2; 2 rows of 4; cut stacks; pages in order; copies of each page (default: `2up-booklet`) |
+| `--cols`, `--rows` | the grid of cut stacks, sequential and step and repeat (default: 2 × 2) |
+| `--binding saddle\|perfect`, `--sheets-per-fold N` | saddle-stitching, or perfect binding in stacks of N folded sheets (default: perfect, 1) |
+| `--direction left\|right`, `--single-sided` | the binding edge; print on one side only |
+| `--gutter-v`, `--gutter-h`, `--spread`, `--creep` | space between columns and rows; between the middle columns of an 8-up booklet; creep for the paper's thickness |
+| `--media SIZE\|auto`, `--orientation portrait\|landscape` | the sheet: a paper name or WxH, or `auto` to fit the pages (default: Legal landscape) |
+| `--auto-rotate`, `--no-auto-scale` | turn pages to fit their cells; don't shrink large pages |
+| `--margin…` | margins |
+| `--trim-marks`, `--bleed-marks`, `--registration-marks`, `--page-info` | printer marks; page information is the document name, sheet number, date and time |
+
+The 4- and 8-up booklets use the standard folding layouts: fold each sheet,
+then nest the folded sheets (saddle-stitching) or stack them in groups of
+`--sheets-per-fold` (perfect binding).
+
+```bash
+py-imposition impose --layout 4up-booklet --binding saddle --media a3 --orientation portrait --trim-marks --margin 1.5 doc.pdf
+py-imposition impose --layout step-repeat --cols 2 --rows 5 --media a4 --orientation portrait --trim-marks cards.pdf
+```
 
 #### `booklet` — Create booklet
 

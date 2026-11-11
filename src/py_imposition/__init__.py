@@ -8,14 +8,14 @@ from pathlib import Path
 from pikepdf import Pdf
 
 from . import (  # noqa: F401  (importing registers the commands)
-    bleed, datamerge, impose, info, insert, manual, pagetools, sequence, shuffle, split, stamp,
+    bleed, datamerge, impose, info, insert, manual, pagetools, sequence, shuffle, simple, split, stamp,
 )
 from .common import COMMANDS, Context, ImpositionError
 from .runner import build_parser, make_context, record, save_result, strip_io
 from . import interface
 from .interface import ntr, tr
 
-__version__ = "0.4.1"
+__version__ = "0.5"
 
 __all__ = ["main", "COMMANDS", "Context", "ImpositionError", "__version__"]
 

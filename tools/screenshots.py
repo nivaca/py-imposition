@@ -51,6 +51,12 @@ EXAMPLE = ROOT / "docs" / "example" / "memman.pdf"
 # command and these options), the command and its options in the form, and
 # an optional sequence shown in the panel.
 SHOTS = {
+    "basic": dict(
+        document="numbers-100.pdf",
+        tokens=["impose", "--layout", "4up-booklet", "--binding", "saddle", "--media", "a3", "--orientation",
+                "portrait", "--margin", "1.5", "--gutter-v", "1.5", "--gutter-h", "1.5", "--trim-marks"],
+        mode="basic",
+    ),
     "booklet": dict(
         tokens=["booklet", "--binding", "perfect", "--signature", "16", "--paper", "a4", "--margin", "1.5cm",
                 "--crop-marks"],
@@ -144,7 +150,7 @@ def gui(kind: str, lang: str, out: Path, scale: float, size: tuple[int, int], da
             if result.returncode:
                 raise SystemExit(f"could not make the example document: {result.stderr}")
         else:
-            doc = EXAMPLE
+            doc = EXAMPLE.with_name(shot["document"]) if "document" in shot else EXAMPLE
         cmd = [sys.executable, str(Path(__file__).resolve()), "--child", kind, str(doc), str(out),
                f"{size[0]}x{size[1]}"] + (["--dark"] if dark else [])
         subprocess.run(cmd, env=environment(folder, scale), check=True)
@@ -191,7 +197,9 @@ def gui_child(kind: str, doc: str, out: str, size: str, dark: bool):
     w.show()
     w.auto.setChecked(False)
     w.open_path(Path(doc))
-    w.select_command(shot["tokens"][0])
+    w.set_mode(shot.get("mode", "advanced"))
+    if shot.get("mode") != "basic":
+        w.select_command(shot["tokens"][0])
     lang = interface.code()
     w.form(shot["tokens"][0]).set_tokens(localize(shot["tokens"], lang))
     w.seq.set_steps([localize(step, lang) for step in shot.get("sequence", [])])

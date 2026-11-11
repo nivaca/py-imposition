@@ -1,6 +1,6 @@
 [project]
 name = "py-imposition"
-version = "0.1"
+version = "0.2"
 description = "PDF imposition toolkit: booklets, n-up, step and repeat, shuffling, bleeds, stamps, sequences and hot folders"
 readme = "README.md"
 license = "GPL-3.0-or-later"
@@ -16,6 +16,15 @@ dependencies = [
 
 [project.scripts]
 py-imposition = "py_imposition:main"
+
+[project.gui-scripts]
+py-imposition-gui = "py_imposition.gui:main"
+
+[project.optional-dependencies]
+gui = [
+    "pyside6-essentials>=6.12",
+    "pyside6-pdf>=6.12",
+]
 
 [build-system]
 requires = ["uv_build>=0.11.23,<0.12.0"]

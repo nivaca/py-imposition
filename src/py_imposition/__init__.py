@@ -13,7 +13,7 @@ from . import (  # noqa: F401  (importing registers the commands)
 from .common import COMMANDS, Context, ImpositionError
 from .runner import build_parser, make_context, record, save_result, strip_io
 
-__version__ = "0.1"
+__version__ = "0.2"
 
 __all__ = ["main", "COMMANDS", "Context", "ImpositionError", "__version__"]
 

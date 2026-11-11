@@ -21,8 +21,17 @@ uv sync
 uv tool install .        # optional: makes `py-imposition` available everywhere
 ```
 
+For the graphical interface, include the `gui` extra:
+
+```bash
+uv sync --extra gui
+uv tool install '.[gui]'   # installs both py-imposition and py-imposition-gui
+```
+
 Dependencies: [pikepdf](https://pikepdf.readthedocs.io/) (based on QPDF)
-and [reportlab](https://www.reportlab.com/) (text and fonts).
+and [reportlab](https://www.reportlab.com/) (text and fonts). The GUI also
+needs [PySide6](https://doc.qt.io/qtforpython-6/) (Qt 6): the
+`pyside6-essentials` and `pyside6-pdf` packages, about 250 MB.
 
 ## Quick start
 
@@ -43,6 +52,46 @@ py-imposition booklet --help         # options of one command
 Without `-o`, output goes to `<input>-<command>.pdf`. Commands that produce
 several documents (for example `--sides separate`) add a suffix such as
 `-fronts`/`-backs`.
+
+## Graphical interface
+
+```bash
+py-imposition-gui [file.pdf]        # or: uv run py-imposition-gui
+```
+
+The GUI offers every command of the CLI:
+
+- **Commands** are listed on the left, grouped like the sections below.
+- **Options** for the selected command appear as a form generated from the
+  same definitions as the command line, so names, defaults and help (in
+  tooltips) match. The equivalent command line is shown above the form; copy
+  it with *Run ▸ Copy command line*. Options that exclude each other clear
+  each other. *Reference* expands the layout/fields/sequence file formats
+  for `manual`, `merge-data` and `run`.
+- **Previews:** the current document and the result are shown side by side.
+  With *Auto preview* on, the result updates shortly after each change. A
+  drop-down switches between results when a command produces several files
+  (e.g. separate fronts and backs).
+- **Apply** makes the result the current document, so you can chain
+  commands (number pages, then make a booklet, then add crop marks…).
+  *Undo apply* (Ctrl+Z) steps back, and *File ▸ Revert to original* starts
+  over. *Save document* saves the current document, and *Save result* saves
+  the last result.
+- **Preferences** (units, registration colour, bleed handling, PDF/X) are
+  on the toolbar and apply to every command.
+- **Sequence panel:**
+  - Collect steps from the form (*Add current*), or reorder them by dragging.
+  - Load steps from a document's recorded commands (*From document*, i.e.
+    imposition by example).
+  - Load and save sequence files.
+  - Run the steps on the current document (with preview), or on a batch of
+    files.
+- **Info, run and hot folders:** *Imposition info* opens a report, and
+  *Hot folder* starts and stops a `watch` process. All commands run in a
+  background process, so the window stays responsive. *Stop* (Esc) cancels a
+  run, and the *Log* tab shows each command line and its output.
+- Drop a PDF on the window to open it. Window layout, preferences, the
+  options of each command and the sequence are remembered between sessions.
 
 ## General conventions
 
@@ -475,7 +524,8 @@ Protected Mode, Enfocus Switch integration, and the demo mode.
 ## Development
 
 ```bash
-uv run pytest
+uv sync --all-extras
+uv run pytest            # GUI tests run headless (QT_QPA_PLATFORM=offscreen) or are skipped without PySide6
 ```
 
 The tests check page orders against the worked examples in the Quite
@@ -492,6 +542,7 @@ Imposing manual and run every command end to end. The code lives in
 | `pdfutil.py` | page boxes, placing pages as Form XObjects, crop marks |
 | `units.py`, `pagesel.py` | lengths, paper sizes, page ranges |
 | `common.py`, `runner.py` | command framework and CLI |
+| `gui/` | the PySide6 interface: `forms.py` (option forms built from the CLI parser), `preview.py` (PDF viewer), `window.py` (main window, sequence panel, process runner) |
 
 ## License
 

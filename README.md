@@ -8,7 +8,33 @@ split/merge (partials), automation sequences and hot folders.
 
 Every command reads a PDF and writes a new one. Commands can be chained by
 running them one after another, or saved as a **sequence** and run in a
-single go.
+single go. There is also a graphical interface with live previews.
+
+## Screenshots
+
+The window, making a perfect-bound booklet in 16-page signatures from the
+example book ([`docs/example/memman.pdf`](docs/example/README.md)):
+
+![Making a booklet in the window](docs/img/gui_booklet.png)
+
+4-up on A3 with crop marks:
+
+![n-up pages](docs/img/gui_nup.png)
+
+Step and repeat (business cards):
+
+![Step and repeat](docs/img/gui_step-repeat.png)
+
+Adding page numbers, with a sequence of commands ready in the Sequence panel:
+
+![Text and numbers, and a sequence](docs/img/gui_text.png)
+
+The command line:
+
+![The command line](docs/img/cli.png)
+
+These pictures are made by `uv run python tools/screenshots.py` (see
+[Development](#development)).
 
 ## Installation
 
@@ -33,7 +59,52 @@ and [reportlab](https://www.reportlab.com/) (text and fonts). The GUI also
 needs [PySide6](https://doc.qt.io/qtforpython-6/) (Qt 6): the
 `pyside6-essentials` and `pyside6-pdf` packages, about 250 MB.
 
+### A menu entry
+
+To start the window from the applications menu, run once
+
+```bash
+py-imposition-install          # or: uv run py-imposition-install, python -m py_imposition.install
+```
+
+This adds an entry, with the program's icon, that starts the window with the
+same Python that ran the installer. Where it goes depends on the system:
+
+* **Linux** (and other systems with freedesktop menus): in the applications
+  menu, as a `.desktop` file and icons in `~/.local/share`. The entry also
+  offers py-imposition in the *Open with* menu of PDF files.
+* **Windows:** in the Start menu, as a shortcut.
+* **macOS:** in `~/Applications`, as a small application.
+
+It doesn't need administrator rights. If the Python environment moves or is
+rebuilt (for example, after `uv tool install` again into a new place), run it
+again. It needs the `gui` extra, and says so if PySide6 is missing.
+
+### Uninstalling
+
+```bash
+py-imposition-install --uninstall   # remove the menu entry and its icons
+uv tool uninstall py-imposition     # if installed with uv tool
+```
+
+`--uninstall` removes only what the installer added: the entry and the
+`py-imposition` icons in every size. Settings of the window are kept by Qt in
+`~/.config/py-imposition/` (Linux), the registry (Windows) or
+`~/Library/Preferences` (macOS); delete them too if you like.
+
 ## Quick start
+
+The repository includes a real book to try things on:
+[`docs/example/memman.pdf`](docs/example/README.md), the 625-page manual of
+the LaTeX *memoir* class.
+
+```bash
+py-imposition info docs/example/memman.pdf
+py-imposition booklet --signature 16 --paper a4 --crop-marks --margin 1.5cm docs/example/memman.pdf
+py-imposition-gui docs/example/memman.pdf
+```
+
+In general:
 
 ```bash
 # 2-up booklet with the default settings
@@ -543,6 +614,34 @@ Imposing manual and run every command end to end. The code lives in
 | `units.py`, `pagesel.py` | lengths, paper sizes, page ranges |
 | `common.py`, `runner.py` | command framework and CLI |
 | `gui/` | the PySide6 interface: `forms.py` (option forms built from the CLI parser), `preview.py` (PDF viewer), `window.py` (main window, sequence panel, process runner) |
+| `install.py` | `py-imposition-install`: the menu entry on Linux, Windows and macOS |
+| `icons/` | the icon: `py-imposition.svg` and every size made from it |
+
+### Tools
+
+```bash
+uv run python tools/screenshots.py [-o docs/img] [--only booklet,nup,step-repeat,text,cli] [--scale 2] [--dark]
+uv run python tools/icons.py [--dry-run]
+```
+
+- `tools/screenshots.py` makes the pictures of this README in `docs/img/`:
+  - **The window** (`gui_<command>.png`) runs headless with Qt's offscreen
+    platform. Nothing appears on screen, and the size and scale (2× by
+    default, sharp on high-resolution screens) don't depend on your display.
+    Each shot uses settings of its own in a temporary folder, so your
+    settings and sequence are untouched. The example documents are made with
+    `py-imposition sample`.
+  - **The command line** (`cli.png`) is a real session: the commands are run
+    and their output is drawn like a terminal.
+  - It needs only the `gui` extra.
+- `tools/icons.py` makes every icon afresh from
+  `src/py_imposition/icons/py-imposition.svg`:
+  - the freedesktop hicolor sizes and a scalable SVG;
+  - the macOS iconset and `.icns`;
+  - the Windows `.ico`.
+
+  Each size is drawn by Inkscape (the Flatpak or the one on the `PATH`),
+  and the `.ico` is assembled with Pillow.
 
 ## License
 

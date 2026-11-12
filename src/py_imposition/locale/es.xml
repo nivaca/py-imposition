@@ -488,6 +488,14 @@
     <tr>Abrir…</tr>
   </text>
   <text>
+    <en>Open recent</en>
+    <tr>Abrir reciente</tr>
+  </text>
+  <text>
+    <en>Clear the list</en>
+    <tr>Vaciar la lista</tr>
+  </text>
+  <text>
     <en>Save document…</en>
     <tr>Guardar documento…</tr>
   </text>
@@ -636,8 +644,8 @@
     <tr>Acerca de py-imposition</tr>
   </text>
   <text>
-    <en>&lt;b&gt;py-imposition {version}&lt;/b&gt;&lt;p&gt;A PDF imposition toolkit.&lt;/p&gt;&lt;p&gt;Licensed under the GNU General Public License, version 3 or later.&lt;/p&gt;</en>
-    <tr>&lt;b&gt;py-imposition {version}&lt;/b&gt;&lt;p&gt;Un conjunto de herramientas de imposición de PDF.&lt;/p&gt;&lt;p&gt;Distribuido bajo la Licencia Pública General de GNU, versión 3 o posterior.&lt;/p&gt;</tr>
+    <en>&lt;b&gt;py-imposition {version}&lt;/b&gt;&lt;p&gt;A PDF imposition toolkit.&lt;/p&gt;&lt;p&gt;By {author}.&lt;/p&gt;&lt;p&gt;Licensed under the GNU General Public License, version 3 or later.&lt;/p&gt;</en>
+    <tr>&lt;b&gt;py-imposition {version}&lt;/b&gt;&lt;p&gt;Un conjunto de herramientas de imposición de PDF.&lt;/p&gt;&lt;p&gt;Por {author}.&lt;/p&gt;&lt;p&gt;Distribuido bajo la Licencia Pública General de GNU, versión 3 o posterior.&lt;/p&gt;</tr>
   </text>
   <text>
     <en>Add current</en>

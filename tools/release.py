@@ -63,6 +63,12 @@ COPR_PROJECT = "py-imposition"  # (of the copr-cli user, nivaca)
 REMOTES = {"github": "origin", "codeberg": "codeberg"}
 
 
+def signing_key() -> str:
+    """The project's signing key, as packaging/build-rpm.sh pins it."""
+    m = re.search(r'SIGNING_KEY="\$\{SIGNING_KEY:-([0-9A-F]{40})\}"', (ROOT / "packaging/build-rpm.sh").read_text())
+    return m.group(1) if m else ""
+
+
 def init_version() -> str:
     m = re.search(r'^__version__ = "([^"]+)"', (ROOT / "src/py_imposition/__init__.py").read_text(), re.M)
     return m.group(1) if m else ""
@@ -132,6 +138,12 @@ class Release:
         for tool in tools:
             if not shutil.which(tool):
                 sys.exit(f"release.py: {tool} is not installed")
+        if self.args.rpm:
+            key = signing_key()
+            have = subprocess.run(["gpg", "--batch", "--list-secret-keys", key], capture_output=True).returncode
+            if not key or have != 0:
+                sys.exit(f"release.py: the signing key {key or '(none pinned)'} is not in this machine's gpg "
+                         "keyring; import it first (see packaging/COPR.org)")
         if init_version() != VERSION:
             sys.exit(f"release.py: pyproject.toml says {VERSION}, src/py_imposition/__init__.py says "
                      f"{init_version()}")

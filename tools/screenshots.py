@@ -16,9 +16,8 @@ the screen (2 by default, sharp on screens of high resolution).
   screen, and only the program's own window is captured (Qt draws it into
   the image). Each shot has settings of its own in a temporary folder, so
   the user's settings, recent options and sequence are not touched. The
-  example document is docs/example/memman.pdf (the manual of the LaTeX
-  memoir class); the business cards for step and repeat are made with
-  py-imposition's own 'sample' command.
+  example document is docs/example/numbers-100.pdf (100 pages, each
+  showing its own number), used by every shot.
 * The command line is a real session: the commands are run and their
   output is drawn like a terminal (Konsole's Breeze colours, a monospaced
   font), also by Qt.
@@ -45,14 +44,12 @@ sys.path.insert(0, str(ROOT / "src"))
 SCALE = 2
 WINDOW = (1500, 940)  # pixels, before the scale
 
-EXAMPLE = ROOT / "docs" / "example" / "memman.pdf"
+EXAMPLE = ROOT / "docs" / "example" / "numbers-100.pdf"
 
-# Each shot: the example document (EXAMPLE, or one made with the sample
-# command and these options), the command and its options in the form, and
-# an optional sequence shown in the panel.
+# Each shot: the command and its options in the form (on EXAMPLE), the
+# window's mode, and an optional sequence shown in the panel.
 SHOTS = {
     "basic": dict(
-        document="numbers-100.pdf",
         tokens=["impose", "--layout", "4up-booklet", "--binding", "saddle", "--media", "a3", "--orientation",
                 "portrait", "--margin", "1.5", "--gutter-v", "1.5", "--gutter-h", "1.5", "--trim-marks"],
         mode="basic",
@@ -66,9 +63,8 @@ SHOTS = {
                 "--margin", "1.5cm", "--spacing", "1.5cm", "--align", "center", "--crop-marks"],
     ),
     "step-repeat": dict(
-        sample=["--count", "1", "--paper", "8.5x5.5cm"],
-        tokens=["step-repeat", "--paper", "a4", "--orientation", "tall", "--spacing", "0.6cm", "--margin", "1cm",
-                "--align", "center", "--crop-marks"],
+        tokens=["step-repeat", "--paper", "a4", "--orientation", "tall", "--scale", "fit", "--cols", "3",
+                "--rows", "3", "--spacing", "0.6cm", "--margin", "1cm", "--align", "center", "--crop-marks"],
     ),
     "text": dict(
         tokens=["text", "--text", "Page [#] of [Doc:NumPages]", "--position", "bottom-center", "--size", "11",
@@ -91,11 +87,11 @@ def localize(tokens: list[str], lang: str) -> list[str]:
 
 # The command-line session (run in a temporary folder holding a copy of EXAMPLE)
 SESSION = [
-    ["info", "memman.pdf"],
-    ["text", "--text", "Page [#] of [Doc:NumPages]", "memman.pdf", "-o", "numbered.pdf"],
+    ["info", "numbers-100.pdf"],
+    ["text", "--text", "Page [#] of [Doc:NumPages]", "numbers-100.pdf", "-o", "numbered.pdf"],
     ["booklet", "--binding", "perfect", "--signature", "16", "--paper", "a4", "--crop-marks",
      "--margin", "1.5cm", "numbered.pdf", "-o", "booklet.pdf"],
-    ["nup", "--cols", "2", "--rows", "2", "--scale", "fit", "--paper", "a3", "memman.pdf"],
+    ["nup", "--cols", "2", "--rows", "2", "--scale", "fit", "--paper", "a3", "numbers-100.pdf"],
     ["info", "booklet.pdf"],
 ]
 
@@ -143,14 +139,7 @@ def gui(kind: str, lang: str, out: Path, scale: float, size: tuple[int, int], da
     folder = Path(tempfile.mkdtemp(prefix=f"py-imposition-shot-{kind}-{lang}-"))
     try:
         settings_folder(folder, lang)
-        shot = SHOTS[kind]
-        if "sample" in shot:
-            doc = folder / "cards.pdf"
-            result = cli_run(["sample", *shot["sample"], "-o", str(doc), "-q"], folder)
-            if result.returncode:
-                raise SystemExit(f"could not make the example document: {result.stderr}")
-        else:
-            doc = EXAMPLE.with_name(shot["document"]) if "document" in shot else EXAMPLE
+        doc = EXAMPLE
         cmd = [sys.executable, str(Path(__file__).resolve()), "--child", kind, str(doc), str(out),
                f"{size[0]}x{size[1]}"] + (["--dark"] if dark else [])
         subprocess.run(cmd, env=environment(folder, scale), check=True)

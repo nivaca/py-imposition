@@ -20,8 +20,8 @@ de 4 grapado a caballete de [`docs/example/numbers-100.pdf`](docs/example/README
 ![Modo básico](docs/img/gui_basic_es.png)
 
 En modo avanzado, la ventana, haciendo un folleto de encuadernación encolada en cuadernillos de
-16 páginas a partir del libro de ejemplo
-([`docs/example/memman.pdf`](docs/example/README.md)):
+16 páginas a partir del documento de ejemplo
+([`docs/example/numbers-100.pdf`](docs/example/README.md)):
 
 ![Hacer un folleto en la ventana](docs/img/gui_booklet_es.png)
 
@@ -29,7 +29,7 @@ En modo avanzado, la ventana, haciendo un folleto de encuadernación encolada en
 
 ![Páginas n-up](docs/img/gui_nup_es.png)
 
-Paso y repetición (tarjetas de visita):
+Paso y repetición (nueve copias de una página en A4):
 
 ![Paso y repetición](docs/img/gui_step-repeat_es.png)
 
@@ -84,7 +84,9 @@ pikepdf, reportlab y PySide6 del propio Fedora. Las actualizaciones llegan con
 [Copr](https://copr.fedorainfracloud.org/coprs/nivaca/py-imposition/).
 
 Cada versión publicada incluye además el RPM, firmado con la clave del autor,
-y esa clave (`RPM-GPG-KEY-py-imposition`):
+y esa clave (`RPM-GPG-KEY-py-imposition`, también en el repositorio como
+[`packaging/RPM-GPG-KEY-py-imposition`](packaging/RPM-GPG-KEY-py-imposition)).
+Su huella es `1C16 55FF C029 6282 8A87 315E E750 A4F9 6998 9DA6`:
 
 ```bash
 sudo rpm --import RPM-GPG-KEY-py-imposition
@@ -152,13 +154,14 @@ uv tool uninstall py-imposition     # si se instaló con uv tool
 ## Primeros pasos
 
 El repositorio incluye un libro real con el que hacer pruebas:
-[`docs/example/memman.pdf`](docs/example/README.md), el manual de 625
-páginas de la clase *memoir* de LaTeX.
+[`docs/example/numbers-100.pdf`](docs/example/README.md), 100 páginas que
+muestran cada una su propio número, de modo que el orden de las páginas de
+cualquier imposición se comprueba de un vistazo.
 
 ```bash
-py-imposition info docs/example/memman.pdf
-py-imposition booklet --signature 16 --paper a4 --crop-marks --margin 1.5cm docs/example/memman.pdf
-py-imposition-gui docs/example/memman.pdf
+py-imposition info docs/example/numbers-100.pdf
+py-imposition booklet --signature 16 --paper a4 --crop-marks --margin 1.5cm docs/example/numbers-100.pdf
+py-imposition-gui docs/example/numbers-100.pdf
 ```
 
 En general:
@@ -215,7 +218,9 @@ orden [`impose`](#impose--imposición):
 
 Las opciones que no se aplican a la disposición elegida aparecen en gris. Las
 vistas previas, *Aplicar*, *Deshacer aplicación* y el guardado de documentos
-y resultados funcionan como en el modo avanzado.
+y resultados funcionan como en el modo avanzado. En ambos modos, *Archivo ▸
+Abrir reciente* muestra los últimos diez documentos abiertos (*Vaciar la
+lista* la vacía).
 
 **El modo avanzado** ofrece todas las órdenes de la línea de órdenes:
 

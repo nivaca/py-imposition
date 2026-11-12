@@ -166,24 +166,24 @@ def test_split_merge(sample, tmp_path):
     assert "page 4 of" in texts[0] and "page 5 of" in texts[4]
 
 
-EXAMPLE = Path(__file__).resolve().parent.parent / "docs" / "example" / "memman.pdf"
+EXAMPLE = Path(__file__).resolve().parent.parent / "docs" / "example" / "numbers-100.pdf"
 
 
 @pytest.mark.skipif(not EXAMPLE.is_file(), reason="example document not present")
-def test_real_book(tmp_path):
-    """The example book: 625 pages in 16-page signatures -> 40 signatures, 160 sheets, 320 sides."""
+def test_example_document(tmp_path):
+    """The example: 100 pages in 16-page signatures -> 7 signatures (112 pages), 28 sheets, 56 sides."""
     numbered = tmp_path / "numbered.pdf"
     assert run("text", "--text", "Page [#] of [Doc:NumPages]", EXAMPLE, "-o", numbered) == 0
-    assert "Page 625 of 625" in subprocess.run(["pdftotext", "-f", "625", "-l", "625", str(numbered), "-"],
+    assert "Page 100 of 100" in subprocess.run(["pdftotext", "-f", "100", "-l", "100", str(numbered), "-"],
                                                capture_output=True, text=True).stdout
     out = tmp_path / "book.pdf"
     assert run("booklet", "--signature", "16", "--paper", "a4", "--crop-marks", "--margin", "1.5cm",
                numbered, "-o", out) == 0
     pdf = pikepdf.open(out)
-    assert len(pdf.pages) == 320
+    assert len(pdf.pages) == 56
     # the first sheet carries pages 16 and 1 of the first signature
     first = " ".join(subprocess.run(["pdftotext", "-f", "1", "-l", "1", str(out), "-"],
                                     capture_output=True, text=True).stdout.split())
-    assert "Page 16 of 625" in first and "Page 1 of 625" in first
+    assert "Page 16 of 100" in first and "Page 1 of 100" in first
     check = subprocess.run(["qpdf", "--check", str(out)], capture_output=True, text=True)
     assert check.returncode == 0, check.stdout

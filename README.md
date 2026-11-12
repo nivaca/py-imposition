@@ -19,7 +19,7 @@ booklet of [`docs/example/numbers-100.pdf`](docs/example/README.md):
 ![Basic mode](docs/img/gui_basic_en.png)
 
 In advanced mode, the window, making a perfect-bound booklet in 16-page signatures from the
-example book ([`docs/example/memman.pdf`](docs/example/README.md)):
+example document ([`docs/example/numbers-100.pdf`](docs/example/README.md)):
 
 ![Making a booklet in the window](docs/img/gui_booklet_en.png)
 
@@ -27,7 +27,7 @@ example book ([`docs/example/memman.pdf`](docs/example/README.md)):
 
 ![n-up pages](docs/img/gui_nup_en.png)
 
-Step and repeat (business cards):
+Step and repeat (nine copies of a page on A4):
 
 ![Step and repeat](docs/img/gui_step-repeat_en.png)
 
@@ -80,7 +80,9 @@ packages are built and signed by
 [Copr](https://copr.fedorainfracloud.org/coprs/nivaca/py-imposition/).
 
 Each release also has the RPM itself, signed with the author's key, and that
-key (`RPM-GPG-KEY-py-imposition`):
+key (`RPM-GPG-KEY-py-imposition`, also in the repository as
+[`packaging/RPM-GPG-KEY-py-imposition`](packaging/RPM-GPG-KEY-py-imposition)).
+Its fingerprint is `1C16 55FF C029 6282 8A87 315E E750 A4F9 6998 9DA6`:
 
 ```bash
 sudo rpm --import RPM-GPG-KEY-py-imposition
@@ -145,14 +147,15 @@ uv tool uninstall py-imposition     # if installed with uv tool
 
 ## Quick start
 
-The repository includes a real book to try things on:
-[`docs/example/memman.pdf`](docs/example/README.md), the 625-page manual of
-the LaTeX *memoir* class.
+The repository includes a document to try things on:
+[`docs/example/numbers-100.pdf`](docs/example/README.md), 100 pages each
+showing its own number, so the page order of any imposition can be checked at
+a glance.
 
 ```bash
-py-imposition info docs/example/memman.pdf
-py-imposition booklet --signature 16 --paper a4 --crop-marks --margin 1.5cm docs/example/memman.pdf
-py-imposition-gui docs/example/memman.pdf
+py-imposition info docs/example/numbers-100.pdf
+py-imposition booklet --signature 16 --paper a4 --crop-marks --margin 1.5cm docs/example/numbers-100.pdf
+py-imposition-gui docs/example/numbers-100.pdf
 ```
 
 In general:
@@ -207,7 +210,8 @@ command:
 
 Options that don't apply to the chosen layout are greyed out. The previews,
 *Apply*, *Undo apply* and the saving of documents and results work as in
-advanced mode.
+advanced mode. In both modes, *File ▸ Open recent* lists the last ten
+documents opened (*Clear the list* empties it).
 
 **Advanced mode** offers every command of the CLI:
 

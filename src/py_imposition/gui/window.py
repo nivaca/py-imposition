@@ -26,6 +26,9 @@ from .basic import BasicPanel
 from .forms import CommandForm, file_filter, subparsers
 from .preview import PdfPane
 
+RECENT = 10  # documents in File ▸ Open recent
+AUTHOR = '<a href="https://nicolasvaughan.org">Nicolas Vaughan</a>'
+
 CATEGORIES = [
     (N_("Impose"), ["impose", "booklet", "nup", "step-repeat", "join", "manual"]),
     (N_("Arrange pages"), ["shuffle", "evenodd", "reverse", "duplicate", "delete", "move", "insert", "split"]),
@@ -548,6 +551,8 @@ class MainWindow(QMainWindow):
     def _build_menus(self):
         m = self.menuBar().addMenu(tr("&File"))
         m.addAction(self.a_open)
+        self.m_recent = m.addMenu(tr("Open recent"))
+        self._recent_menu()
         m.addAction(self.a_save)
         m.addAction(QAction(tr("Save result…"), self, shortcut="Ctrl+Shift+S", triggered=self.save_result))
         m.addAction(QAction(tr("Revert to original"), self, triggered=self.revert))
@@ -1020,10 +1025,45 @@ class MainWindow(QMainWindow):
             self.status(tr('{path} not found', path=path), error=True)
             return
         self.settings.setValue("last_dir", str(path.parent))
+        self.add_recent(path)
         self.original = path
         self.undo_stack = []
         self.set_source(path)
         self.status(tr('Opened {path}', path=path))
+
+    def recent_files(self) -> list[Path]:
+        try:
+            names = json.loads(self.settings.value("recent", "[]"))
+        except (TypeError, ValueError):
+            names = []
+        return [Path(n) for n in names if isinstance(n, str)][:RECENT]
+
+    def _set_recent(self, paths: list[Path]):
+        self.settings.setValue("recent", json.dumps([str(p) for p in paths[:RECENT]]))
+        self._recent_menu()
+
+    def add_recent(self, path: Path):
+        path = path.resolve()
+        self._set_recent([path] + [p for p in self.recent_files() if p != path])
+
+    def clear_recent(self):
+        self._set_recent([])
+
+    def _recent_menu(self):
+        m = getattr(self, "m_recent", None)
+        if m is None:
+            return
+        m.clear()
+        paths = self.recent_files()
+        for i, path in enumerate(paths, 1):
+            key = f"&{i}" if i < 10 else "1&0"
+            act = m.addAction(f"{key} " + path.name.replace("&", "&&"), lambda p=path: self.open_path(p))
+            act.setToolTip(str(path))
+            act.setStatusTip(str(path))
+        if paths:
+            m.addSeparator()
+        m.addAction(tr("Clear the list"), self.clear_recent).setEnabled(bool(paths))
+        m.setToolTipsVisible(True)
 
     def open_dialog(self):
         path, _ = QFileDialog.getOpenFileName(self, tr("Open PDF"), self.last_dir(), file_filter("pdf"))
@@ -1130,4 +1170,4 @@ class MainWindow(QMainWindow):
 
     def about(self):
         QMessageBox.about(self, tr("About py-imposition"),
-                          tr('<b>py-imposition {version}</b><p>A PDF imposition toolkit.</p><p>Licensed under the GNU General Public License, version 3 or later.</p>', version=__version__))
+                          tr('<b>py-imposition {version}</b><p>A PDF imposition toolkit.</p><p>By {author}.</p><p>Licensed under the GNU General Public License, version 3 or later.</p>', version=__version__, author=AUTHOR))

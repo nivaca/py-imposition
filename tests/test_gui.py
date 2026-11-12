@@ -301,3 +301,30 @@ def test_show_document_option(app, window, tmp_path):
     finally:
         other.runner.stop()
         other.close()
+
+
+def test_recent_files(app, window, tmp_path):
+    from py_imposition.gui.window import RECENT, MainWindow
+    assert window.recent_files() == []
+    actions = [a for a in window.m_recent.actions() if not a.isSeparator()]
+    assert len(actions) == 1 and not actions[0].isEnabled()  # only "Clear the list", disabled
+    docs = []
+    for i in range(RECENT + 2):
+        doc = tmp_path / f"d{i} & co.pdf"
+        assert main(["sample", "--count", "1", "-o", str(doc), "-q"]) == 0
+        window.open_path(doc)
+        docs.append(doc.resolve())
+    window.open_path(docs[3])  # (again: it moves to the top)
+    recent = window.recent_files()
+    assert len(recent) == RECENT and recent[0] == docs[3] and recent[1] == docs[-1]
+    items = [a for a in window.m_recent.actions() if not a.isSeparator()]
+    assert items[0].text() == "&1 d3 && co.pdf" and items[0].toolTip() == str(docs[3])
+    other = MainWindow()  # (the list is kept in the settings)
+    try:
+        assert other.recent_files() == recent
+        items[1].trigger()
+        assert window.original == docs[-1]
+        window.clear_recent()
+        assert window.recent_files() == []
+    finally:
+        other.close()

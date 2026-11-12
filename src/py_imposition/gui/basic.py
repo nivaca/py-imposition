@@ -105,9 +105,9 @@ class BasicPanel(QWidget):
 
         # Gutters
         box, form = self._group(tr("Gutters"))
-        self.gutter_v = self._length()
-        self.gutter_h = self._length()
-        self.spread = self._length()
+        self.gutter_v = self._length(negative=True)
+        self.gutter_h = self._length(negative=True)
+        self.spread = self._length(negative=True)
         self.creep = self._length()
         form.addRow(tr("Vertical"), self.gutter_v)
         form.addRow(tr("Horizontal"), self.gutter_h)
@@ -150,17 +150,32 @@ class BasicPanel(QWidget):
         self.auto_rotate.setToolTip(tr("Turn each page 90° when that fits its place on the sheet better"))
         self.auto_scale = QCheckBox(tr("Auto Scale"))
         self.auto_scale.setToolTip(tr("Shrink pages that are larger than their place on the sheet"))
+        self.enlarge = QCheckBox(tr("Enlarge"))
+        self.enlarge.setToolTip(tr("Also enlarge pages that are smaller than their place on the sheet, to fill it"))
         pv.addWidget(self.auto_rotate)
         pv.addWidget(self.auto_scale)
+        pv.addWidget(self.enlarge)
         outer.addWidget(box)
 
         # Margins
         box, form = self._group(tr("Margins"))
-        self.m_top, self.m_bottom, self.m_left, self.m_right = (self._length() for _ in range(4))
+        box.setToolTip(tr("Negative margins let the pages run off the sheet's edges"))
+        self.m_top, self.m_bottom, self.m_left, self.m_right = (self._length(negative=True) for _ in range(4))
         form.addRow(tr("Top"), self.m_top)
         form.addRow(tr("Bottom"), self.m_bottom)
         form.addRow(tr("Left"), self.m_left)
         form.addRow(tr("Right"), self.m_right)
+        outer.addWidget(box)
+
+        # Page trim
+        box, form = self._group(tr("Page Trim"))
+        box.setToolTip(tr("Cut this much off the edges of every page (its white margins), so that its content "
+                          "fills more of the sheet; tick Enlarge to let the pages grow"))
+        self.t_top, self.t_bottom, self.t_left, self.t_right = (self._length() for _ in range(4))
+        form.addRow(tr("Top"), self.t_top)
+        form.addRow(tr("Bottom"), self.t_bottom)
+        form.addRow(tr("Left"), self.t_left)
+        form.addRow(tr("Right"), self.t_right)
         outer.addWidget(box)
 
         # Printer marks
@@ -214,9 +229,9 @@ class BasicPanel(QWidget):
         s.setValue(value)
         return s
 
-    def _length(self, maximum: float = 1000) -> QDoubleSpinBox:
+    def _length(self, maximum: float = 1000, negative: bool = False) -> QDoubleSpinBox:
         s = QDoubleSpinBox()
-        s.setRange(0, maximum)
+        s.setRange(-maximum if negative else 0, maximum)
         s.setDecimals(2)
         s.setSingleStep(0.1)
         s.setSuffix(f" {self._units}")
@@ -242,6 +257,7 @@ class BasicPanel(QWidget):
         self.landscape.setChecked(True)
         self.auto_rotate.setChecked(False)
         self.auto_scale.setChecked(True)
+        self.enlarge.setChecked(False)
         for c in (self.trim_marks, self.bleed_marks, self.reg_marks, self.page_info):
             c.setChecked(False)
         self._loading = False
@@ -275,6 +291,7 @@ class BasicPanel(QWidget):
         self.landscape.setEnabled(fit and not custom)
         self.width.setEnabled(fit and custom)
         self.height.setEnabled(fit and custom)
+        self.enlarge.setEnabled(self.auto_scale.isChecked())
 
     def _show_media_size(self):
         """A named size shows its dimensions (in the orientation chosen)."""
@@ -305,6 +322,11 @@ class BasicPanel(QWidget):
     def _num(v: float) -> str:
         return f"{v:.4g}"
 
+    @classmethod
+    def _length_opt(cls, opt: str, v: float) -> list[str]:
+        """OPT and its value; a negative one joined with "=" (so it isn't taken for an option)."""
+        return [f"{opt}={cls._num(v)}"] if v < 0 else [opt, cls._num(v)]
+
     def tokens(self) -> list[str]:
         """The "impose" command line for these settings (only what differs from the defaults)."""
         t = ["impose"]
@@ -324,11 +346,11 @@ class BasicPanel(QWidget):
             t.append("--single-sided")
         for opt, s in (("--gutter-v", self.gutter_v), ("--gutter-h", self.gutter_h)):
             if s.value():
-                t += [opt, self._num(s.value())]
+                t += self._length_opt(opt, s.value())
         if self.spread.isEnabled() and self.spread.value():
-            t += ["--spread", self._num(self.spread.value())]
+            t += self._length_opt("--spread", self.spread.value())
         if self.creep.isEnabled() and self.creep.value():
-            t += ["--creep", self._num(self.creep.value())]
+            t += self._length_opt("--creep", self.creep.value())
         if self.autosize.isChecked():
             t += ["--media", "auto"]
         elif self.media.currentData() == "custom":
@@ -342,10 +364,14 @@ class BasicPanel(QWidget):
             t.append("--auto-rotate")
         if not self.auto_scale.isChecked():
             t.append("--no-auto-scale")
+        elif self.enlarge.isChecked():
+            t.append("--enlarge")
         for opt, s in (("--margin-top", self.m_top), ("--margin-bottom", self.m_bottom),
-                       ("--margin-left", self.m_left), ("--margin-right", self.m_right)):
+                       ("--margin-left", self.m_left), ("--margin-right", self.m_right),
+                       ("--page-trim-top", self.t_top), ("--page-trim-bottom", self.t_bottom),
+                       ("--page-trim-left", self.t_left), ("--page-trim-right", self.t_right)):
             if s.value():
-                t += [opt, self._num(s.value())]
+                t += self._length_opt(opt, s.value())
         for opt, c in (("--trim-marks", self.trim_marks), ("--bleed-marks", self.bleed_marks),
                        ("--registration-marks", self.reg_marks), ("--page-info", self.page_info)):
             if c.isChecked():
@@ -401,10 +427,13 @@ class BasicPanel(QWidget):
         (self.portrait if ns.orientation == "portrait" else self.landscape).setChecked(True)
         self.auto_rotate.setChecked(ns.auto_rotate)
         self.auto_scale.setChecked(not ns.no_auto_scale)
-        base = ns.margin
-        for s, v in ((self.m_top, ns.margin_top), (self.m_bottom, ns.margin_bottom),
-                     (self.m_left, ns.margin_left), (self.m_right, ns.margin_right)):
-            s.setValue(length(v if v is not None else base))
+        self.enlarge.setChecked(ns.enlarge)
+        for base, fields in ((ns.margin, ((self.m_top, ns.margin_top), (self.m_bottom, ns.margin_bottom),
+                                          (self.m_left, ns.margin_left), (self.m_right, ns.margin_right))),
+                             (ns.page_trim, ((self.t_top, ns.page_trim_top), (self.t_bottom, ns.page_trim_bottom),
+                                             (self.t_left, ns.page_trim_left), (self.t_right, ns.page_trim_right)))):
+            for s, v in fields:
+                s.setValue(length(v if v is not None else base))
         self.trim_marks.setChecked(ns.trim_marks)
         self.bleed_marks.setChecked(ns.bleed_marks)
         self.reg_marks.setChecked(ns.registration_marks)

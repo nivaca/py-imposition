@@ -337,3 +337,21 @@ def test_basic_defaults_four_sheets_per_fold(app, window):
     assert window.basic.sheets.value() == 4 and window.basic.tokens() == ["impose"]
     window.basic.set_tokens(["impose", "--sheets-per-fold", "2"])
     assert window.basic.tokens() == ["impose", "--sheets-per-fold", "2"]
+
+
+def test_basic_negative_margins_page_trim_enlarge(app, window):
+    b = window.basic
+    b.reset()
+    b.m_left.setValue(-1)
+    b.gutter_v.setValue(-0.5)
+    b.t_top.setValue(1.5)
+    b.enlarge.setChecked(True)
+    t = b.tokens()
+    assert "--margin-left=-1" in t and "--gutter-v=-0.5" in t and "--enlarge" in t
+    assert t[t.index("--page-trim-top") + 1] == "1.5"
+    b.reset()
+    b.set_tokens(t)
+    assert (b.m_left.value(), b.gutter_v.value(), b.t_top.value()) == (-1, -0.5, 1.5)
+    assert b.enlarge.isChecked() and b.tokens() == t
+    b.auto_scale.setChecked(False)
+    assert not b.enlarge.isEnabled() and "--enlarge" not in b.tokens()

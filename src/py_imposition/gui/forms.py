@@ -248,6 +248,8 @@ class TextField(Field):
         t = self.text()
         if not t or (self.action.default is not None and t == str(self.action.default)):
             return []
+        if self.option and t.startswith("-"):  # (a negative length: joined, so it isn't taken for an option)
+            return [f"{self.option}={t}"]
         return [self.option, t] if self.option else [t]
 
     def set_value(self, value):

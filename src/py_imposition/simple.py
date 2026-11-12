@@ -66,7 +66,10 @@ def _args(p):
                    help=tr("turn pages 90° when that fits their cell better"))
     g.add_argument("--no-auto-scale", action="store_true",
                    help=tr("don't shrink pages that are larger than their cell"))
+    g.add_argument("--enlarge", action="store_true",
+                   help=tr("also enlarge pages that are smaller than their cell, to fill it"))
     add_margin_args(p, "margin", tr("margin"))
+    add_margin_args(p, "page-trim", tr("page trim (cut off each page's edges)"))
     g = p.add_argument_group(tr("printer marks"))
     g.add_argument("--trim-marks", action="store_true", help=tr("marks where the pages are to be trimmed"))
     g.add_argument("--bleed-marks", action="store_true", help=tr("outline of the bleed area of pages that have one"))
@@ -172,7 +175,11 @@ def page_info(canvas: pu.Canvas, text: str, H: float, colour: bytes):
 @command("impose", "impose in one step: booklets, cut stacks, sequential or step and repeat", _args,
          description=N_("Impose a document in one step, with the usual layouts (2-, 4- and 8-up booklets, cut "
                         "stacks, sequential, step and repeat), binding, gutters, paper, margins and printer "
-                        "marks. The window's basic mode runs this command."))
+                        "marks. The window's basic mode runs this command. To make the pages' content "
+                        "fill more of the sheet, cut off their white edges with --page-trim and let "
+                        "them grow with --enlarge; margins and gutters can also be negative "
+                        "(--margin=-1cm), so pages run off the sheet's edges or overlap, cut at the "
+                        "edge or in the middle of the overlap."))
 def impose(pdf: Pdf, a, ctx: Context):
     count = len(pdf.pages)
     if count == 0:
@@ -194,8 +201,14 @@ def impose(pdf: Pdf, a, ctx: Context):
     vgaps = [spread if a.layout == "8up-booklet" and k == 1 else gv for k in range(cols - 1)]
     hgaps = [gh] * (rows - 1)
     ml, mb, mr, mt = get_margins(a, ctx)
+    cut = get_margins(a, ctx, "page-trim")
+    if min(cut) < 0:
+        raise ImpositionError(tr("the page trim cannot be negative"))
 
-    geoms = [pu.geometry(p.obj, ctx.use_bleed) for p in pdf.pages]
+    try:
+        geoms = [pu.geometry(p.obj, ctx.use_bleed).trimmed(*cut) for p in pdf.pages]
+    except ValueError:
+        raise ImpositionError(tr("the page trim is larger than the pages")) from None
     sizes = [g.size() for g in geoms]
     maxw = max(w for w, _ in sizes)
     maxh = max(h for _, h in sizes)
@@ -208,7 +221,7 @@ def impose(pdf: Pdf, a, ctx: Context):
         W, H = ctx.paper(a.media, a.orientation if named else "as-is")
         cw = (W - ml - mr - sum(vgaps)) / cols
         ch = (H - mb - mt - sum(hgaps)) / rows
-    if cw <= 0 or ch <= 0:
+    if cw <= 0 or ch <= 0 or W <= 0 or H <= 0:
         raise ImpositionError(tr("margins and gutters leave no room for pages"))
 
     def turn(i: int) -> int:
@@ -221,7 +234,10 @@ def impose(pdf: Pdf, a, ctx: Context):
     # one scale for the whole document, from the largest page (as turned)
     dims = [(sizes[i][1], sizes[i][0]) if turn(i) else sizes[i] for i in range(count)]
     s = min(cw / max(d[0] for d in dims), ch / max(d[1] for d in dims))
-    s = 1.0 if a.no_auto_scale else min(s, 1.0)
+    if a.no_auto_scale:
+        s = 1.0
+    elif not a.enlarge:
+        s = min(s, 1.0)
 
     # cell rectangles, row by row from the top left
     xs, x = [], ml

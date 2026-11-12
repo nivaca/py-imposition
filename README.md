@@ -203,8 +203,14 @@ command:
   an 8-up booklet, and the creep.
 - **Paper:** *Autosize Media* (the sheet fits the pages), or *Fit to Media
   Size* with a standard or custom size and portrait or landscape;
-  *Auto-rotate* and *Auto Scale* (shrink pages that are too large).
-- **Margins:** top, bottom, left and right.
+  *Auto-rotate*, *Auto Scale* (shrink pages that are too large) and
+  *Enlarge* (also enlarge small pages to fill their place).
+- **Margins:** top, bottom, left and right. Margins and gutters can be
+  negative: the pages then run off the sheet's edges or overlap, and are cut
+  at the edge or in the middle of the overlap.
+- **Page Trim:** cut this much off the edges of every page (its white
+  margins), so that its content fills more of the sheet; with *Enlarge*, the
+  pages grow to fill their place.
 - **Printer Marks:** trim marks, bleed marks, registration marks and page
   information.
 
@@ -325,8 +331,9 @@ basic mode:
 | `--direction left\|right`, `--single-sided` | the binding edge; print on one side only |
 | `--gutter-v`, `--gutter-h`, `--spread`, `--creep` | space between columns and rows; between the middle columns of an 8-up booklet; creep for the paper's thickness |
 | `--media SIZE\|auto`, `--orientation portrait\|landscape` | the sheet: a paper name or WxH, or `auto` to fit the pages (default: Legal landscape) |
-| `--auto-rotate`, `--no-auto-scale` | turn pages to fit their cells; don't shrink large pages |
-| `--margin…` | margins |
+| `--auto-rotate`, `--no-auto-scale`, `--enlarge` | turn pages to fit their cells; don't shrink large pages; also enlarge small pages to fill their cells |
+| `--margin…` | margins; like the gutters, they can be negative (write `--margin=-1cm`): pages then run off the sheet or overlap, cut at the edge or in the middle of the overlap |
+| `--page-trim…` | cut this much off the edges of every page (all four, or `--page-trim-top` etc.), to leave out its white margins |
 | `--trim-marks`, `--bleed-marks`, `--registration-marks`, `--page-info` | printer marks; page information is the document name, sheet number, date and time |
 
 The 4- and 8-up booklets use the standard folding layouts: fold each sheet,
@@ -336,6 +343,7 @@ then nest the folded sheets (saddle-stitching) or stack them in groups of
 ```bash
 py-imposition impose --layout 4up-booklet --binding saddle --media a3 --orientation portrait --trim-marks --margin 1.5 doc.pdf
 py-imposition impose --layout step-repeat --cols 2 --rows 5 --media a4 --orientation portrait --trim-marks cards.pdf
+py-imposition impose --media a4 --page-trim 1.5 --enlarge --margin=-0.3 doc.pdf   # bigger text, less white
 ```
 
 #### `booklet` — Create booklet

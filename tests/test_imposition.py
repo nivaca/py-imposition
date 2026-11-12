@@ -187,3 +187,44 @@ def test_example_document(tmp_path):
     assert "Page 16 of 100" in first and "Page 1 of 100" in first
     check = subprocess.run(["qpdf", "--check", str(out)], capture_output=True, text=True)
     assert check.returncode == 0, check.stdout
+
+
+def _sheet(path: Path) -> tuple[float, float]:
+    with pikepdf.open(path) as pdf:
+        box = [float(v) for v in pdf.pages[0].mediabox]
+    return round(box[2] - box[0], 1), round(box[3] - box[1], 1)
+
+
+def _page_scale(path: Path) -> float:
+    """The scale at which the first page is placed on the first sheet."""
+    pdf = pikepdf.open(path)
+    scales = [abs(float(ops[0])) or abs(float(ops[1]))
+              for ops, op in pikepdf.parse_content_stream(pdf.pages[0]) if str(op) == "cm"]
+    return max(scales)
+
+
+def test_impose_page_trim_and_negative_margins(sample, tmp_path):
+    a5w, a5h = parse_paper("a5")
+    cm = parse_length("1cm")
+    one = ["impose", "--layout", "sequential", "--cols", "1", "--rows", "1", "--media", "auto"]
+    out = tmp_path / "t.pdf"
+    assert run(*one, "--page-trim", "1cm", "--page-trim-top", "2cm", sample, "-o", out) == 0
+    assert _sheet(out) == (round(a5w - 2 * cm, 1), round(a5h - 3 * cm, 1))
+    assert page_texts(out)[0]  # (the page is still there, cut)
+    assert run(*one, "--margin=-1cm", sample, "-o", out) == 0
+    assert _sheet(out) == (round(a5w - 2 * cm, 1), round(a5h - 2 * cm, 1))
+    assert run("impose", "--gutter-v=-2cm", "--margin=-0.5cm", "--trim-marks", sample, "-o", out) == 0
+    for bad in (["--page-trim=-1cm"], ["--page-trim", "8cm"], ["--media", "auto", "--margin=-20cm"]):
+        assert run("impose", *bad, sample, "-o", tmp_path / "bad.pdf") != 0
+
+
+def test_impose_enlarge(sample, tmp_path):
+    one = ["impose", "--layout", "sequential", "--cols", "1", "--rows", "1", "--media", "a4",
+           "--orientation", "portrait"]
+    out = tmp_path / "e.pdf"
+    assert run(*one, sample, "-o", out) == 0
+    assert _page_scale(out) == pytest.approx(1.0)  # (auto scale only shrinks)
+    assert run(*one, "--enlarge", sample, "-o", out) == 0
+    assert _page_scale(out) == pytest.approx(2 ** 0.5, rel=0.01)  # A5 -> A4
+    assert run(*one, "--enlarge", "--page-trim", "1cm", sample, "-o", out) == 0
+    assert _page_scale(out) > 2 ** 0.5  # (smaller after the trim, so it grows more)

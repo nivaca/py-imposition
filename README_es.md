@@ -211,8 +211,15 @@ orden [`impose`](#impose--imposición):
 - **Papel:** *Ajustar el soporte a las páginas* (el pliego se ajusta a las
   páginas), o *Ajustar al tamaño del soporte* con un tamaño estándar o
   personalizado y orientación vertical o apaisada; *Giro automático* y
-  *Escala automática* (reducir las páginas demasiado grandes).
-- **Márgenes:** superior, inferior, izquierdo y derecho.
+  *Escala automática* (reducir las páginas demasiado grandes) y *Ampliar*
+  (ampliar también las páginas pequeñas para llenar su lugar).
+- **Márgenes:** superior, inferior, izquierdo y derecho. Los márgenes y los
+  medianiles pueden ser negativos: las páginas se salen entonces de los
+  bordes del pliego o se solapan, y se cortan en el borde o en la mitad del
+  solapamiento.
+- **Recorte de páginas:** recortar esta cantidad de los bordes de cada
+  página (sus márgenes en blanco), para que su contenido ocupe más del
+  pliego; con *Ampliar*, las páginas crecen hasta llenar su lugar.
 - **Marcas de impresión:** marcas de corte, de sangrado y de registro, e
   información de página.
 
@@ -347,8 +354,9 @@ básico de la ventana:
 | `--direction left\|right`, `--single-sided` | el borde de encuadernación; imprimir por una sola cara |
 | `--gutter-v`, `--gutter-h`, `--spread`, `--creep` | espacio entre columnas y filas; entre las columnas del medio de un folleto de 8; corrimiento por el grosor del papel |
 | `--media SIZE\|auto`, `--orientation portrait\|landscape` | el pliego: un nombre de papel o WxH, o `auto` para ajustarse a las páginas (por defecto: Legal apaisado) |
-| `--auto-rotate`, `--no-auto-scale` | girar las páginas para que encajen en sus celdas; no reducir las páginas grandes |
-| `--margin…` | márgenes |
+| `--auto-rotate`, `--no-auto-scale`, `--enlarge` | girar las páginas para que encajen en sus celdas; no reducir las páginas grandes; ampliar también las páginas pequeñas para llenar sus celdas |
+| `--margin…` | márgenes; como los medianiles, pueden ser negativos (escriba `--margin=-1cm`): las páginas se salen entonces del pliego o se solapan, cortadas en el borde o en la mitad del solapamiento |
+| `--page-trim…` | recortar esta cantidad de los bordes de cada página (los cuatro, o `--page-trim-top`, etc.), para dejar fuera sus márgenes en blanco |
 | `--trim-marks`, `--bleed-marks`, `--registration-marks`, `--page-info` | marcas de impresión; la información de página es el nombre del documento, el número de pliego, la fecha y la hora |
 
 Los folletos de 4 y de 8 usan las disposiciones de plegado habituales: se
@@ -359,6 +367,7 @@ encolada).
 ```bash
 py-imposition impose --layout 4up-booklet --binding saddle --media a3 --orientation portrait --trim-marks --margin 1.5 doc.pdf
 py-imposition impose --layout step-repeat --cols 2 --rows 5 --media a4 --orientation portrait --trim-marks cards.pdf
+py-imposition impose --media a4 --page-trim 1.5 --enlarge --margin=-0.3 doc.pdf   # texto más grande, menos blanco
 ```
 
 #### `booklet` — Crear folleto

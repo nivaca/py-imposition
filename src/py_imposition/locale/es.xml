@@ -2784,8 +2784,8 @@
     <tr>Horizontal</tr>
   </text>
   <text>
-    <en>Impose a document in one step, with the usual layouts (2-, 4- and 8-up booklets, cut stacks, sequential, step and repeat), binding, gutters, paper, margins and printer marks. The window's basic mode runs this command.</en>
-    <tr>Imponer un documento en un solo paso, con las disposiciones habituales (folletos de 2, 4 y 8, corte y apilado, secuencial, paso y repetición), encuadernación, medianiles, papel, márgenes y marcas de impresión. El modo básico de la ventana ejecuta esta orden.</tr>
+    <en>Impose a document in one step, with the usual layouts (2-, 4- and 8-up booklets, cut stacks, sequential, step and repeat), binding, gutters, paper, margins and printer marks. The window's basic mode runs this command. To make the pages' content fill more of the sheet, cut off their white edges with --page-trim and let them grow with --enlarge; margins and gutters can also be negative (--margin=-1cm), so pages run off the sheet's edges or overlap, cut at the edge or in the middle of the overlap.</en>
+    <tr>Imponer un documento en un solo paso, con las disposiciones habituales (folletos de 2, 4 y 8, corte y apilado, secuencial, paso y repetición), encuadernación, medianiles, papel, márgenes y marcas de impresión. El modo básico de la ventana ejecuta esta orden. Para que el contenido de las páginas ocupe más del pliego, recorte sus bordes blancos con --page-trim y déjelas crecer con --enlarge; los márgenes y los medianiles también pueden ser negativos (--margin=-1cm), de modo que las páginas se salgan de los bordes del pliego o se solapen, cortadas en el borde o en la mitad del solapamiento.</tr>
   </text>
   <text>
     <en>Imposition</en>
@@ -3058,5 +3058,41 @@
   <text>
     <en>Show the document beside the result (kept in the configuration file)</en>
     <tr>Mostrar el documento junto al resultado (se guarda en el archivo de configuración)</tr>
+  </text>
+  <text>
+    <en>Also enlarge pages that are smaller than their place on the sheet, to fill it</en>
+    <tr>Ampliar también las páginas más pequeñas que su lugar en el pliego, para llenarlo</tr>
+  </text>
+  <text>
+    <en>Cut this much off the edges of every page (its white margins), so that its content fills more of the sheet; tick Enlarge to let the pages grow</en>
+    <tr>Recortar esta cantidad de los bordes de cada página (sus márgenes en blanco), para que su contenido ocupe más del pliego; marque Ampliar para que las páginas crezcan</tr>
+  </text>
+  <text>
+    <en>Enlarge</en>
+    <tr>Ampliar</tr>
+  </text>
+  <text>
+    <en>Negative margins let the pages run off the sheet's edges</en>
+    <tr>Con márgenes negativos, las páginas se salen de los bordes del pliego</tr>
+  </text>
+  <text>
+    <en>Page Trim</en>
+    <tr>Recorte de páginas</tr>
+  </text>
+  <text>
+    <en>also enlarge pages that are smaller than their cell, to fill it</en>
+    <tr>ampliar también las páginas más pequeñas que su celda, para llenarla</tr>
+  </text>
+  <text>
+    <en>page trim (cut off each page's edges)</en>
+    <tr>recorte de página (lo que se corta de los bordes de cada página)</tr>
+  </text>
+  <text>
+    <en>the page trim cannot be negative</en>
+    <tr>el recorte de página no puede ser negativo</tr>
+  </text>
+  <text>
+    <en>the page trim is larger than the pages</en>
+    <tr>el recorte de página es mayor que las páginas</tr>
   </text>
 </interface>

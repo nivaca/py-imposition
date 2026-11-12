@@ -88,6 +88,13 @@ def rotate(deg_ccw: float) -> Matrix:
     return (c, s, -s, c, 0, 0)
 
 
+def invert(m: Matrix) -> Matrix:
+    a, b, c, d, e, f = m
+    det = a * d - b * c
+    ia, ib, ic, id_ = d / det, -b / det, -c / det, a / det
+    return (ia, ib, ic, id_, -(e * ia + f * ic), -(e * ib + f * id_))
+
+
 def apply(m: Matrix, x: float, y: float) -> tuple[float, float]:
     a, b, c, d, e, f = m
     return a * x + c * y + e, b * x + d * y + f
@@ -225,6 +232,21 @@ class PageGeom:
     def size(self, extra_cw: float = 0) -> tuple[float, float]:
         r = transform_rect(rotate(-(self.rotation + extra_cw)), self.box)
         return rect_w(r), rect_h(r)
+
+    def trimmed(self, left: float, bottom: float, right: float, top: float) -> "PageGeom":
+        """The page with these amounts cut off its edges (as the page is seen, with its /Rotate).
+
+        Both the layout box and the area shown shrink, so nothing beyond the
+        new edges shows (any bleed is cut off too)."""
+        if not (left or bottom or right or top):
+            return self
+        m = self.visual_matrix()
+        v = transform_rect(m, self.box)
+        new = (v[0] + left, v[1] + bottom, v[2] - right, v[3] - top)
+        if new[2] - new[0] <= 0 or new[3] - new[1] <= 0:
+            raise ValueError("trim larger than the page")
+        box = transform_rect(invert(m), new)
+        return PageGeom(box, box, self.rotation)
 
     def bleed_margins(self, extra_cw: float = 0) -> tuple[float, float, float, float]:
         """Visual (left, bottom, right, top) bleed beyond the box."""

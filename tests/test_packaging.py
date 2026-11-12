@@ -68,7 +68,8 @@ def test_the_shipped_key_is_the_pinned_one(tmp_path):
     assert fprs and fprs[0] == pinned_key()
 
 
-@pytest.mark.skipif(not shutil.which("gpg"), reason="gpg not installed")
+@pytest.mark.skipif(not all(shutil.which(t) for t in ("gpg", "git", "rpmbuild", "rpmspec")),
+                    reason="gpg, git or rpm-build not installed")
 def test_signing_without_the_key_says_how_to_import_it(tmp_path):
     """--sign uses only the pinned key: with an empty keyring it stops before building."""
     env = {"GNUPGHOME": str(tmp_path), "PATH": "/usr/bin:/bin", "RPMSIGN": "/bin/true"}

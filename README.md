@@ -163,7 +163,7 @@ a glance.
 
 **In the window**, open it (from the applications menu, *File ▸ Open*, or by
 dropping it on the window), choose a layout in basic mode, and watch the
-preview; *Save result…* writes the imposed PDF:
+preview; *Save…* writes the imposed PDF:
 
 ```bash
 py-imposition-gui docs/example/numbers-100.pdf     # or the AppImage, with the file as its argument
@@ -234,9 +234,22 @@ command:
   information.
 
 Options that don't apply to the chosen layout are greyed out. The previews,
-*Apply*, *Undo apply* and the saving of documents and results work as in
-advanced mode. In both modes, *File ▸ Open recent* lists the last ten
-documents opened (*Clear the list* empties it).
+*Apply*, *Undo apply* and saving work as in advanced mode.
+
+In both modes:
+
+- **Save…** (Ctrl+S) saves what the right pane shows: the current command's
+  result on the current document. If the preview isn't up to date (or there
+  is none yet), the command runs first. When a command makes several files
+  (fronts and backs, for example), they are all saved, with a suffix.
+  *File ▸ Save the document as it is…* (Ctrl+Shift+S) saves the current
+  document instead: the commands applied so far, without the current one.
+- **Unsaved changes:** when commands have been applied, or options changed
+  and a result made, since the document was opened or saved, the title bar
+  shows an asterisk. Closing the window, opening another document or
+  reverting to the original then asks whether to save first.
+- *File ▸ Open recent* lists the last ten documents opened (*Clear the
+  list* empties it).
 
 **Advanced mode** offers every command of the command line:
 
@@ -256,9 +269,9 @@ documents opened (*Clear the list* empties it).
   (e.g. separate fronts and backs).
 - **Apply** makes the result the current document, so you can chain
   commands (number pages, then make a booklet, then add crop marks…).
-  *Undo apply* (Ctrl+Z) steps back, and *File ▸ Revert to original* starts
-  over. *Save document* saves the current document, and *Save result* saves
-  the last result.
+  The right pane then shows the document as it is, until you change the
+  options again. *Undo apply* (Ctrl+Z) steps back, and *File ▸ Revert to
+  original* starts over.
 - **Preferences** (units, registration colour, bleed handling, PDF/X) are
   on the toolbar and apply to every command. The language is under
   *Settings ▸ Language of the interface*.

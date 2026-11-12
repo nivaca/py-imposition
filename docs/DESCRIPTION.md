@@ -12,7 +12,7 @@ variable data, and runs sequences of commands and hot folders.
 Nicolas Vaughan made it in 2026.  It has a window, with a basic mode for
 the usual impositions and an advanced mode with every command, and a
 command line with the same commands, in English or in Spanish.  Here I
-explain how it was made, in seven stages.
+explain how it was made, in eight stages.
 
 py-imposition is free software, under the GNU General Public License,
 version 3 or later.  It is written in Python and stands on two libraries:
@@ -176,10 +176,30 @@ pages then run off the sheet or overlap, and each one is cut at the
 sheet's edge or in the middle of the overlap.  The same version made
 four sheets per fold the default of perfect binding.
 
+8. Saving, and what is not saved
+--------------------------------
+
+The window had two ways to save: *Save document*, the original with the
+commands applied so far, and *Save result*, the current command's
+preview.  Once the original document was hidden by default, the first
+saved something that could not be seen, and after *Apply* the automatic
+preview ran the same command again, so the result showed it applied
+twice.  Version 0.8 has one *Save…*, which saves what the right pane
+shows (running the command first if the preview is not up to date);
+after *Apply*, that pane shows the document as it is until the options
+change.  *File ▸ Save the document as it is…* keeps the other way, for
+chains of commands.
+
+The window also says when there is something to lose: while commands
+have been applied, or options changed and a result made, since the
+document was opened or saved, the title bar shows an asterisk, and
+closing the window, opening another document or reverting to the
+original asks first whether to save it.
+
 Testing
 -------
 
-The program has 95 automated tests (`tests/`), run with pytest.  They
+The program has 97 automated tests (`tests/`), run with pytest.  They
 check the page orders against worked examples of standard impositions,
 run every command from beginning to end on generated documents and read
 the results with pdftotext and `qpdf --check`, and impose the example

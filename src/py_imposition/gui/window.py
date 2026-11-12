@@ -357,6 +357,10 @@ class MainWindow(QMainWindow):
         self.result_key = None
         self._pending_key = None
         self._apply_after = False
+        self._save_after = False
+        # unsaved work: commands applied, or options changed (and a result made), since the last save
+        self._applied_unsaved = False
+        self._options_changed = False
         self.parsers = subparsers()
         self.forms: dict[str, CommandForm] = {}
         self.current = ""
@@ -395,8 +399,9 @@ class MainWindow(QMainWindow):
         tb.addSeparator()
         self.a_open = QAction(tr("Open…"), self, shortcut=QKeySequence.StandardKey.Open, triggered=self.open_dialog)
         tb.addAction(self.a_open)
-        self.a_save = QAction(tr("Save document…"), self, shortcut=QKeySequence.StandardKey.Save,
-                              triggered=self.save_document)
+        self.a_save = QAction(tr("Save…"), self, shortcut=QKeySequence.StandardKey.Save, triggered=self.save)
+        self.a_save.setToolTip(tr("Save the result shown on the right (if it isn't up to date, the command runs "
+                                  "first)"))
         tb.addAction(self.a_save)
         self.a_undo = QAction(tr("Undo apply"), self, shortcut=QKeySequence.StandardKey.Undo, triggered=self.undo)
         tb.addAction(self.a_undo)
@@ -479,8 +484,9 @@ class MainWindow(QMainWindow):
         self.b_apply.setToolTip(tr("Make the result the current document, to continue with another command "
                                 "(Ctrl+Enter)"))
         self.b_apply.clicked.connect(self.apply)
-        self.b_save_result = QPushButton(tr("Save result…"))
-        self.b_save_result.clicked.connect(self.save_result)
+        self.b_save_result = QPushButton(tr("Save…"))
+        self.b_save_result.setToolTip(self.a_save.toolTip())
+        self.b_save_result.clicked.connect(self.save)
         self.b_reset = QPushButton(tr("Defaults"))
         self.b_reset.setToolTip(tr("Reset this command's options"))
         self.b_reset.clicked.connect(lambda: self.form(self.current).reset())
@@ -554,7 +560,11 @@ class MainWindow(QMainWindow):
         self.m_recent = m.addMenu(tr("Open recent"))
         self._recent_menu()
         m.addAction(self.a_save)
-        m.addAction(QAction(tr("Save result…"), self, shortcut="Ctrl+Shift+S", triggered=self.save_result))
+        a = QAction(tr("Save the document as it is…"), self, shortcut="Ctrl+Shift+S", triggered=self.save_document)
+        a.setToolTip(tr("Save the current document, with the commands applied so far but without the current "
+                        "command"))
+        m.addAction(a)
+        m.setToolTipsVisible(True)
         m.addAction(QAction(tr("Revert to original"), self, triggered=self.revert))
         m.addSeparator()
         m.addAction(QAction(tr("Quit"), self, shortcut=QKeySequence.StandardKey.Quit, triggered=self.close))
@@ -626,6 +636,9 @@ class MainWindow(QMainWindow):
         self.show_document(self.a_show_document.isChecked(), save=False)
 
     def closeEvent(self, event):
+        if not self.maybe_discard():
+            event.ignore()
+            return
         self.runner.stop()
         self.save_settings()
         super().closeEvent(event)
@@ -649,13 +662,16 @@ class MainWindow(QMainWindow):
     def export_state(self) -> dict:
         """What a new window needs to carry on with the same document."""
         return {"tmpdir": self._tmpdir, "id": self._id, "original": self.original, "source": self.source,
-                "undo": list(self.undo_stack)}
+                "undo": list(self.undo_stack), "applied_unsaved": self._applied_unsaved}
 
     def adopt_state(self, state: dict):
         self.original = state["original"]
         self.undo_stack = state["undo"]
         if state["source"]:
             self.set_source(state["source"])
+        self._applied_unsaved = state.get("applied_unsaved", False)
+        self._options_changed = False
+        self._update_modified()
 
     # ----------------------------------------------------------------- language
 
@@ -837,16 +853,19 @@ class MainWindow(QMainWindow):
                 return None
         return f.tokens()
 
-    def _form_changed(self):
+    def _form_changed(self, by_user: bool = True, preview: bool = True):
         if not self.current:  # (still being built)
             return
+        if by_user:
+            self._options_changed = True
         tokens = self.form(self.current).tokens()
         cmd = COMMANDS[self.current]
         shown = list(tokens)
         if cmd.needs_input is True or (cmd.needs_input == "optional" and self.source):
             shown.append(self.source.name if self.source else "INPUT.pdf")
         self.cmd_line.setText("py-imposition " + shlex.join(shown))
-        self.schedule()
+        if preview:
+            self.schedule()
 
     def schedule(self):
         if self.auto.isChecked() and self.current not in NO_PREVIEW:
@@ -912,6 +931,7 @@ class MainWindow(QMainWindow):
         purpose = {"info": "info", "run": "batch", "watch": "watch"}.get(self.current, "preview")
         self._pending_key = self.key()
         self._apply_after = False
+        self._save_after = False
         self.run_tokens(tokens, purpose, quiet=quiet)
         if purpose == "watch" and self.runner.busy():
             self.b_preview.setText(tr("Stop watching"))
@@ -928,6 +948,7 @@ class MainWindow(QMainWindow):
             return
         self._pending_key = self.key()
         self._apply_after = True
+        self._save_after = False
         self.run_tokens(tokens, "preview")
 
     def stop(self):
@@ -946,7 +967,7 @@ class MainWindow(QMainWindow):
             lines = [ln for ln in err.strip().splitlines() if ln.strip()]
             msg = lines[-1] if lines else f"failed (exit code {code})"
             self.status(f"{self._job_label}: {msg}", error=True)
-            self._apply_after = False
+            self._apply_after = self._save_after = False
             return
         if purpose == "info":
             self.show_text(tr("Imposition info"), out)
@@ -976,9 +997,13 @@ class MainWindow(QMainWindow):
         self.status(ntr("{label}: done — {count} warning, see Log", "{label}: done — {count} warnings, see Log",
                         len(warn), label=self._job_label) if warn else tr("{label}: done", label=self._job_label),
                     error=False)
+        self._update_modified()
         if self._apply_after:
             self._apply_after = False
             self._apply_result()
+        elif self._save_after:
+            self._save_after = False
+            self._write_result()
 
     def _suffix(self, f: Path) -> str:
         if self._out_base is not None and f.stem.startswith(self._out_base.stem + "-"):
@@ -992,18 +1017,27 @@ class MainWindow(QMainWindow):
     def _apply_result(self):
         if len(self.result_files) != 1:
             QMessageBox.information(self, tr("Apply"),
-                                    tr("This command produced several documents. Use “Save result…” to save them."))
+                                    tr("This command produced several documents. Use “Save…” to save them."))
             return
         new = self.tmp / f"document-{self.next_id()}.pdf"
         shutil.copyfile(self.result_files[0], new)
         if self.source:
             self.undo_stack.append(self.source)
-        self.set_source(new)
+        self.set_source(new, preview=False)
+        # the right pane shows the document as it is now, until the options change again
+        self._out_base = None
+        self.result_files = [new]
+        self.result_key = ("document", str(new))
+        self.res_pane.set_outputs(["result"])
+        self.res_pane.load(new)
+        self._applied_unsaved = True
+        self._options_changed = False
+        self._update_modified()
         self.status(tr('Applied {current}. The result is now the current document.', current=self.current))
 
     # ----------------------------------------------------------------- documents
 
-    def set_source(self, path: Path | None):
+    def set_source(self, path: Path | None, preview: bool = True):
         self.source = path
         self.result_files = []
         self.result_key = None
@@ -1013,21 +1047,22 @@ class MainWindow(QMainWindow):
         note = ntr("{count} command applied", "{count} commands applied", steps) if steps else ""
         self.src_pane.load(path, note)
         name = self.original.name if self.original else (path.name if path else "")
-        if name:
-            self.setWindowTitle(tr("py-imposition — {name} (modified)", name=name) if steps
-                                else f"py-imposition — {name}")
-        else:
-            self.setWindowTitle("py-imposition")
-        self._form_changed()
+        # ([*]: Qt shows an asterisk there while there are unsaved changes)
+        self.setWindowTitle(f"py-imposition — {name}[*]" if name else "py-imposition[*]")
+        self._form_changed(by_user=False, preview=preview)
+        self._update_modified()
 
     def open_path(self, path: Path):
         if not path.is_file():
             self.status(tr('{path} not found', path=path), error=True)
             return
+        if not self.maybe_discard():
+            return
         self.settings.setValue("last_dir", str(path.parent))
         self.add_recent(path)
         self.original = path
         self.undo_stack = []
+        self._applied_unsaved = self._options_changed = False
         self.set_source(path)
         self.status(tr('Opened {path}', path=path))
 
@@ -1075,11 +1110,16 @@ class MainWindow(QMainWindow):
             self.status(tr("Nothing to undo"), error=True)
             return
         self.set_source(self.undo_stack.pop())
+        self._applied_unsaved = bool(self.undo_stack)
+        self._update_modified()
         self.status(tr("Undone"))
 
     def revert(self):
         if self.original:
+            if not self.maybe_discard():
+                return
             self.undo_stack = []
+            self._applied_unsaved = self._options_changed = False
             self.set_source(self.original)
             self.status(tr("Reverted to the original document"))
 
@@ -1094,34 +1134,100 @@ class MainWindow(QMainWindow):
         self.settings.setValue("last_dir", str(p.parent))
         return p
 
-    def save_document(self):
+    def save_document(self) -> bool:
+        """Save the current document as it is: the commands applied so far, not the current one."""
         if not self.source:
             self.status(tr("Nothing to save"), error=True)
-            return
+            return False
         stem = self.original.stem if self.original else "document"
-        p = self._save_target("Save document", f"{stem}-imposed.pdf")
-        if p:
-            if p.resolve() == self.source.resolve():
-                self.status(tr("That is the file currently open"), error=True)
-                return
-            shutil.copyfile(self.source, p)
-            self.status(tr('Saved {page}', page=p))
-
-    def save_result(self):
-        if not self.result_files:
-            self.status(tr("No result yet: click Preview first"), error=True)
-            return
-        stem = self.original.stem if self.original else "document"
-        p = self._save_target("Save result", f"{stem}-{self.current}.pdf")
+        p = self._save_target(tr("Save the document as it is"), f"{stem}-imposed.pdf")
         if not p:
+            return False
+        if p.resolve() == self.source.resolve():
+            self.status(tr("That is the file currently open"), error=True)
+            return False
+        shutil.copyfile(self.source, p)
+        self._applied_unsaved = False
+        self._update_modified()
+        self.status(tr('Saved {page}', page=p))
+        return True
+
+    def _result_is_fresh(self) -> bool:
+        src = str(self.source)
+        return (bool(self.result_files) and not self.runner.busy()
+                and self.result_key in (self.key(), ("sequence", src), ("document", src)))
+
+    def save(self):
+        """Save what the right pane shows; if it isn't up to date, run the command first."""
+        if not self.source:
+            self.status(tr("Open a PDF first (File ▸ Open, or drop a file on the window)"), error=True)
             return
+        if self._result_is_fresh():
+            self._write_result()
+            return
+        if self.current in NO_PREVIEW:
+            self.status(tr("This command doesn't make a document to save"), error=True)
+            return
+        tokens = self.current_tokens(check=True)
+        if not tokens:
+            return
+        self._pending_key = self.key()
+        self._apply_after = False
+        self._save_after = True
+        self.run_tokens(tokens, "preview")
+
+    def _write_result(self) -> bool:
+        """Ask where, and save the result shown (all its files), or else the current document."""
+        if not self.result_files:
+            return self.save_document()
+        stem = self.original.stem if self.original else "document"
+        applied = self.result_key is not None and self.result_key[0] == "document"
+        p = self._save_target(tr("Save"), f"{stem}-imposed.pdf" if applied else f"{stem}-{self.current}.pdf")
+        if not p:
+            return False
+        if self.source and p.resolve() == self.source.resolve():
+            self.status(tr("That is the file currently open"), error=True)
+            return False
         written = []
         for f in self.result_files:
             suffix = self._suffix(f)
             target = p.with_name(f"{p.stem}-{suffix}.pdf") if suffix and len(self.result_files) > 1 else p
             shutil.copyfile(f, target)
             written.append(target.name)
-        self.status("Saved " + ", ".join(written))
+        self._applied_unsaved = self._options_changed = False
+        self._update_modified()
+        self.status(tr('Saved {page}', page=", ".join(written)))
+        return True
+
+    # ----------------------------------------------------------------- unsaved changes
+
+    def is_modified(self) -> bool:
+        """Is there work that would be lost: commands applied, or options changed and a result made,
+        since the document was opened or saved?"""
+        if not self.source:
+            return False
+        made = bool(self.result_files) and not (self.result_key and self.result_key[0] == "document")
+        return self._applied_unsaved or (self._options_changed and made)
+
+    def _update_modified(self):
+        self.setWindowModified(self.is_modified())
+
+    def ask_unsaved(self) -> QMessageBox.StandardButton:
+        box = QMessageBox(QMessageBox.Icon.Warning, tr("Unsaved changes"),
+                          tr("The imposed document hasn't been saved. Save it before going on?"),
+                          QMessageBox.StandardButton.Save | QMessageBox.StandardButton.Discard
+                          | QMessageBox.StandardButton.Cancel, self)
+        box.setDefaultButton(QMessageBox.StandardButton.Save)
+        return QMessageBox.StandardButton(box.exec())
+
+    def maybe_discard(self) -> bool:
+        """True if it is all right to go on (nothing unsaved, saved now, or discarded)."""
+        if not self.is_modified():
+            return True
+        answer = self.ask_unsaved()
+        if answer == QMessageBox.StandardButton.Save:
+            return self._write_result()
+        return answer == QMessageBox.StandardButton.Discard
 
     # ----------------------------------------------------------------- drag and drop
 

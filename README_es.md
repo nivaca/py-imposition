@@ -170,7 +170,7 @@ cualquier imposición se comprueba de un vistazo.
 
 **En la ventana**, ábralo (desde el menú de aplicaciones, con *Archivo ▸
 Abrir…* o soltándolo en la ventana), elija una disposición en el modo básico
-y mire la vista previa; *Guardar resultado…* escribe el PDF impuesto:
+y mire la vista previa; *Guardar…* escribe el PDF impuesto:
 
 ```bash
 py-imposition-gui docs/example/numbers-100.pdf     # o la AppImage, con el archivo como argumento
@@ -244,10 +244,25 @@ orden [`impose`](#impose--imposición):
   información de página.
 
 Las opciones que no se aplican a la disposición elegida aparecen en gris. Las
-vistas previas, *Aplicar*, *Deshacer aplicación* y el guardado de documentos
-y resultados funcionan como en el modo avanzado. En ambos modos, *Archivo ▸
-Abrir reciente* muestra los últimos diez documentos abiertos (*Vaciar la
-lista* la vacía).
+vistas previas, *Aplicar*, *Deshacer aplicación* y el guardado funcionan como
+en el modo avanzado.
+
+En ambos modos:
+
+- **Guardar…** (Ctrl+S) guarda lo que muestra el panel de la derecha: el
+  resultado de la orden actual sobre el documento actual. Si la vista previa
+  no está al día (o todavía no hay ninguna), primero se ejecuta la orden.
+  Cuando una orden produce varios archivos (anversos y reversos, por
+  ejemplo), se guardan todos, con un sufijo. *Archivo ▸ Guardar el documento
+  tal como está…* (Ctrl+Mayús+S) guarda en cambio el documento actual: las
+  órdenes aplicadas hasta ahora, sin la actual.
+- **Cambios sin guardar:** cuando se han aplicado órdenes, o se han cambiado
+  opciones y se ha hecho un resultado, desde que se abrió o se guardó el
+  documento, la barra de título muestra un asterisco. Al cerrar la ventana,
+  abrir otro documento o volver al original, se pregunta antes si se desea
+  guardar.
+- *Archivo ▸ Abrir reciente* muestra los últimos diez documentos abiertos
+  (*Vaciar la lista* la vacía).
 
 **El modo avanzado** ofrece todas las órdenes de la línea de órdenes:
 
@@ -273,9 +288,9 @@ lista* la vacía).
 - **Aplicar** convierte el resultado en el documento actual, para que pueda
   encadenar órdenes (numerar las páginas, luego hacer un folleto, luego
   añadir marcas de corte…). *Deshacer aplicación* (Ctrl+Z) retrocede un
-  paso, y *Archivo ▸ Volver al original* empieza de nuevo. *Guardar
-  documento…* guarda el documento actual, y *Guardar resultado…* guarda el
-  último resultado.
+  paso, y *Archivo ▸ Volver al original* empieza de nuevo. Después de
+  aplicar, el panel de la derecha muestra el documento tal como está, hasta
+  que se vuelvan a cambiar las opciones.
 - **Las preferencias** (unidades, color de registro, tratamiento de los
   sangrados, PDF/X) están en la barra de herramientas y se aplican a todas
   las órdenes. El idioma está en *Ajustes ▸ Idioma de la interfaz*.

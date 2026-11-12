@@ -496,10 +496,6 @@
     <tr>Vaciar la lista</tr>
   </text>
   <text>
-    <en>Save document…</en>
-    <tr>Guardar documento…</tr>
-  </text>
-  <text>
     <en>Undo apply</en>
     <tr>Deshacer aplicación</tr>
   </text>
@@ -534,10 +530,6 @@
   <text>
     <en>Make the result the current document, to continue with another command (Ctrl+Enter)</en>
     <tr>Hacer del resultado el documento actual, para continuar con otra orden (Ctrl+Enter)</tr>
-  </text>
-  <text>
-    <en>Save result…</en>
-    <tr>Guardar resultado…</tr>
   </text>
   <text>
     <en>Defaults</en>
@@ -804,10 +796,6 @@
     <tr>{job_label}: hecho (no se produjo ningún PDF)</tr>
   </text>
   <text>
-    <en>This command produced several documents. Use “Save result…” to save them.</en>
-    <tr>Esta orden produjo varios documentos. Use «Guardar resultado…» para guardarlos.</tr>
-  </text>
-  <text>
     <en>{path} not found</en>
     <tr>no se encontró {path}</tr>
   </text>
@@ -824,16 +812,8 @@
     <tr>Nada que guardar</tr>
   </text>
   <text>
-    <en>No result yet: click Preview first</en>
-    <tr>Aún no hay resultado: pulse primero Vista previa</tr>
-  </text>
-  <text>
     <en>Could not keep the setting: {error}</en>
     <tr>No se pudo guardar el ajuste: {error}</tr>
-  </text>
-  <text>
-    <en>py-imposition — {name} (modified)</en>
-    <tr>py-imposition — {name} (modificado)</tr>
   </text>
   <text>
     <en>That is the file currently open</en>
@@ -3094,5 +3074,37 @@
   <text>
     <en>the page trim is larger than the pages</en>
     <tr>el recorte de página es mayor que las páginas</tr>
+  </text>
+  <text>
+    <en>Save the current document, with the commands applied so far but without the current command</en>
+    <tr>Guardar el documento actual, con las órdenes aplicadas hasta ahora pero sin la orden actual</tr>
+  </text>
+  <text>
+    <en>Save the document as it is</en>
+    <tr>Guardar el documento tal como está</tr>
+  </text>
+  <text>
+    <en>Save the document as it is…</en>
+    <tr>Guardar el documento tal como está…</tr>
+  </text>
+  <text>
+    <en>Save the result shown on the right (if it isn't up to date, the command runs first)</en>
+    <tr>Guardar el resultado que se ve a la derecha (si no está al día, primero se ejecuta la orden)</tr>
+  </text>
+  <text>
+    <en>The imposed document hasn't been saved. Save it before going on?</en>
+    <tr>El documento impuesto no se ha guardado. ¿Desea guardarlo antes de seguir?</tr>
+  </text>
+  <text>
+    <en>This command doesn't make a document to save</en>
+    <tr>Esta orden no produce un documento que guardar</tr>
+  </text>
+  <text>
+    <en>This command produced several documents. Use “Save…” to save them.</en>
+    <tr>Esta orden produjo varios documentos. Use «Guardar…» para guardarlos.</tr>
+  </text>
+  <text>
+    <en>Unsaved changes</en>
+    <tr>Cambios sin guardar</tr>
   </text>
 </interface>

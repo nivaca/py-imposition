@@ -34,11 +34,15 @@ def window(app, tmp_path, monkeypatch):
     monkeypatch.setenv("XDG_CONFIG_HOME", str(tmp_path / "config"))
     monkeypatch.setenv("PY_IMPOSITION_CONFIG", str(tmp_path / "py-imposition-config"))
     QSettings.setPath(QSettings.Format.NativeFormat, QSettings.Scope.UserScope, str(tmp_path / "config"))
+    from PySide6.QtWidgets import QMessageBox
     from py_imposition.gui.window import MainWindow
+    # (no modal question in the tests: unsaved work is discarded, unless a test says otherwise)
+    monkeypatch.setattr(MainWindow, "ask_unsaved", lambda self: QMessageBox.StandardButton.Discard)
     w = MainWindow()
     w.set_mode("advanced")  # (most tests drive the command forms)
     yield w
     try:
+        w.ask_unsaved = lambda: QMessageBox.StandardButton.Discard
         w.runner.stop()
         w.close()
     except RuntimeError:  # (already deleted: the window was built again in another language)
@@ -355,3 +359,69 @@ def test_basic_negative_margins_page_trim_enlarge(app, window):
     assert b.enlarge.isChecked() and b.tokens() == t
     b.auto_scale.setChecked(False)
     assert not b.enlarge.isEnabled() and "--enlarge" not in b.tokens()
+
+
+def _pages(path) -> int:
+    import pikepdf
+    with pikepdf.open(path) as pdf:
+        return len(pdf.pages)
+
+
+def test_save_saves_what_the_result_pane_shows(app, window, tmp_path, monkeypatch):
+    sample = tmp_path / "s.pdf"
+    assert main(["sample", "--count", "8", "--paper", "a5", "-o", str(sample), "-q"]) == 0
+    targets = iter([tmp_path / "out1.pdf", tmp_path / "out2.pdf", tmp_path / "out3.pdf"])
+    monkeypatch.setattr(window, "_save_target", lambda title, suggested: next(targets))
+    window.auto.setChecked(False)
+    window.open_path(sample)
+    window.select_command("nup")
+    window.form("nup").set_tokens(["nup", "--cols", "2", "--rows", "1", "--scale", "fit"])
+    window.save()  # (no preview yet: the command runs first, then it is saved)
+    wait(app, window)
+    assert _pages(tmp_path / "out1.pdf") == 4
+    window.apply()  # the right pane now shows the applied document; nothing runs again
+    wait(app, window)
+    assert window.result_key[0] == "document" and window.res_pane.doc.pageCount() == 4
+    window.save()
+    assert _pages(tmp_path / "out2.pdf") == 4  # (not n-up twice)
+    window.select_command("reverse")
+    window.preview()
+    wait(app, window)
+    window.save()
+    assert _pages(tmp_path / "out3.pdf") == 4
+
+
+def test_unsaved_changes(app, window, tmp_path, monkeypatch):
+    from PySide6.QtWidgets import QMessageBox
+    sample = tmp_path / "s.pdf"
+    assert main(["sample", "--count", "4", "-o", str(sample), "-q"]) == 0
+    window.auto.setChecked(False)
+    window.open_path(sample)
+    assert not window.is_modified()  # (opening and looking is not a change)
+    window.select_command("reverse")
+    window.preview()
+    wait(app, window)
+    assert window.is_modified() and window.isWindowModified() and "[*]" in window.windowTitle()
+    asked = []
+    answer = QMessageBox.StandardButton.Cancel
+    monkeypatch.setattr(window, "ask_unsaved", lambda: asked.append(1) or answer)
+    other = tmp_path / "o.pdf"
+    assert main(["sample", "--count", "2", "-o", str(other), "-q"]) == 0
+    window.open_path(other)  # cancelled: the document stays
+    assert asked and window.original == sample
+    answer = QMessageBox.StandardButton.Save
+    monkeypatch.setattr(window, "_save_target", lambda title, suggested: tmp_path / "saved.pdf")
+    window.open_path(other)  # saved, then opened
+    assert (tmp_path / "saved.pdf").exists() and window.original == other and not window.is_modified()
+    window.select_command("reverse")
+    window.preview()
+    wait(app, window)
+    window.apply()
+    assert window.is_modified()
+    window.undo()
+    assert not window.is_modified()
+    window.apply()  # (the result is still the document as it was: apply it again)
+    wait(app, window)
+    answer = QMessageBox.StandardButton.Discard
+    window.revert()
+    assert window.source == other and not window.is_modified()

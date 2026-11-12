@@ -10,7 +10,7 @@
 # Build with packaging/build-rpm.sh, which makes the source tarball.
 
 Name:           py-imposition
-Version:        0.7
+Version:        0.8
 Release:        1%{?dist}
 Summary:        PDF imposition toolkit: booklets, n-up, step and repeat and more
 
@@ -80,6 +80,9 @@ export HOME="$PWD/check-home" PY_IMPOSITION_CONFIG="$PWD/check-home/config" QT_Q
 %{_datadir}/icons/hicolor/*/apps/py-imposition.*
 
 %changelog
+* Thu Nov 12 2026 Nicolas Vaughan <nivaca@fastmail.com> - 0.8-1
+- The window: one Save, and a warning about unsaved changes
+
 * Thu Nov 12 2026 Nicolas Vaughan <nivaca@fastmail.com> - 0.7-1
 - impose: perfect binding in stacks of four sheets per fold by default
 - impose: page trim, enlarge, and negative margins and gutters

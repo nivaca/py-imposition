@@ -1,4 +1,4 @@
-# py-imposition 0.7: descripción
+# py-imposition 0.8: descripción
 
 ## Análisis
 
@@ -38,7 +38,7 @@ La ventana no impone nada por sí misma: ejecuta la línea de órdenes en un pro
 
 El modo básico es un único formulario, dispuesto como un diálogo de imposición corriente: la disposición (folletos de 2, 4 y 8, corte y apilado, secuencial, paso y repetición), la encuadernación, los medianiles, el papel, los márgenes, el recorte de páginas y las marcas de impresión, con perfiles con nombre que pueden ir en un menú. Las opciones que no se aplican a la disposición elegida aparecen en gris. Detrás está la orden `impose`, de modo que todo lo que hace el formulario puede hacerse también en la línea de órdenes, y el formulario muestra siempre la línea de órdenes que ejecuta.
 
-La ventana recuerda su modo, su disposición, las opciones de cada orden, la secuencia, los perfiles y los últimos diez documentos abiertos (*Archivo ▸ Abrir reciente*). El documento original se muestra junto al resultado solo si se marca *Ver ▸ Mostrar el documento original*.
+*Guardar…* guarda lo que muestra el panel de la derecha (si la vista previa no está al día, primero ejecuta la orden), y *Archivo ▸ Guardar el documento tal como está…* guarda el documento con las órdenes aplicadas, sin la actual. Mientras haya cambios sin guardar, la barra de título muestra un asterisco, y la ventana pregunta antes de cerrarse, de abrir otro documento o de volver al original. La ventana recuerda su modo, su disposición, las opciones de cada orden, la secuencia, los perfiles y los últimos diez documentos abiertos (*Archivo ▸ Abrir reciente*). El documento original se muestra junto al resultado solo si se marca *Ver ▸ Mostrar el documento original*.
 
 ### Llenar el pliego
 
@@ -50,7 +50,7 @@ Cada texto del programa, en la ventana y en la línea de órdenes, incluidos los
 
 ### Proceso y distribución
 
-El trabajo pasó por siete etapas: primero un folleto 2-up en la línea de órdenes; luego el conjunto completo de herramientas (versión 0.1); la ventana, con el instalador del menú, el icono y las capturas (0.2 y 0.3); la interfaz en español y los paquetes (0.4 y 0.4.1); el modo básico con la orden `impose` (0.5), y después las vistas del documento original y los documentos recientes (0.5.1 y 0.6); y por último las maneras de llenar el pliego (0.7).
+El trabajo pasó por ocho etapas: primero un folleto 2-up en la línea de órdenes; luego el conjunto completo de herramientas (versión 0.1); la ventana, con el instalador del menú, el icono y las capturas (0.2 y 0.3); la interfaz en español y los paquetes (0.4 y 0.4.1); el modo básico con la orden `impose` (0.5), y después las vistas del documento original y los documentos recientes (0.5.1 y 0.6); las maneras de llenar el pliego (0.7), y por último un solo *Guardar…* y el aviso de cambios sin guardar (0.8).
 
 La AppImage lleva su propio Python, Qt y bibliotecas, y funciona en casi cualquier Linux; su primer argumento decide entre la ventana y la línea de órdenes. La primera AppImage enseñó algo: en el equipo donde se hizo encontraba pikepdf entre los paquetes de Python del usuario, así que funcionaba allí y en ningún otro sitio. Desde la 0.4.1 los paquetes se instalan aislados, se comprueba que cada módulo se importe desde dentro de la AppImage, y esta se arranca una vez con una carpeta personal vacía antes de publicarla.
 
@@ -60,7 +60,7 @@ El código se gestiona con git, en un solo repositorio publicado en GitHub (http
 
 ## Validación
 
-Hay 95 pruebas automáticas (`tests/`), que se corren con `uv run pytest`. Comprueban el orden de las páginas con ejemplos resueltos de imposiciones habituales, ejecutan cada orden de principio a fin sobre documentos generados y leen los resultados con pdftotext y `qpdf --check`, e imponen el documento de ejemplo, cuyas páginas muestran cada una su número. La ventana se prueba sin pantalla, con la plataforma offscreen de Qt: los formularios, el modo básico y sus perfiles, las vistas previas, *Aplicar* y *Deshacer*, los documentos recientes y el idioma. Otras pruebas comprueban que cada texto tenga su traducción y que no sobre ninguna, el instalador del menú en cada sistema, los archivos de empaquetado y la clave de firma.
+Hay 97 pruebas automáticas (`tests/`), que se corren con `uv run pytest`. Comprueban el orden de las páginas con ejemplos resueltos de imposiciones habituales, ejecutan cada orden de principio a fin sobre documentos generados y leen los resultados con pdftotext y `qpdf --check`, e imponen el documento de ejemplo, cuyas páginas muestran cada una su número. La ventana se prueba sin pantalla, con la plataforma offscreen de Qt: los formularios, el modo básico y sus perfiles, las vistas previas, *Aplicar* y *Deshacer*, los documentos recientes y el idioma. Otras pruebas comprueban que cada texto tenga su traducción y que no sobre ninguna, el instalador del menú en cada sistema, los archivos de empaquetado y la clave de firma.
 
 Las pruebas corren con cada push en GitHub Actions, y otra vez dentro de cada construcción del RPM en Copr, con el Python de cada Fedora (3.14 y 3.15). Las capturas de los README se rehacen con cada cambio de la ventana y se revisan a ojo.
 

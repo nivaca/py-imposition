@@ -328,3 +328,12 @@ def test_recent_files(app, window, tmp_path):
         assert window.recent_files() == []
     finally:
         other.close()
+
+
+def test_basic_defaults_four_sheets_per_fold(app, window):
+    from py_imposition.runner import build_parser
+    assert build_parser().parse_args(["impose", "x.pdf"]).sheets_per_fold == 4
+    window.basic.reset()
+    assert window.basic.sheets.value() == 4 and window.basic.tokens() == ["impose"]
+    window.basic.set_tokens(["impose", "--sheets-per-fold", "2"])
+    assert window.basic.tokens() == ["impose", "--sheets-per-fold", "2"]

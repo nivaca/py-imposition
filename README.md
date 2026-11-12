@@ -321,7 +321,7 @@ basic mode:
 |---|---|
 | `--layout 2up-booklet\|4up-booklet\|8up-booklet\|cut-stacks\|sequential\|step-repeat` | 2 pages side by side; 2 rows of 2; 2 rows of 4; cut stacks; pages in order; copies of each page (default: `2up-booklet`) |
 | `--cols`, `--rows` | the grid of cut stacks, sequential and step and repeat (default: 2 × 2) |
-| `--binding saddle\|perfect`, `--sheets-per-fold N` | saddle-stitching, or perfect binding in stacks of N folded sheets (default: perfect, 1) |
+| `--binding saddle\|perfect`, `--sheets-per-fold N` | saddle-stitching, or perfect binding in stacks of N folded sheets (default: perfect, 4) |
 | `--direction left\|right`, `--single-sided` | the binding edge; print on one side only |
 | `--gutter-v`, `--gutter-h`, `--spread`, `--creep` | space between columns and rows; between the middle columns of an 8-up booklet; creep for the paper's thickness |
 | `--media SIZE\|auto`, `--orientation portrait\|landscape` | the sheet: a paper name or WxH, or `auto` to fit the pages (default: Legal landscape) |

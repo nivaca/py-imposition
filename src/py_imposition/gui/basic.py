@@ -92,7 +92,7 @@ class BasicPanel(QWidget):
         self.binding = QComboBox()
         self.binding.addItem(tr("Saddle-Stitching"), "saddle")
         self.binding.addItem(tr("Perfect Binding"), "perfect")
-        self.sheets = self._spin(1, 64, 1)
+        self.sheets = self._spin(1, 64, 4)
         self.direction = QComboBox()
         self.direction.addItem(tr("Left"), "left")
         self.direction.addItem(tr("Right"), "right")
@@ -226,13 +226,13 @@ class BasicPanel(QWidget):
     # ----------------------------------------------------------------- state
 
     def reset(self, emit: bool = True):
-        """The defaults: a 2-up booklet, perfect bound one sheet per fold, on Legal landscape."""
+        """The defaults: a 2-up booklet, perfect bound four sheets per fold, on Legal landscape."""
         self._loading = True
         self.layout_type.setCurrentIndex(0)
         self.cols.setValue(2)
         self.rows.setValue(2)
         self.binding.setCurrentIndex(1)
-        self.sheets.setValue(1)
+        self.sheets.setValue(4)
         self.direction.setCurrentIndex(0)
         self.double.setChecked(True)
         for s in self.lengths:
@@ -316,7 +316,7 @@ class BasicPanel(QWidget):
         if layout in BOOKLETS:
             if self.binding.currentData() != "perfect":
                 t += ["--binding", self.binding.currentData()]
-            elif self.sheets.value() != 1:
+            elif self.sheets.value() != 4:
                 t += ["--sheets-per-fold", str(self.sheets.value())]
         if self.direction.isEnabled() and self.direction.currentData() != "left":
             t += ["--direction", "right"]

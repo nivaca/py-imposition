@@ -343,7 +343,7 @@ básico de la ventana:
 |---|---|
 | `--layout 2up-booklet\|4up-booklet\|8up-booklet\|cut-stacks\|sequential\|step-repeat` | 2 páginas una al lado de otra; 2 filas de 2; 2 filas de 4; corte y apilado; páginas en orden; copias de cada página (por defecto: `2up-booklet`) |
 | `--cols`, `--rows` | la cuadrícula de corte y apilado, secuencial y paso y repetición (por defecto: 2 × 2) |
-| `--binding saddle\|perfect`, `--sheets-per-fold N` | grapado a caballete, o encuadernación encolada en cuadernillos de N pliegos plegados (por defecto: perfect, 1) |
+| `--binding saddle\|perfect`, `--sheets-per-fold N` | grapado a caballete, o encuadernación encolada en cuadernillos de N pliegos plegados (por defecto: perfect, 4) |
 | `--direction left\|right`, `--single-sided` | el borde de encuadernación; imprimir por una sola cara |
 | `--gutter-v`, `--gutter-h`, `--spread`, `--creep` | espacio entre columnas y filas; entre las columnas del medio de un folleto de 8; corrimiento por el grosor del papel |
 | `--media SIZE\|auto`, `--orientation portrait\|landscape` | el pliego: un nombre de papel o WxH, o `auto` para ajustarse a las páginas (por defecto: Legal apaisado) |

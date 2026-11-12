@@ -43,8 +43,8 @@ def _args(p):
     g.add_argument("--binding", choices=["saddle", "perfect"], default="perfect",
                    help=tr("saddle: all sheets folded together and stapled; perfect: stacks of folded sheets, "
                            "glued at the spine (default: perfect)"))
-    g.add_argument("--sheets-per-fold", type=int, default=1, metavar="N",
-                   help=tr("perfect binding: sheets in each folded stack (default: 1)"))
+    g.add_argument("--sheets-per-fold", type=int, default=4, metavar="N",
+                   help=tr("perfect binding: sheets in each folded stack (default: 4)"))
     g.add_argument("--direction", choices=["left", "right"], default="left",
                    help=tr("binding edge (default: left)"))
     g.add_argument("--single-sided", action="store_true",

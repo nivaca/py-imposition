@@ -3004,8 +3004,8 @@
     <tr>papel</tr>
   </text>
   <text>
-    <en>perfect binding: sheets in each folded stack (default: 1)</en>
-    <tr>encuadernación encolada: pliegos en cada cuadernillo plegado (por defecto: 1)</tr>
+    <en>perfect binding: sheets in each folded stack (default: 4)</en>
+    <tr>encuadernación encolada: pliegos en cada cuadernillo plegado (por defecto: 4)</tr>
   </text>
   <text>
     <en>print on one side only: fronts, then backs (booklets), or single-sided stacks</en>

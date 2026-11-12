@@ -218,7 +218,10 @@ advanced mode.
   it with *Run ▸ Copy command line*. Options that exclude each other clear
   each other. *Reference* expands the layout/fields/sequence file formats
   for `manual`, `merge-data` and `run`.
-- **Previews:** the current document and the result are shown side by side.
+- **Previews:** the result is shown on the right. *View ▸ Show the original
+  document* also shows the current document beside it; it is off by default,
+  and the choice is kept in the configuration file (`show_document` in
+  `config.toml`, see [The language of the interface](#the-language-of-the-interface)).
   With *Auto preview* on, the result updates shortly after each change. A
   drop-down switches between results when a command produces several files
   (e.g. separate fronts and backs).
@@ -261,7 +264,8 @@ The choice is kept in a small configuration file, `config.toml`, in
 `~/.config/py-imposition/` (Linux), `~/Library/Application
 Support/py-imposition/` (macOS) or `%APPDATA%\py-imposition\` (Windows);
 `$PY_IMPOSITION_CONFIG` names another folder. Both the command line and the
-window read it.
+window read it. The window also keeps there whether it shows the original
+document (`show_document = true` or `false`).
 
 The translations are in `src/py_imposition/locale/es.xml`, with one `<text>`
 for each text of the program, giving the English (`<en>`) and its

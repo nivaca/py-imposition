@@ -10,7 +10,7 @@
 # Build with packaging/build-rpm.sh, which makes the source tarball.
 
 Name:           py-imposition
-Version:        0.5
+Version:        0.5.1
 Release:        1%{?dist}
 Summary:        PDF imposition toolkit: booklets, n-up, step and repeat and more
 
@@ -80,6 +80,10 @@ export HOME="$PWD/check-home" PY_IMPOSITION_CONFIG="$PWD/check-home/config" QT_Q
 %{_datadir}/icons/hicolor/*/apps/py-imposition.*
 
 %changelog
+* Thu Nov 12 2026 Nicolas Vaughan <nivaca@fastmail.com> - 0.5.1-1
+- View > Show the original document: the document's preview is optional, off by
+  default, and kept in config.toml
+
 * Wed Nov 11 2026 Nicolas Vaughan <nivaca@fastmail.com> - 0.5-1
 - Basic mode in the window: one imposition form (layout, profiles, binding,
   gutters, paper, margins, printer marks); a Basic | Advanced switch

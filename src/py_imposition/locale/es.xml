@@ -3043,4 +3043,12 @@
     <en>turn pages 90° when that fits their cell better</en>
     <tr>girar las páginas 90° cuando así encajan mejor en su celda</tr>
   </text>
+  <text>
+    <en>Show the original document</en>
+    <tr>Mostrar el documento original</tr>
+  </text>
+  <text>
+    <en>Show the document beside the result (kept in the configuration file)</en>
+    <tr>Mostrar el documento junto al resultado (se guarda en el archivo de configuración)</tr>
+  </text>
 </interface>

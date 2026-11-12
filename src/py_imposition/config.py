@@ -6,11 +6,12 @@ It is a small TOML file, ``config.toml``, in the user's configuration folder:
 * macOS: ``~/Library/Application Support/py-imposition``;
 * Windows: ``%APPDATA%\\py-imposition``.
 
-``$PY_IMPOSITION_CONFIG`` names another folder. For now it holds one
-setting, the language of the interface:
+``$PY_IMPOSITION_CONFIG`` names another folder. It holds the language of
+the interface and whether the window shows the original document:
 
     [parameters]
     interface = "es"
+    show_document = false
 """
 
 from __future__ import annotations
@@ -21,7 +22,7 @@ import tomllib
 from pathlib import Path
 
 ENV = "PY_IMPOSITION_CONFIG"
-SETTINGS = {"interface": "en"}  # name: default
+SETTINGS = {"interface": "en", "show_document": False}  # name: default
 
 
 class ConfigError(Exception):

@@ -32,6 +32,7 @@ def app():
 def window(app, tmp_path, monkeypatch):
     from PySide6.QtCore import QSettings
     monkeypatch.setenv("XDG_CONFIG_HOME", str(tmp_path / "config"))
+    monkeypatch.setenv("PY_IMPOSITION_CONFIG", str(tmp_path / "py-imposition-config"))
     QSettings.setPath(QSettings.Format.NativeFormat, QSettings.Scope.UserScope, str(tmp_path / "config"))
     from py_imposition.gui.window import MainWindow
     w = MainWindow()
@@ -281,3 +282,22 @@ def test_mode_survives_a_language_change(app, window, tmp_path, monkeypatch):
             w.runner.stop()
             w.close()
         winmod._WINDOWS.clear()
+
+
+def test_show_document_option(app, window, tmp_path):
+    from py_imposition import config
+    from py_imposition.gui.window import MainWindow
+    assert not window.a_show_document.isChecked()  # off by default
+    assert not window.src_pane.isVisibleTo(window)
+    window.a_show_document.setChecked(True)
+    assert window.src_pane.isVisibleTo(window)
+    assert config.get("show_document") is True
+    assert "show_document = true" in config.config_path().read_text()
+    other = MainWindow()  # (a new window reads the configuration file)
+    try:
+        assert other.a_show_document.isChecked() and other.src_pane.isVisibleTo(other)
+        other.a_show_document.setChecked(False)
+        assert config.get("show_document") is False
+    finally:
+        other.runner.stop()
+        other.close()

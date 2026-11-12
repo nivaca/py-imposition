@@ -561,6 +561,12 @@ class MainWindow(QMainWindow):
         m.addSeparator()
         m.addAction(QAction(tr("Copy command line"), self, triggered=self.copy_command_line))
         m = self.menuBar().addMenu(tr("&View"))
+        self.a_show_document = QAction(tr("Show the original document"), self, checkable=True)
+        self.a_show_document.setToolTip(tr("Show the document beside the result (kept in the configuration file)"))
+        self.a_show_document.setChecked(bool(config.get("show_document")))
+        self.a_show_document.toggled.connect(self.show_document)
+        m.addAction(self.a_show_document)
+        m.addSeparator()
         for d in self.docks:
             m.addAction(d.toggleViewAction())
         self.m_profiles = self.menuBar().addMenu(tr("&Profiles"))
@@ -612,6 +618,7 @@ class MainWindow(QMainWindow):
         last = self.settings.value("command", "booklet")
         self.select_command(last if last in COMMANDS else "booklet")
         self.set_mode(self.settings.value("mode", "basic"))
+        self.show_document(self.a_show_document.isChecked(), save=False)
 
     def closeEvent(self, event):
         self.runner.stop()
@@ -738,6 +745,15 @@ class MainWindow(QMainWindow):
         else:
             self.select_command(self._adv_command if self._adv_command in COMMANDS else "booklet")
             self._activate(self.current)
+
+    def show_document(self, on: bool, save: bool = True):
+        """Show or hide the preview of the original document, and keep the choice."""
+        self.src_pane.setVisible(on)
+        if save and bool(config.get("show_document")) != on:
+            try:
+                config.set("show_document", on)
+            except OSError as e:
+                self.status(tr("Could not keep the setting: {error}", error=e), error=True)
 
     def _profiles_menu(self):
         m = self.m_profiles

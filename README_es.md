@@ -229,8 +229,12 @@ y resultados funcionan como en el modo avanzado.
   opciones que se excluyen entre sí se borran mutuamente. *Referencia*
   despliega los formatos de los archivos de disposición, de campos y de
   secuencia para `manual`, `merge-data` y `run`.
-- **Vistas previas:** el documento actual y el resultado se muestran uno
-  junto a otro. Con *Vista previa automática* activada, el resultado se
+- **Vistas previas:** el resultado se muestra a la derecha. *Ver ▸ Mostrar el
+  documento original* muestra además el documento actual a su lado; está
+  desactivado por defecto, y la elección se guarda en el archivo de
+  configuración (`show_document` en `config.toml`, véase
+  [El idioma de la interfaz](#el-idioma-de-la-interfaz)). Con *Vista previa
+  automática* activada, el resultado se
   actualiza poco después de cada cambio. Una lista desplegable pasa de un
   resultado a otro cuando una orden produce varios archivos (p. ej.,
   anversos y reversos por separado).
@@ -278,7 +282,8 @@ La elección se guarda en un pequeño archivo de configuración, `config.toml`,
 en `~/.config/py-imposition/` (Linux), `~/Library/Application
 Support/py-imposition/` (macOS) o `%APPDATA%\py-imposition\` (Windows);
 `$PY_IMPOSITION_CONFIG` indica otra carpeta. Tanto la línea de órdenes como
-la ventana lo leen.
+la ventana lo leen. La ventana guarda ahí también si muestra el documento
+original (`show_document = true` o `false`).
 
 Las traducciones están en `src/py_imposition/locale/es.xml`, con un `<text>`
 para cada texto del programa, que da el inglés (`<en>`) y su traducción

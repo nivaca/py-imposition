@@ -33,8 +33,8 @@
 set -euo pipefail
 
 DIR="$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")/.." && pwd)"
-# The project's signing key (Nicolas Vaughan, RSA 3072, 2021)
-SIGNING_KEY="${SIGNING_KEY:-1C1655FFC02962828A87315EE750A4F969989DA6}"
+# The project's signing key (Nicolas Vaughan, RPM signing, ed25519, 2026)
+SIGNING_KEY="${SIGNING_KEY:-81870643CA221AF90C30554EBE6832CD35994948}"
 SPEC="$DIR/packaging/py-imposition.spec"
 TOP="$DIR/build/rpm"
 RPMSIGN="${RPMSIGN:-rpmsign}"

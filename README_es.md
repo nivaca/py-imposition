@@ -96,7 +96,8 @@ pikepdf, reportlab y PySide6 del propio Fedora. Las actualizaciones llegan con
 Cada versión publicada incluye además el RPM, firmado con la clave del autor,
 y esa clave (`RPM-GPG-KEY-py-imposition`, también en el repositorio como
 [`packaging/RPM-GPG-KEY-py-imposition`](packaging/RPM-GPG-KEY-py-imposition)).
-Su huella es `1C16 55FF C029 6282 8A87 315E E750 A4F9 6998 9DA6`:
+Su huella es `8187 0643 CA22 1AF9 0C30 554E BE68 32CD 3599 4948` (desde la 0.8; los RPM
+de las versiones anteriores se firmaron con `1C16 55FF C029 6282 8A87 315E E750 A4F9 6998 9DA6`):
 
 ```bash
 sudo rpm --import RPM-GPG-KEY-py-imposition

@@ -31,7 +31,7 @@ and =BuildRequires=), so they must be installed here too.
 
 ** 3. Signing key
 All RPMs are signed with one key, the same on all the author's machines:
-=1C1655FFC02962828A87315EE750A4F969989DA6= (Nicolas Vaughan, RSA 3072, 2021).
+=81870643CA221AF90C30554EBE6832CD35994948= (Nicolas Vaughan, RPM signing, ed25519, 2026).
 =build-rpm.sh= pins it (=SIGNING_KEY=); =--sign= uses only that key and stops if
 it isn't in this machine's keyring, and =release.py --rpm= checks for it first.
 gpg asks for the passphrase. A copy of the public key is in the repository,
@@ -40,9 +40,9 @@ gpg asks for the passphrase. A copy of the public key is in the repository,
 
 To set up another machine, copy the key over and trust it:
 #+begin_src sh
-gpg --export-secret-keys --armor 1C1655FFC02962828A87315EE750A4F969989DA6 > key.asc   # on a machine that has it
+gpg --export-secret-keys --armor 81870643CA221AF90C30554EBE6832CD35994948 > key.asc   # on a machine that has it
 gpg --import key.asc && shred -u key.asc                                            # on the new one
-gpg --edit-key 1C1655FFC02962828A87315EE750A4F969989DA6 trust                        # 5 = ultimate
+gpg --edit-key 81870643CA221AF90C30554EBE6832CD35994948 trust                        # 5 = ultimate
 #+end_src
 (Keep the exported secret key out of any synced or version-controlled
 folder; =build-rpm.sh= refuses to pack a private key it finds in the tree.)

@@ -2,15 +2,25 @@
 
 *(English: [README.md](README.md))*
 
-Un conjunto de herramientas de imposición de PDF para la línea de órdenes:
-folletos, n-up, paso y repetición, reordenación de páginas, recorte y
-desplazamiento, corrimiento, sangrados, números de página y sellos, cinta de
-enmascarar, imposición manual, combinación de datos variables, dividir/unir
-(parciales), secuencias de automatización y carpetas vigiladas.
+Un conjunto de herramientas de imposición de PDF, con una ventana y una
+línea de órdenes: folletos, n-up, paso y repetición, reordenación de páginas,
+recorte y desplazamiento, corrimiento, sangrados, números de página y sellos,
+cinta de enmascarar, imposición manual, combinación de datos variables,
+dividir/unir (parciales), secuencias de automatización y carpetas vigiladas.
 
-Cada orden lee un PDF y escribe uno nuevo. Las órdenes pueden encadenarse
-ejecutándolas una tras otra, o guardarse como una **secuencia** y ejecutarse
-de una sola vez. Hay también una interfaz gráfica con vistas previas en vivo.
+- **La ventana** (`py-imposition-gui`) muestra el resultado a medida que se
+  cambian las opciones. Su **modo básico** es un único formulario de
+  imposición con las opciones habituales (disposición, encuadernación,
+  medianiles, papel, márgenes, recorte de páginas, marcas de impresión) y
+  perfiles guardados; su **modo avanzado** tiene todas las órdenes, las
+  encadena, y arma y ejecuta secuencias. Véase [Interfaz gráfica](#interfaz-gráfica).
+- **La línea de órdenes** (`py-imposition`) tiene las mismas órdenes, para
+  scripts, lotes y carpetas vigiladas. Véase [Órdenes](#órdenes).
+
+Ambas leen un PDF y escriben uno nuevo; nada cambia el original. Las órdenes
+pueden encadenarse, una tras otra o guardadas como una **secuencia** que se
+ejecuta de una sola vez. La interfaz está en inglés o en español. Cómo se
+hizo se cuenta en [`docs/DESCRIPCIÓN_es.md`](docs/DESCRIPCIÓN_es.md).
 
 ## Capturas de pantalla
 
@@ -98,7 +108,7 @@ sudo dnf install ./py-imposition-*.noarch.rpm
 Se necesita Python 3.12 o posterior y [uv](https://docs.astral.sh/uv/).
 
 ```bash
-git clone <repo-url> py-imposition
+git clone https://github.com/nivaca/py-imposition.git    # o https://codeberg.org/nivaca/py-imposition.git
 cd py-imposition
 uv sync
 uv tool install .        # opcional: hace que `py-imposition` esté disponible en todas partes
@@ -153,15 +163,25 @@ uv tool uninstall py-imposition     # si se instaló con uv tool
 
 ## Primeros pasos
 
-El repositorio incluye un libro real con el que hacer pruebas:
+El repositorio incluye un documento con el que hacer pruebas:
 [`docs/example/numbers-100.pdf`](docs/example/README.md), 100 páginas que
 muestran cada una su propio número, de modo que el orden de las páginas de
 cualquier imposición se comprueba de un vistazo.
 
+**En la ventana**, ábralo (desde el menú de aplicaciones, con *Archivo ▸
+Abrir…* o soltándolo en la ventana), elija una disposición en el modo básico
+y mire la vista previa; *Guardar resultado…* escribe el PDF impuesto:
+
+```bash
+py-imposition-gui docs/example/numbers-100.pdf     # o la AppImage, con el archivo como argumento
+```
+
+**En la línea de órdenes:**
+
 ```bash
 py-imposition info docs/example/numbers-100.pdf
+py-imposition impose --layout 4up-booklet --binding saddle --media a3 --orientation portrait docs/example/numbers-100.pdf
 py-imposition booklet --signature 16 --paper a4 --crop-marks --margin 1.5cm docs/example/numbers-100.pdf
-py-imposition-gui docs/example/numbers-100.pdf
 ```
 
 En general:
@@ -767,6 +787,7 @@ código está en `src/py_imposition/`:
 
 | Archivo | Contenido |
 |---|---|
+| `simple.py` | `impose`: todas las imposiciones habituales en una orden (lo que ejecuta el modo básico) |
 | `impose.py` | folleto, n-up, paso y repetición, unir |
 | `shuffle.py` | reglas de reordenación, pares/impares, invertir |
 | `pagetools.py` | recortar/desplazar, corrimiento, cambio de tamaño, girar, duplicar/eliminar/mover, mosaico |
@@ -775,16 +796,16 @@ código está en `src/py_imposition/`:
 | `pdfutil.py` | cajas de página, colocación de páginas como Form XObjects, marcas de corte |
 | `units.py`, `pagesel.py` | longitudes, tamaños de papel, intervalos de páginas |
 | `common.py`, `runner.py` | estructura de las órdenes y línea de órdenes |
-| `gui/` | la interfaz en PySide6: `forms.py` (formularios de opciones construidos a partir del analizador de la línea de órdenes), `preview.py` (visor de PDF), `window.py` (ventana principal, panel Secuencia, ejecución de procesos) |
+| `gui/` | la interfaz en PySide6: `basic.py` (modo básico: el formulario de imposición y sus perfiles), `forms.py` (formularios de opciones construidos a partir del analizador de la línea de órdenes), `preview.py` (visor de PDF), `window.py` (ventana principal, menús, documentos recientes, panel Secuencia, ejecución de procesos) |
 | `install.py` | `py-imposition-install`: la entrada de menú en Linux, Windows y macOS |
 | `interface.py`, `locale/` | el idioma de la interfaz: `tr()` traduce sus textos; `locale/es.xml` contiene el español |
-| `config.py` | el archivo de configuración (`config.toml`): el idioma de la interfaz |
+| `config.py` | el archivo de configuración (`config.toml`): el idioma de la interfaz, y si la ventana muestra el documento original |
 | `icons/` | el icono: `py-imposition.svg` y todos los tamaños hechos a partir de él |
 
 ### Herramientas
 
 ```bash
-uv run python tools/screenshots.py [-o docs/img] [--only booklet,nup,step-repeat,text,cli] [--langs en,es] [--scale 2] [--dark]
+uv run python tools/screenshots.py [-o docs/img] [--only basic,booklet,nup,step-repeat,text,cli] [--langs en,es] [--scale 2] [--dark]
 uv run python tools/icons.py [--dry-run]
 ```
 
@@ -795,8 +816,8 @@ uv run python tools/icons.py [--dry-run]
     la plataforma offscreen de Qt. No aparece nada en pantalla, y el tamaño y
     la escala (2× por defecto, nítida en pantallas de alta resolución) no
     dependen de su monitor. Cada captura usa sus propios ajustes en una
-    carpeta temporal, así que sus ajustes y su secuencia no se tocan. Los
-    documentos de ejemplo se hacen con `py-imposition sample`.
+    carpeta temporal, así que sus ajustes y su secuencia no se tocan. Todas
+    las capturas usan [`docs/example/numbers-100.pdf`](docs/example/README.md).
   - **La línea de órdenes** (`cli_<lang>.png`) es una sesión real: se
     ejecutan las órdenes y su salida se dibuja como en una terminal.
   - Solo necesita el extra `gui`.
@@ -816,7 +837,7 @@ Codeberg y, con `--rpm`, en Copr:
 
 ```bash
 # 1. subir la versión en pyproject.toml, src/py_imposition/__init__.py y la spec:
-rpmdev-bumpspec -n 0.5 -c "What changed" -u "Nicolas Vaughan <nivaca@fastmail.com>" packaging/py-imposition.spec
+rpmdev-bumpspec -n X.Y -c "What changed" -u "Nicolas Vaughan <nivaca@fastmail.com>" packaging/py-imposition.spec
 # 2. hacer el commit, y luego:
 uv run python tools/release.py --rpm --notes-file NOTES.md     # --dry-run para ver antes el plan
 ```

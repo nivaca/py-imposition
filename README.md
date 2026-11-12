@@ -2,14 +2,23 @@
 
 *(Español: [README_es.md](README_es.md))*
 
-A command-line PDF imposition toolkit: booklets, n-up, step and repeat, page
-shuffling, trimming and shifting, creep, bleeds, page numbers and stamps,
-masking tape, manual imposition, variable data merge, split/merge (partials),
-automation sequences and hot folders.
+A PDF imposition toolkit, with a window and a command line: booklets, n-up,
+step and repeat, page shuffling, trimming and shifting, creep, bleeds, page
+numbers and stamps, masking tape, manual imposition, variable data merge,
+split/merge (partials), automation sequences and hot folders.
 
-Every command reads a PDF and writes a new one. Commands can be chained by
-running them one after another, or saved as a **sequence** and run in a
-single go. There is also a graphical interface with live previews.
+- **The window** (`py-imposition-gui`) shows the result as you change the
+  options. Its **basic mode** is a single imposition form with the usual
+  options (layout, binding, gutters, paper, margins, page trim, printer marks)
+  and saved profiles; its **advanced mode** has every command, chains them,
+  and builds and runs sequences. See [Graphical interface](#graphical-interface).
+- **The command line** (`py-imposition`) has the same commands, for scripts,
+  batches and hot folders. See [Commands](#commands).
+
+Both read a PDF and write a new one; nothing changes the original. Commands
+can be chained, one after another or saved as a **sequence** and run in a
+single go. The interface is in English or Spanish. How it was made is told
+in [`docs/DESCRIPTION.md`](docs/DESCRIPTION.md).
 
 ## Screenshots
 
@@ -94,7 +103,7 @@ sudo dnf install ./py-imposition-*.noarch.rpm
 You need Python 3.12+ and [uv](https://docs.astral.sh/uv/).
 
 ```bash
-git clone <repo-url> py-imposition
+git clone https://github.com/nivaca/py-imposition.git    # or https://codeberg.org/nivaca/py-imposition.git
 cd py-imposition
 uv sync
 uv tool install .        # optional: makes `py-imposition` available everywhere
@@ -152,10 +161,20 @@ The repository includes a document to try things on:
 showing its own number, so the page order of any imposition can be checked at
 a glance.
 
+**In the window**, open it (from the applications menu, *File ▸ Open*, or by
+dropping it on the window), choose a layout in basic mode, and watch the
+preview; *Save result…* writes the imposed PDF:
+
+```bash
+py-imposition-gui docs/example/numbers-100.pdf     # or the AppImage, with the file as its argument
+```
+
+**On the command line:**
+
 ```bash
 py-imposition info docs/example/numbers-100.pdf
+py-imposition impose --layout 4up-booklet --binding saddle --media a3 --orientation portrait docs/example/numbers-100.pdf
 py-imposition booklet --signature 16 --paper a4 --crop-marks --margin 1.5cm docs/example/numbers-100.pdf
-py-imposition-gui docs/example/numbers-100.pdf
 ```
 
 In general:
@@ -219,7 +238,7 @@ Options that don't apply to the chosen layout are greyed out. The previews,
 advanced mode. In both modes, *File ▸ Open recent* lists the last ten
 documents opened (*Clear the list* empties it).
 
-**Advanced mode** offers every command of the CLI:
+**Advanced mode** offers every command of the command line:
 
 - **Commands** are listed on the left, grouped like the sections below.
 - **Options** for the selected command appear as a form generated from the
@@ -725,6 +744,7 @@ that no translation is left unused. The code lives in
 
 | File | Contents |
 |---|---|
+| `simple.py` | `impose`: every usual imposition in one command (what basic mode runs) |
 | `impose.py` | booklet, n-up, step and repeat, join |
 | `shuffle.py` | shuffle rules, even/odd, reverse |
 | `pagetools.py` | trim/shift, creep, resize, rotate, duplicate/delete/move, tile |
@@ -733,16 +753,16 @@ that no translation is left unused. The code lives in
 | `pdfutil.py` | page boxes, placing pages as Form XObjects, crop marks |
 | `units.py`, `pagesel.py` | lengths, paper sizes, page ranges |
 | `common.py`, `runner.py` | command framework and CLI |
-| `gui/` | the PySide6 interface: `forms.py` (option forms built from the CLI parser), `preview.py` (PDF viewer), `window.py` (main window, sequence panel, process runner) |
+| `gui/` | the PySide6 interface: `basic.py` (basic mode: the imposition form and its profiles), `forms.py` (option forms built from the CLI parser), `preview.py` (PDF viewer), `window.py` (main window, menus, recent documents, sequence panel, process runner) |
 | `install.py` | `py-imposition-install`: the menu entry on Linux, Windows and macOS |
 | `interface.py`, `locale/` | the language of the interface: `tr()` translates its texts; `locale/es.xml` holds the Spanish |
-| `config.py` | the configuration file (`config.toml`): the language of the interface |
+| `config.py` | the configuration file (`config.toml`): the language of the interface, and whether the window shows the original document |
 | `icons/` | the icon: `py-imposition.svg` and every size made from it |
 
 ### Tools
 
 ```bash
-uv run python tools/screenshots.py [-o docs/img] [--only booklet,nup,step-repeat,text,cli] [--langs en,es] [--scale 2] [--dark]
+uv run python tools/screenshots.py [-o docs/img] [--only basic,booklet,nup,step-repeat,text,cli] [--langs en,es] [--scale 2] [--dark]
 uv run python tools/icons.py [--dry-run]
 ```
 
@@ -753,8 +773,8 @@ uv run python tools/icons.py [--dry-run]
     platform. Nothing appears on screen, and the size and scale (2× by
     default, sharp on high-resolution screens) don't depend on your display.
     Each shot uses settings of its own in a temporary folder, so your
-    settings and sequence are untouched. The example documents are made with
-    `py-imposition sample`.
+    settings and sequence are untouched. Every shot uses
+    [`docs/example/numbers-100.pdf`](docs/example/README.md).
   - **The command line** (`cli_<lang>.png`) is a real session: the commands are run
     and their output is drawn like a terminal.
   - It needs only the `gui` extra.
@@ -774,7 +794,7 @@ and Codeberg and, with `--rpm`, on Copr:
 
 ```bash
 # 1. bump the version in pyproject.toml, src/py_imposition/__init__.py and the spec:
-rpmdev-bumpspec -n 0.5 -c "What changed" -u "Nicolas Vaughan <nivaca@fastmail.com>" packaging/py-imposition.spec
+rpmdev-bumpspec -n X.Y -c "What changed" -u "Nicolas Vaughan <nivaca@fastmail.com>" packaging/py-imposition.spec
 # 2. commit, then:
 uv run python tools/release.py --rpm --notes-file NOTES.md     # --dry-run to see the plan first
 ```

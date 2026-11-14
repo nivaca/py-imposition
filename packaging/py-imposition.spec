@@ -10,7 +10,7 @@
 # Build with packaging/build-rpm.sh, which makes the source tarball.
 
 Name:           py-imposition
-Version:        0.8.1
+Version:        0.8.2
 Release:        1%{?dist}
 Summary:        PDF imposition toolkit: booklets, n-up, step and repeat and more
 
@@ -80,6 +80,9 @@ export HOME="$PWD/check-home" PY_IMPOSITION_CONFIG="$PWD/check-home/config" QT_Q
 %{_datadir}/icons/hicolor/*/apps/py-imposition.*
 
 %changelog
+* Sat Nov 14 2026 Nicolas Vaughan <nivaca@fastmail.com> - 0.8.2-1
+- Python 3.15 or later is needed; no longer built for Fedora 44
+
 * Sat Nov 14 2026 Nicolas Vaughan <nivaca@fastmail.com> - 0.8.1-1
 - Python 3.13 or later is needed
 

@@ -1,4 +1,4 @@
-# py-imposition 0.8.1: descripción
+# py-imposition 0.8.2: descripción
 
 ## Análisis
 

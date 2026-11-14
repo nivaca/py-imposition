@@ -210,7 +210,7 @@ every text is translated, the menu installer on each system, the
 packaging files, and the signing key.
 
 The tests run on every push, on GitHub Actions, and again inside every
-RPM build on Copr, with the Python of each Fedora (3.14 and 3.15).  The
+RPM build on Copr, with the Python of Fedora (3.15).  The
 screenshots of the README are made again with each change to the
 window, and checked by eye.  The program has now about 7,800 lines in 28
 modules, and 30 commands.

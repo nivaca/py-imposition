@@ -2,7 +2,7 @@
 """Make an AppImage of py-imposition, for Linux:
 
     uv run python tools/bundle-appimage.py [-o FOLDER] [--python APPIMAGE]
-                                          [--python-version 3.14] [--appimagetool APPIMAGE]
+                                          [--python-version 3.15] [--appimagetool APPIMAGE]
 
 The AppImage is dist/py-imposition-VERSION-x86_64.AppImage (the version of
 pyproject.toml; --output gives another folder). It holds a Python of its own
@@ -51,7 +51,7 @@ VERSION = tomllib.loads((ROOT / "pyproject.toml").read_text())["project"]["versi
 
 # The Python put in the AppImage (python-appimage has one release per version,
 # with an AppImage per manylinux; PySide6 needs glibc 2.34 anyway).
-PYTHON = "3.14"
+PYTHON = "3.15"
 PYTHON_RELEASES = "https://api.github.com/repos/niess/python-appimage/releases/tags/python{version}"
 MANYLINUX = ("manylinux_2_28", "manylinux2014")
 APPIMAGETOOL = f"https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-{ARCH}.AppImage"

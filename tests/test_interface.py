@@ -31,7 +31,7 @@ def argparse_texts() -> list[str]:
     return texts
 
 
-# argparse texts that only the other supported Pythons (3.13-3.14) use; they are
+# argparse texts that only Pythons before 3.15 use; they are
 # translated too, so the interface is complete on each of them.
 OTHER_PYTHONS_ARGPARSE = {
     "%r is not callable", "'required' is an invalid argument for positionals", ".__call__() not defined",

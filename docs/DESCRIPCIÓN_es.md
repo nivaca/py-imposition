@@ -24,7 +24,7 @@ Fuera del paquete quedan las herramientas: `tools/screenshots.py` hace las captu
 
 ## Implementación
 
-Está escrito en Python 3.12 o superior, con dos bibliotecas: pikepdf (basada en QPDF), que lee y escribe los PDF, y reportlab, para el texto y las fuentes. La ventana usa PySide6 (Qt 6), con QtPdf para las vistas previas. Son 28 módulos, unas 7800 líneas, y 30 órdenes.
+Está escrito en Python 3.13 o superior, con dos bibliotecas: pikepdf (basada en QPDF), que lee y escribe los PDF, y reportlab, para el texto y las fuentes. La ventana usa PySide6 (Qt 6), con QtPdf para las vistas previas. Son 28 módulos, unas 7800 líneas, y 30 órdenes.
 
 Ninguna página se rasteriza ni se reescribe. Cada página de origen se convierte en un Form XObject, un trozo independiente de contenido PDF, que el pliego dibuja con una matriz que la mueve, la escala y la gira, dentro de un rectángulo de recorte. Así las páginas conservan su texto, sus fuentes y sus imágenes, y una página colocada muchas veces (como en paso y repetición) se guarda una sola vez. Lo que se alinea en el pliego es la caja de recorte de cada página; si tiene caja de sangrado, el sangrado se ve más allá, recortado para que no invada la página vecina. Las marcas de corte son "inteligentes": una marca se omite donde caería sobre una página.
 
@@ -66,7 +66,7 @@ Las pruebas corren con cada push en GitHub Actions, y otra vez dentro de cada co
 
 ## Plataforma
 
-Funciona en Linux. La AppImage corre en cualquier distribución con glibc 2.34 o posterior (Ubuntu 22.04, Debian 12, Fedora 35 y posteriores) y no necesita nada más; en Fedora, el paquete de Copr se instala con `dnf` y se actualiza con el sistema. Desde el código fuente necesita Python 3.12 o superior, pikepdf y reportlab, y para la ventana PySide6 (unos 250 MB).
+Funciona en Linux. La AppImage corre en cualquier distribución con glibc 2.34 o posterior (Ubuntu 22.04, Debian 12, Fedora 35 y posteriores) y no necesita nada más; en Fedora, el paquete de Copr se instala con `dnf` y se actualiza con el sistema. Desde el código fuente necesita Python 3.13 o superior, pikepdf y reportlab, y para la ventana PySide6 (unos 250 MB).
 
 Al ser Python y Qt, debería funcionar también en Windows y macOS desde el código fuente, y el instalador del menú los contempla (un acceso en el menú Inicio, una pequeña aplicación en `~/Applications`), pero allí solo se ha probado con las pruebas automáticas. No necesita internet ni permisos de administrador.
 

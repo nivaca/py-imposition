@@ -106,7 +106,7 @@ sudo dnf install ./py-imposition-*.noarch.rpm
 
 ### Desde el código fuente
 
-Se necesita Python 3.12 o posterior y [uv](https://docs.astral.sh/uv/).
+Se necesita Python 3.13 o posterior y [uv](https://docs.astral.sh/uv/).
 
 ```bash
 git clone https://github.com/nivaca/py-imposition.git    # o https://codeberg.org/nivaca/py-imposition.git

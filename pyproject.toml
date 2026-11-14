@@ -8,7 +8,7 @@ license-files = ["LICENSE"]
 authors = [
     { name = "Nicolas Vaughan", email = "nivaca@fastmail.com" }
 ]
-requires-python = ">=3.12"
+requires-python = ">=3.13"
 dependencies = [
     "pikepdf>=10.8",
     "reportlab>=4.4",

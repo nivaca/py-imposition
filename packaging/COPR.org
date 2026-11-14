@@ -62,7 +62,7 @@ copr-cli create py-imposition \
   python3-pikepdf, python3-reportlab, python3-pyside6. The build makes the
   wheel with Fedora's Python macros (=%pyproject_wheel=) and runs the whole
   test suite in =%check=, without network.
-- Python 3.12 or later is required (Fedora 44 has 3.14, Fedora 45 has 3.15).
+- Python 3.13 or later is required (Fedora 44 has 3.14, Fedora 45 has 3.15).
 
 * Releasing a new version
 1. Bump the version in =pyproject.toml= and =src/py_imposition/__init__.py=,

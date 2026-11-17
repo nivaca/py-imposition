@@ -425,3 +425,22 @@ def test_unsaved_changes(app, window, tmp_path, monkeypatch):
     answer = QMessageBox.StandardButton.Discard
     window.revert()
     assert window.source == other and not window.is_modified()
+
+
+def test_basic_gutters_only_where_there_are_two_columns_or_rows(app, window):
+    b = window.basic
+    b.reset()
+    b.gutter_v.setValue(1)
+    b.gutter_h.setValue(2)
+    b.layout_type.setCurrentIndex(b.layout_type.findData("2up-booklet"))  # 2 columns, 1 row
+    assert b.gutter_v.isEnabled() and not b.gutter_h.isEnabled()
+    t = b.tokens()
+    assert "--gutter-v" in t and "--gutter-h" not in t
+    b.layout_type.setCurrentIndex(b.layout_type.findData("4up-booklet"))  # 2 x 2
+    assert b.gutter_v.isEnabled() and b.gutter_h.isEnabled() and "--gutter-h" in b.tokens()
+    b.layout_type.setCurrentIndex(b.layout_type.findData("sequential"))
+    b.cols.setValue(1)
+    b.rows.setValue(2)  # one above the other
+    assert not b.gutter_v.isEnabled() and b.gutter_h.isEnabled()
+    t = b.tokens()
+    assert "--gutter-h" in t and "--gutter-v" not in t

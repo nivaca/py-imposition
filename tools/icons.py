@@ -16,11 +16,12 @@ bigger PNG), all of them in a single run of Inkscape. The .ico is put
 together with Pillow from those same PNGs, and the .icns from the iconset
 as py-imposition-install does it (as iconutil would, with all ten sizes).
 
-Inkscape may be a Flatpak (org.inkscape.Inkscape), and then it is run with
-"flatpak run", with absolute paths, and writing only inside FOLDER: a
-Flatpak does not see the host's /tmp. So the PNGs are first drawn in a
-hidden folder inside FOLDER, and only moved to their places once all are
-there. If there is no Flatpak, the inkscape on the PATH is used.
+Inkscape is looked for in this order: $INKSCAPE, the AppImage at
+~/AppImages/inkscape.appimage, inkscape on the PATH, and last the Flatpak
+(org.inkscape.Inkscape). A Flatpak is run with "flatpak run", with absolute
+paths, and writing only inside FOLDER: it does not see the host's /tmp. So
+the PNGs are first drawn in a hidden folder inside FOLDER, and only moved to
+their places once all are there.
 """
 
 import argparse
@@ -33,6 +34,7 @@ from pathlib import Path
 
 NAME = "py-imposition"
 FLATPAK_ID = "org.inkscape.Inkscape"
+APPIMAGE = Path.home() / "AppImages" / "inkscape.appimage"
 HICOLOR_SIZES = [16, 22, 24, 32, 48, 64, 96, 128, 192, 256, 512]
 ICONSET_SIZES = [16, 32, 128, 256, 512]  # each also @2x
 ICO_SIZES = [16, 20, 24, 32, 40, 48, 64, 96, 128, 256]
@@ -47,15 +49,19 @@ sys.path.insert(0, str(ROOT / "src"))
 
 def find_inkscape():
     """The command to run Inkscape, and whether it is a Flatpak."""
+    for candidate in (os.environ.get("INKSCAPE"), APPIMAGE):
+        if candidate and Path(candidate).is_file() and os.access(candidate, os.X_OK):
+            return [str(candidate)], False
+    native = shutil.which("inkscape")
+    if native:
+        return [native], False
     if shutil.which("flatpak"):
         found = subprocess.run(["flatpak", "info", FLATPAK_ID], stdout=subprocess.DEVNULL,
                                stderr=subprocess.DEVNULL)
         if found.returncode == 0:
             return ["flatpak", "run", FLATPAK_ID], True
-    native = shutil.which("inkscape")
-    if native:
-        return [native], False
-    sys.exit(f"Inkscape was not found (neither the Flatpak {FLATPAK_ID} nor inkscape on the PATH).")
+    sys.exit(f"Inkscape was not found ($INKSCAPE, {APPIMAGE}, inkscape on the PATH, or the Flatpak "
+             f"{FLATPAK_ID}).")
 
 
 def render(inkscape, svg, folder, sizes):

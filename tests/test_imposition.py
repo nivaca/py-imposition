@@ -228,3 +228,13 @@ def test_impose_enlarge(sample, tmp_path):
     assert _page_scale(out) == pytest.approx(2 ** 0.5, rel=0.01)  # A5 -> A4
     assert run(*one, "--enlarge", "--page-trim", "1cm", sample, "-o", out) == 0
     assert _page_scale(out) > 2 ** 0.5  # (smaller after the trim, so it grows more)
+
+
+def test_impose_warns_about_a_gutter_that_cannot_apply(sample, tmp_path, capsys):
+    out = tmp_path / "g.pdf"
+    assert main(["impose", "--gutter-h", "1cm", str(sample), "-o", str(out)]) == 0  # 2-up: one row
+    assert "--gutter-h is ignored" in capsys.readouterr().err
+    assert main(["impose", "--layout", "sequential", "--cols", "1", "--rows", "2", "--gutter-v", "1cm",
+                 str(sample), "-o", str(out)]) == 0
+    err = capsys.readouterr().err
+    assert "--gutter-v is ignored" in err and "--gutter-h" not in err

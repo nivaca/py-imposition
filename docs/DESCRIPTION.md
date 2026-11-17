@@ -199,7 +199,7 @@ original asks first whether to save it.
 Testing
 -------
 
-The program has 97 automated tests (`tests/`), run with pytest.  They
+The program has 99 automated tests (`tests/`), run with pytest.  They
 check the page orders against worked examples of standard impositions,
 run every command from beginning to end on generated documents and read
 the results with pdftotext and `qpdf --check`, and impose the example

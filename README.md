@@ -219,8 +219,11 @@ command:
 - **General:** the units.
 - **Binding:** saddle-stitching or perfect binding, the sheets per fold, the
   binding edge (left or right) and *Double Sided*.
-- **Gutters:** vertical, horizontal, the spread between the middle columns of
-  an 8-up booklet, and the creep.
+- **Gutters:** vertical (between columns), horizontal (between rows), the
+  spread between the middle columns of an 8-up booklet, and the creep. A
+  gutter is greyed out where it can't apply: the horizontal one when there is
+  a single row of pages (a 2-up booklet, for example), the vertical one when
+  there is a single column.
 - **Paper:** *Autosize Media* (the sheet fits the pages), or *Fit to Media
   Size* with a standard or custom size and portrait or landscape;
   *Auto-rotate*, *Auto Scale* (shrink pages that are too large) and
@@ -362,7 +365,7 @@ basic mode:
 | `--cols`, `--rows` | the grid of cut stacks, sequential and step and repeat (default: 2 × 2) |
 | `--binding saddle\|perfect`, `--sheets-per-fold N` | saddle-stitching, or perfect binding in stacks of N folded sheets (default: perfect, 4) |
 | `--direction left\|right`, `--single-sided` | the binding edge; print on one side only |
-| `--gutter-v`, `--gutter-h`, `--spread`, `--creep` | space between columns and rows; between the middle columns of an 8-up booklet; creep for the paper's thickness |
+| `--gutter-v`, `--gutter-h`, `--spread`, `--creep` | space between columns and rows (a gutter given where there is only one column or one row is ignored, with a warning); between the middle columns of an 8-up booklet; creep for the paper's thickness |
 | `--media SIZE\|auto`, `--orientation portrait\|landscape` | the sheet: a paper name or WxH, or `auto` to fit the pages (default: Legal landscape) |
 | `--auto-rotate`, `--no-auto-scale`, `--enlarge` | turn pages to fit their cells; don't shrink large pages; also enlarge small pages to fill their cells |
 | `--margin…` | margins; like the gutters, they can be negative (write `--margin=-1cm`): pages then run off the sheet or overlap, cut at the edge or in the middle of the overlap |
@@ -798,7 +801,8 @@ uv run python tools/icons.py [--dry-run]
   - the macOS iconset and `.icns`;
   - the Windows `.ico`.
 
-  Each size is drawn by Inkscape (the Flatpak or the one on the `PATH`),
+  Each size is drawn by Inkscape (`$INKSCAPE`, the AppImage at
+  `~/AppImages/inkscape.appimage`, the one on the `PATH`, or the Flatpak),
   and the `.ico` is assembled with Pillow.
 
 ### Releasing

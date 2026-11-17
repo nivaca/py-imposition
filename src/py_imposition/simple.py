@@ -197,6 +197,10 @@ def impose(pdf: Pdf, a, ctx: Context):
         pdf = creep_pages(pdf, ns, ctx)
     cols, rows, sides = plan(a.layout, count, a.cols, a.rows, a.binding, a.sheets_per_fold, a.direction, double)
     gv, gh = ctx.L(a.gutter_v), ctx.L(a.gutter_h)
+    if gv and cols == 1:
+        ctx.warn(tr("--gutter-v is ignored: there is only one column of pages"))
+    if gh and rows == 1:
+        ctx.warn(tr("--gutter-h is ignored: there is only one row of pages"))
     spread = ctx.L(a.spread) if a.spread is not None else gv
     vgaps = [spread if a.layout == "8up-booklet" and k == 1 else gv for k in range(cols - 1)]
     hgaps = [gh] * (rows - 1)

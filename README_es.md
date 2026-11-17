@@ -227,8 +227,11 @@ orden [`impose`](#impose--imposición):
 - **Encuadernación:** grapado a caballete o encuadernación encolada, los
   pliegos por cuadernillo, el borde de encuadernación (izquierda o derecha) y
   *A doble cara*.
-- **Medianiles:** vertical, horizontal, la separación central entre las
-  columnas del medio de un folleto de 8, y el corrimiento.
+- **Medianiles:** vertical (entre columnas), horizontal (entre filas), la
+  separación central entre las columnas del medio de un folleto de 8, y el
+  corrimiento. Un medianil aparece en gris donde no puede aplicarse: el
+  horizontal cuando hay una sola fila de páginas (un folleto de 2, por
+  ejemplo), el vertical cuando hay una sola columna.
 - **Papel:** *Ajustar el soporte a las páginas* (el pliego se ajusta a las
   páginas), o *Ajustar al tamaño del soporte* con un tamaño estándar o
   personalizado y orientación vertical o apaisada; *Giro automático* y
@@ -388,7 +391,7 @@ básico de la ventana:
 | `--cols`, `--rows` | la cuadrícula de corte y apilado, secuencial y paso y repetición (por defecto: 2 × 2) |
 | `--binding saddle\|perfect`, `--sheets-per-fold N` | grapado a caballete, o encuadernación encolada en cuadernillos de N pliegos plegados (por defecto: perfect, 4) |
 | `--direction left\|right`, `--single-sided` | el borde de encuadernación; imprimir por una sola cara |
-| `--gutter-v`, `--gutter-h`, `--spread`, `--creep` | espacio entre columnas y filas; entre las columnas del medio de un folleto de 8; corrimiento por el grosor del papel |
+| `--gutter-v`, `--gutter-h`, `--spread`, `--creep` | espacio entre columnas y filas (un medianil dado donde solo hay una columna o una fila se ignora, con un aviso); entre las columnas del medio de un folleto de 8; corrimiento por el grosor del papel |
 | `--media SIZE\|auto`, `--orientation portrait\|landscape` | el pliego: un nombre de papel o WxH, o `auto` para ajustarse a las páginas (por defecto: Legal apaisado) |
 | `--auto-rotate`, `--no-auto-scale`, `--enlarge` | girar las páginas para que encajen en sus celdas; no reducir las páginas grandes; ampliar también las páginas pequeñas para llenar sus celdas |
 | `--margin…` | márgenes; como los medianiles, pueden ser negativos (escriba `--margin=-1cm`): las páginas se salen entonces del pliego o se solapan, cortadas en el borde o en la mitad del solapamiento |
@@ -843,7 +846,8 @@ uv run python tools/icons.py [--dry-run]
   - el iconset y el `.icns` de macOS;
   - el `.ico` de Windows.
 
-  Cada tamaño lo dibuja Inkscape (el Flatpak o el que esté en el `PATH`), y
+  Cada tamaño lo dibuja Inkscape (`$INKSCAPE`, la AppImage de
+  `~/AppImages/inkscape.appimage`, el que esté en el `PATH` o el Flatpak), y
   el `.ico` se ensambla con Pillow.
 
 ### Publicar una versión

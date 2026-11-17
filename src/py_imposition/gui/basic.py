@@ -283,6 +283,10 @@ class BasicPanel(QWidget):
         self.direction.setEnabled(layout not in ("cut-stacks", "step-repeat"))
         self.double.setEnabled(layout in BOOKLETS | {"cut-stacks"})
         self.spread.setEnabled(layout == "8up-booklet")
+        # a gutter only matters between two columns (vertical) or two rows (horizontal)
+        cols, rows = self.grid()
+        self.gutter_v.setEnabled(cols > 1)
+        self.gutter_h.setEnabled(rows > 1)
         self.creep.setEnabled(booklet)
         fit = self.fit.isChecked()
         custom = self.media.currentData() == "custom"
@@ -292,6 +296,12 @@ class BasicPanel(QWidget):
         self.width.setEnabled(fit and custom)
         self.height.setEnabled(fit and custom)
         self.enlarge.setEnabled(self.auto_scale.isChecked())
+
+    def grid(self) -> tuple[int, int]:
+        """The columns and rows of pages on each sheet, for the chosen layout."""
+        layout = self.layout_type.currentData()
+        fixed = {"2up-booklet": (2, 1), "4up-booklet": (2, 2), "8up-booklet": (4, 2)}
+        return fixed.get(layout, (self.cols.value(), self.rows.value()))
 
     def _show_media_size(self):
         """A named size shows its dimensions (in the orientation chosen)."""
@@ -345,7 +355,7 @@ class BasicPanel(QWidget):
         if self.double.isEnabled() and not self.double.isChecked():
             t.append("--single-sided")
         for opt, s in (("--gutter-v", self.gutter_v), ("--gutter-h", self.gutter_h)):
-            if s.value():
+            if s.isEnabled() and s.value():
                 t += self._length_opt(opt, s.value())
         if self.spread.isEnabled() and self.spread.value():
             t += self._length_opt("--spread", self.spread.value())

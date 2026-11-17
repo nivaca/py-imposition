@@ -3107,4 +3107,12 @@
     <en>Unsaved changes</en>
     <tr>Cambios sin guardar</tr>
   </text>
+  <text>
+    <en>--gutter-v is ignored: there is only one column of pages</en>
+    <tr>se ignora --gutter-v: solo hay una columna de páginas</tr>
+  </text>
+  <text>
+    <en>--gutter-h is ignored: there is only one row of pages</en>
+    <tr>se ignora --gutter-h: solo hay una fila de páginas</tr>
+  </text>
 </interface>

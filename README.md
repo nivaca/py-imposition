@@ -234,8 +234,14 @@ command:
 - **Page Trim:** cut this much off the edges of every page (its white
   margins), so that its content fills more of the sheet; with *Enlarge*, the
   pages grow to fill their place.
+
+  In *Margins* and in *Page Trim*, a lock beside *Top*/*Bottom* and another
+  beside *Left*/*Right* keep the two sides the same: while a lock is closed,
+  changing one side changes the other too (closing it gives the second side
+  the value of the first). The window remembers the locks.
 - **Printer Marks:** trim marks, bleed marks, registration marks and page
-  information.
+  information (the document name, sheet number, date and time, on by
+  default).
 
 Options that don't apply to the chosen layout are greyed out. The previews,
 *Apply*, *Undo apply* and saving work as in advanced mode.
@@ -370,7 +376,7 @@ basic mode:
 | `--auto-rotate`, `--no-auto-scale`, `--enlarge` | turn pages to fit their cells; don't shrink large pages; also enlarge small pages to fill their cells |
 | `--margin…` | margins; like the gutters, they can be negative (write `--margin=-1cm`): pages then run off the sheet or overlap, cut at the edge or in the middle of the overlap |
 | `--page-trim…` | cut this much off the edges of every page (all four, or `--page-trim-top` etc.), to leave out its white margins |
-| `--trim-marks`, `--bleed-marks`, `--registration-marks`, `--page-info` | printer marks; page information is the document name, sheet number, date and time |
+| `--trim-marks`, `--bleed-marks`, `--registration-marks`, `--page-info` | printer marks; page information is the document name, sheet number, date and time, on by default (`--no-page-info` leaves it out) |
 
 The 4- and 8-up booklets use the standard folding layouts: fold each sheet,
 then nest the folded sheets (saddle-stitching) or stack them in groups of

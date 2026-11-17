@@ -244,8 +244,15 @@ orden [`impose`](#impose--imposición):
 - **Recorte de páginas:** recortar esta cantidad de los bordes de cada
   página (sus márgenes en blanco), para que su contenido ocupe más del
   pliego; con *Ampliar*, las páginas crecen hasta llenar su lugar.
+
+  En *Márgenes* y en *Recorte de páginas*, un candado junto a
+  *Superior*/*Inferior* y otro junto a *Izquierda*/*Derecha* mantienen
+  iguales los dos lados: mientras un candado está cerrado, al cambiar un
+  lado cambia también el otro (al cerrarlo, el segundo lado toma el valor del
+  primero). La ventana recuerda los candados.
 - **Marcas de impresión:** marcas de corte, de sangrado y de registro, e
-  información de página.
+  información de página (el nombre del documento, el número de pliego, la
+  fecha y la hora; activada por defecto).
 
 Las opciones que no se aplican a la disposición elegida aparecen en gris. Las
 vistas previas, *Aplicar*, *Deshacer aplicación* y el guardado funcionan como
@@ -396,7 +403,7 @@ básico de la ventana:
 | `--auto-rotate`, `--no-auto-scale`, `--enlarge` | girar las páginas para que encajen en sus celdas; no reducir las páginas grandes; ampliar también las páginas pequeñas para llenar sus celdas |
 | `--margin…` | márgenes; como los medianiles, pueden ser negativos (escriba `--margin=-1cm`): las páginas se salen entonces del pliego o se solapan, cortadas en el borde o en la mitad del solapamiento |
 | `--page-trim…` | recortar esta cantidad de los bordes de cada página (los cuatro, o `--page-trim-top`, etc.), para dejar fuera sus márgenes en blanco |
-| `--trim-marks`, `--bleed-marks`, `--registration-marks`, `--page-info` | marcas de impresión; la información de página es el nombre del documento, el número de pliego, la fecha y la hora |
+| `--trim-marks`, `--bleed-marks`, `--registration-marks`, `--page-info` | marcas de impresión; la información de página es el nombre del documento, el número de pliego, la fecha y la hora, activada por defecto (`--no-page-info` la omite) |
 
 Los folletos de 4 y de 8 usan las disposiciones de plegado habituales: se
 pliega cada pliego y luego se encajan los pliegos plegados (grapado a

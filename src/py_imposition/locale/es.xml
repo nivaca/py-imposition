@@ -3024,8 +3024,8 @@
     <tr>dianas en los lados del pliego, para alinear las planchas</tr>
   </text>
   <text>
-    <en>the document name, sheet number, date and time at the top left of each sheet</en>
-    <tr>el nombre del documento, el número de pliego, la fecha y la hora arriba a la izquierda de cada pliego</tr>
+    <en>the document name, sheet number, date and time at the top left of each sheet (on by default; --no-page-info leaves it out)</en>
+    <tr>el nombre del documento, el número de pliego, la fecha y la hora arriba a la izquierda de cada pliego (activado por defecto; --no-page-info lo omite)</tr>
   </text>
   <text>
     <en>turn pages 90° when that fits their cell better</en>
@@ -3114,5 +3114,13 @@
   <text>
     <en>--gutter-h is ignored: there is only one row of pages</en>
     <tr>se ignora --gutter-h: solo hay una fila de páginas</tr>
+  </text>
+  <text>
+    <en>Keep the top and the bottom the same</en>
+    <tr>Mantener iguales el superior y el inferior</tr>
+  </text>
+  <text>
+    <en>Keep the left and the right the same</en>
+    <tr>Mantener iguales el izquierdo y el derecho</tr>
   </text>
 </interface>

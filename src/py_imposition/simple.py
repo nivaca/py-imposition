@@ -75,8 +75,9 @@ def _args(p):
     g.add_argument("--bleed-marks", action="store_true", help=tr("outline of the bleed area of pages that have one"))
     g.add_argument("--registration-marks", action="store_true",
                    help=tr("targets at the sides of the sheet, for aligning plates"))
-    g.add_argument("--page-info", action="store_true",
-                   help=tr("the document name, sheet number, date and time at the top left of each sheet"))
+    g.add_argument("--page-info", action=argparse.BooleanOptionalAction, default=True,
+                   help=tr("the document name, sheet number, date and time at the top left of each sheet "
+                           "(on by default; --no-page-info leaves it out)"))
     g.add_argument("--page-info-name", default=None, metavar="NAME", help=argparse.SUPPRESS)
 
 

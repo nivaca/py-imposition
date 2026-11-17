@@ -9,10 +9,11 @@ import json
 import re
 import shlex
 
-from PySide6.QtCore import Qt, Signal
+from PySide6.QtCore import QSize, Qt, Signal
+from PySide6.QtGui import QColor, QIcon, QPainter, QPainterPath, QPen, QPixmap
 from PySide6.QtWidgets import (
     QButtonGroup, QCheckBox, QComboBox, QDoubleSpinBox, QFormLayout, QGridLayout, QGroupBox, QHBoxLayout,
-    QInputDialog, QLabel, QMessageBox, QPushButton, QRadioButton, QSpinBox, QVBoxLayout, QWidget,
+    QInputDialog, QLabel, QMessageBox, QPushButton, QRadioButton, QSpinBox, QToolButton, QVBoxLayout, QWidget,
 )
 
 from ..interface import N_, tr
@@ -25,6 +26,36 @@ MEDIA = ["letter", "legal", "tabloid", "a2", "a3", "a4", "a5", "b4", "b5"]
 NEW_PROFILE = N_("<new profile>")
 BOOKLETS = {"2up-booklet", "4up-booklet", "8up-booklet"}
 GRID = {"cut-stacks", "sequential", "step-repeat"}
+
+
+def lock_icon(closed: bool, colour: QColor) -> QIcon:
+    """A padlock, closed or open, drawn in COLOUR (no icon theme or font needed)."""
+    size = 64  # (drawn large; Qt scales it down to the button)
+    pix = QPixmap(size, size)
+    pix.fill(Qt.GlobalColor.transparent)
+    p = QPainter(pix)
+    p.setRenderHint(QPainter.RenderHint.Antialiasing)
+    pen = QPen(colour, 6)
+    p.setPen(pen)
+    shackle = QPainterPath()
+    left, right, top, body = 20.0, 44.0, 8.0, 30.0
+    if closed:
+        shackle.moveTo(left, body)
+    else:
+        shackle.moveTo(left, top + 16)  # (open: the left leg lifted well out of the body)
+    if closed:
+        shackle.lineTo(left, top + 12)
+    else:
+        top -= 6  # (and the whole shackle raised)
+        shackle.moveTo(left, top + 12)
+    shackle.arcTo(left, top, right - left, 24, 180, -180)
+    shackle.lineTo(right, body)
+    p.drawPath(shackle)
+    p.setPen(Qt.PenStyle.NoPen)
+    p.setBrush(colour)
+    p.drawRoundedRect(12, body, 40, 28, 5, 5)
+    p.end()
+    return QIcon(pix)
 
 
 class BasicPanel(QWidget):
@@ -41,6 +72,8 @@ class BasicPanel(QWidget):
         self._loading = False
         self._units = window.units.currentText()
         self.lengths: list[QDoubleSpinBox] = []
+        self.locks: list[tuple[QToolButton, QDoubleSpinBox, QDoubleSpinBox]] = []
+        self._syncing = False
 
         outer = QVBoxLayout(self)
         outer.setContentsMargins(0, 0, 0, 0)
@@ -158,25 +191,18 @@ class BasicPanel(QWidget):
         outer.addWidget(box)
 
         # Margins
-        box, form = self._group(tr("Margins"))
-        box.setToolTip(tr("Negative margins let the pages run off the sheet's edges"))
         self.m_top, self.m_bottom, self.m_left, self.m_right = (self._length(negative=True) for _ in range(4))
-        form.addRow(tr("Top"), self.m_top)
-        form.addRow(tr("Bottom"), self.m_bottom)
-        form.addRow(tr("Left"), self.m_left)
-        form.addRow(tr("Right"), self.m_right)
+        box = self._sides_group(tr("Margins"), self.m_top, self.m_bottom, self.m_left, self.m_right)
+        box.setToolTip(tr("Negative margins let the pages run off the sheet's edges"))
         outer.addWidget(box)
 
         # Page trim
-        box, form = self._group(tr("Page Trim"))
+        self.t_top, self.t_bottom, self.t_left, self.t_right = (self._length() for _ in range(4))
+        box = self._sides_group(tr("Page Trim"), self.t_top, self.t_bottom, self.t_left, self.t_right)
         box.setToolTip(tr("Cut this much off the edges of every page (its white margins), so that its content "
                           "fills more of the sheet; tick Enlarge to let the pages grow"))
-        self.t_top, self.t_bottom, self.t_left, self.t_right = (self._length() for _ in range(4))
-        form.addRow(tr("Top"), self.t_top)
-        form.addRow(tr("Bottom"), self.t_bottom)
-        form.addRow(tr("Left"), self.t_left)
-        form.addRow(tr("Right"), self.t_right)
         outer.addWidget(box)
+        self._restore_locks()
 
         # Printer marks
         box = QGroupBox(tr("Printer Marks"))
@@ -214,6 +240,73 @@ class BasicPanel(QWidget):
         form = QFormLayout(box)
         form.setFieldGrowthPolicy(QFormLayout.FieldGrowthPolicy.AllNonFixedFieldsGrow)
         return box, form
+
+    def _sides_group(self, title: str, top, bottom, left, right) -> QGroupBox:
+        """Four lengths, with a lock that keeps top and bottom equal and another for left and right."""
+        box = QGroupBox(title)
+        grid = QGridLayout(box)
+        grid.setColumnStretch(1, 1)
+        for row, (label, spin) in enumerate(((tr("Top"), top), (tr("Bottom"), bottom),
+                                             (tr("Left"), left), (tr("Right"), right))):
+            grid.addWidget(QLabel(label), row, 0)
+            grid.addWidget(spin, row, 1)
+        grid.addWidget(self._lock(top, bottom, tr("Keep the top and the bottom the same")), 0, 2, 2, 1)
+        grid.addWidget(self._lock(left, right, tr("Keep the left and the right the same")), 2, 2, 2, 1)
+        return box
+
+    def _lock(self, a: QDoubleSpinBox, b: QDoubleSpinBox, tip: str) -> QToolButton:
+        """A lock button: while it is on, changing A or B gives the other the same value."""
+        btn = QToolButton()
+        btn.setCheckable(True)
+        btn.setToolTip(tip)
+        btn.setIconSize(QSize(22, 22))
+        btn.setSizePolicy(btn.sizePolicy().horizontalPolicy(), btn.sizePolicy().Policy.Expanding)
+
+        def show(on: bool):
+            btn.setIcon(lock_icon(on, btn.palette().buttonText().color()))
+
+        def toggled(on: bool):
+            show(on)
+            if on and not self._loading and b.value() != a.value():
+                b.setValue(a.value())  # (locking makes the second like the first)
+            self._save_locks()
+
+        def follow(src: QDoubleSpinBox, dst: QDoubleSpinBox):
+            def copy(value: float):
+                if btn.isChecked() and not self._loading and not self._syncing and dst.value() != value:
+                    self._syncing = True
+                    try:
+                        dst.setValue(value)
+                    finally:
+                        self._syncing = False
+            src.valueChanged.connect(copy)
+
+        show(False)
+        btn.toggled.connect(toggled)
+        follow(a, b)
+        follow(b, a)
+        self.locks.append((btn, a, b))
+        return btn
+
+    def _save_locks(self):
+        if not self._loading:
+            self.w.settings.setValue("basic/locks", json.dumps([btn.isChecked() for btn, _, _ in self.locks]))
+
+    def _restore_locks(self):
+        try:
+            states = json.loads(self.w.settings.value("basic/locks", "[]"))
+        except (TypeError, ValueError):
+            states = []
+        self._loading = True
+        for (btn, _, _), on in zip(self.locks, states):
+            btn.setChecked(bool(on))
+        self._loading = False
+
+    def _check_locks(self):
+        """A lock whose two values differ (after loading settings) is released."""
+        for btn, a, b in self.locks:
+            if btn.isChecked() and a.value() != b.value():
+                btn.setChecked(False)
 
     @staticmethod
     def _wrap(layout) -> QWidget:
@@ -258,8 +351,9 @@ class BasicPanel(QWidget):
         self.auto_rotate.setChecked(False)
         self.auto_scale.setChecked(True)
         self.enlarge.setChecked(False)
-        for c in (self.trim_marks, self.bleed_marks, self.reg_marks, self.page_info):
+        for c in (self.trim_marks, self.bleed_marks, self.reg_marks):
             c.setChecked(False)
+        self.page_info.setChecked(True)
         self._loading = False
         self._show_media_size()
         self._enable()
@@ -383,10 +477,12 @@ class BasicPanel(QWidget):
             if s.value():
                 t += self._length_opt(opt, s.value())
         for opt, c in (("--trim-marks", self.trim_marks), ("--bleed-marks", self.bleed_marks),
-                       ("--registration-marks", self.reg_marks), ("--page-info", self.page_info)):
+                       ("--registration-marks", self.reg_marks)):
             if c.isChecked():
                 t.append(opt)
-        if self.page_info.isChecked() and self.w.original is not None:
+        if not self.page_info.isChecked():
+            t.append("--no-page-info")
+        elif self.w.original is not None:
             t += ["--page-info-name", self.w.original.name]
         return t
 
@@ -449,6 +545,7 @@ class BasicPanel(QWidget):
         self.reg_marks.setChecked(ns.registration_marks)
         self.page_info.setChecked(ns.page_info)
         self._loading = False
+        self._check_locks()
         self._show_media_size()
         self.changed.emit()
 

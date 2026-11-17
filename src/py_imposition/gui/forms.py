@@ -145,16 +145,27 @@ class FlagField(Field):
         lay = QHBoxLayout(self)
         lay.setContentsMargins(0, 0, 0, 0)
         lay.addWidget(self.help)
+        self.reset()  # (an on/off option starts at its default, which may be on)
         self.box.toggled.connect(lambda _: self.changed.emit())
 
+    @property
+    def on_off(self) -> bool:
+        """An option with a --no- form (argparse.BooleanOptionalAction), usually on by default."""
+        return isinstance(self.action, argparse.BooleanOptionalAction)
+
     def tokens(self):
-        return [self.option] if self.box.isChecked() else []
+        checked = self.box.isChecked()
+        if self.on_off:
+            if checked == bool(self.action.default):
+                return []
+            return [self.option] if checked else ["--no-" + self.option[2:]]
+        return [self.option] if checked else []
 
     def set_value(self, value):
         self.box.setChecked(bool(value))
 
     def reset(self):
-        self.box.setChecked(False)
+        self.box.setChecked(bool(self.action.default) if self.on_off else False)
 
 
 class ChoiceField(Field):
@@ -325,7 +336,7 @@ class ListField(Field):
 
 
 def make_field(action: argparse.Action) -> Field:
-    if isinstance(action, argparse._StoreTrueAction):
+    if isinstance(action, (argparse._StoreTrueAction, argparse.BooleanOptionalAction)):
         return FlagField(action)
     if isinstance(action, argparse._AppendAction):
         return ListField(action)
@@ -488,7 +499,7 @@ class CommandForm(QWidget):
             field = self.by_option.get(opt)
             if field is not None:
                 if isinstance(field, FlagField):
-                    field.set_value(True)
+                    field.set_value(not opt.startswith("--no-"))
                 else:
                     if eq:
                         value = inline

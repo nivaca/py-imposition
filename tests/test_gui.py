@@ -444,3 +444,45 @@ def test_basic_gutters_only_where_there_are_two_columns_or_rows(app, window):
     assert not b.gutter_v.isEnabled() and b.gutter_h.isEnabled()
     t = b.tokens()
     assert "--gutter-h" in t and "--gutter-v" not in t
+
+
+def test_basic_page_info_is_on_by_default(app, window):
+    from py_imposition.runner import build_parser
+    assert build_parser().parse_args(["impose", "x.pdf"]).page_info is True
+    b = window.basic
+    b.reset()
+    assert b.page_info.isChecked() and "--no-page-info" not in b.tokens()
+    b.page_info.setChecked(False)
+    assert "--no-page-info" in b.tokens()
+    b.set_tokens(["impose", "--no-page-info"])
+    assert not b.page_info.isChecked()
+    b.set_tokens(["impose"])
+    assert b.page_info.isChecked()
+    form = window.form("impose")  # (the advanced form of the same command)
+    form.set_tokens(["impose", "--no-page-info"])
+    assert form.tokens() == ["impose", "--no-page-info"]
+    form.set_tokens(["impose", "--page-info"])
+    assert form.tokens() == ["impose"]
+
+
+def test_basic_locks_keep_two_sides_the_same(app, window):
+    from py_imposition.gui.basic import BasicPanel
+    b = window.basic
+    b.reset()
+    (tb, top, bottom), (lr, left, right) = b.locks[0], b.locks[1]
+    assert (top, bottom, left, right) == (b.m_top, b.m_bottom, b.m_left, b.m_right)
+    assert len(b.locks) == 4 and b.locks[2][1:] == (b.t_top, b.t_bottom)
+    b.m_top.setValue(1.5)
+    tb.setChecked(True)  # locking makes the bottom like the top
+    assert b.m_bottom.value() == 1.5
+    b.m_bottom.setValue(-0.5)  # and then each follows the other
+    assert b.m_top.value() == -0.5
+    b.m_left.setValue(2)
+    assert b.m_right.value() == 0  # (left and right are not locked)
+    b.locks[3][0].setChecked(True)
+    b.t_left.setValue(0.7)
+    assert b.t_right.value() == 0.7
+    other = BasicPanel(window)  # the locks are remembered
+    assert [btn.isChecked() for btn, _, _ in other.locks] == [True, False, False, True]
+    b.set_tokens(["impose", "--margin-top", "1", "--margin-bottom", "2"])  # different values release a lock
+    assert not tb.isChecked() and (b.m_top.value(), b.m_bottom.value()) == (1, 2)

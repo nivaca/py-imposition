@@ -18,16 +18,26 @@ def app():
     return QtWidgets.QApplication.instance() or QtWidgets.QApplication([])
 
 
+@pytest.fixture()
+def pane(app):
+    from py_imposition.gui.preview import PdfPane
+    p = PdfPane("Result")
+    yield p
+    # (deleted now, while Qt is still there: a pane left for Python's exit can crash it)
+    p.doc.close()
+    p.close()
+    p.deleteLater()
+    app.processEvents()
+
+
 def sample(path, count):
     assert main(["sample", "--count", str(count), "-o", str(path), "-q"]) == 0
     return path
 
 
-def test_a_new_result_stays_on_the_page_being_looked_at(app, tmp_path):
-    from py_imposition.gui.preview import PdfPane
+def test_a_new_result_stays_on_the_page_being_looked_at(app, pane, tmp_path):
     results = tmp_path / "results"
     results.mkdir()
-    pane = PdfPane("Result")
     pane.resize(400, 600)
     pane.show()
     pane.load(sample(results / "result-1.pdf", 8))

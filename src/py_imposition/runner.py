@@ -8,6 +8,7 @@ from pathlib import Path
 
 from pikepdf import Pdf
 
+from . import conform
 from . import pdfutil as pu
 from .common import COMMANDS, Context, ImpositionError, Result
 from . import interface
@@ -27,7 +28,10 @@ def global_parent() -> argparse.ArgumentParser:
     g.add_argument("--bleed", choices=["use", "ignore"], default=argparse.SUPPRESS,
                    help=tr("use page bleed boxes when imposing, or ignore them (default: use)"))
     g.add_argument("--pdfx", action="store_true", default=argparse.SUPPRESS,
-                   help=tr("keep a TrimBox when removing bleeds (PDF/X)"))
+                   help=tr("keep a TrimBox when removing bleeds (PDF/X); to make a PDF/X-4 file, use --conform x-4"))
+    g.add_argument("--conform", choices=[s for s, _ in conform.STANDARDS], default=argparse.SUPPRESS,
+                   help=tr("save the output as PDF/A (a-1b, a-2b, a-3b: for archiving) or PDF/X-4 (x-4: for "
+                           "printing), made by py-pdfconform, which must be installed"))
     g.add_argument("-q", "--quiet", action="store_true", default=argparse.SUPPRESS, help=tr("no warnings"))
     g.add_argument("--interface", choices=sorted(interface.names()), default=argparse.SUPPRESS,
                    help=tr("the language of the interface, for this run only (to keep a choice, use the "
@@ -75,6 +79,7 @@ def make_context(ns: argparse.Namespace, input_path: Path | None = None, base: C
         registration=vals["registration"] or base.registration,
         use_bleed=(vals["bleed"] != "ignore") if vals["bleed"] else base.use_bleed,
         pdfx=bool(vals["pdfx"]) or base.pdfx,
+        conform=getattr(ns, "conform", None) or base.conform,
         input_path=input_path or base.input_path,
         quiet=bool(vals["quiet"]) or base.quiet,
         warnings=base.warnings,
@@ -123,16 +128,31 @@ def run_steps(pdf: Pdf | None, steps: list[list[str]], ctx: Context) -> Result:
     return current
 
 
-def save_result(result: Result, output: Path) -> list[Path]:
+def save_result(result: Result, output: Path, standard: str = "", checks: dict | None = None) -> list[Path]:
+    """Save RESULT as OUTPUT (a dict of documents: OUTPUT-<key> for each), as
+    plain PDFs or, if given, as STANDARD ('a-2b', 'x-4'...; see conform.py).
+    CHECKS, if given, gets what py-pdfconform says of each file ({path: check})."""
+    if standard and not conform.available():
+        raise ImpositionError(tr("{command} is not installed (or not on the PATH), and --conform needs it",
+                                 command=conform.COMMAND))
     if isinstance(result, dict):
-        paths = []
-        for suffix, pdf in result.items():
-            path = output.with_name(f"{output.stem}-{suffix}{output.suffix or '.pdf'}")
+        paths = [output.with_name(f"{output.stem}-{suffix}{output.suffix or '.pdf'}") for suffix in result]
+        for path, pdf in zip(paths, result.values()):
             pdf.save(path)
-            paths.append(path)
-        return paths
-    result.save(output)
-    return [output]
+    else:
+        result.save(output)
+        paths = [output]
+    if standard:
+        for path in paths:
+            try:
+                check = conform.convert(path, path, standard)
+            except conform.ConformError as e:
+                raise ImpositionError(tr("{path} was saved as a plain PDF, but it could not be made "
+                                         "{standard}: {error}", path=path, standard=conform.label(standard),
+                                         error=e)) from None
+            if checks is not None:
+                checks[path] = check
+    return paths
 
 
 def strip_io(argv: list[str], ns: argparse.Namespace) -> list[str]:
@@ -150,10 +170,11 @@ def strip_io(argv: list[str], ns: argparse.Namespace) -> list[str]:
                 started = True
                 out.append(tok)
             continue
-        if tok in ("-o", "--output", "--interface"):  # (the language is not part of a step)
+        # (the language and the kind of PDF saved are not part of a step)
+        if tok in ("-o", "--output", "--interface", "--conform"):
             skip = True
             continue
-        if tok.startswith(("--output=", "--interface=")):
+        if tok.startswith(("--output=", "--interface=", "--conform=")):
             continue
         if inp is not None and tok == inp:
             inp = None

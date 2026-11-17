@@ -238,3 +238,29 @@ def test_impose_warns_about_a_gutter_that_cannot_apply(sample, tmp_path, capsys)
                  str(sample), "-o", str(out)]) == 0
     err = capsys.readouterr().err
     assert "--gutter-v is ignored" in err and "--gutter-h" not in err
+
+
+def _placed(path: Path, sheet: int = 0) -> list[tuple[float, float]]:
+    """The left and right edges of the pages placed on a sheet, from left to right."""
+    with pikepdf.open(path) as pdf:
+        page = pdf.pages[sheet]
+        out = []
+        for ops, op in pikepdf.parse_content_stream(page):
+            if str(op) == "cm" and abs(float(ops[0])) not in (0.0, 1.0):
+                out.append((float(ops[4]), float(ops[0])))
+    return sorted(out)
+
+
+def test_impose_gutter_is_the_space_between_the_pages(tmp_path):
+    letter_w = parse_paper("letter")[0]
+    legal_long = parse_paper("legal")[1]
+    cm = parse_length("1cm")
+    for gutter in (0, 2):
+        out = tmp_path / f"g{gutter}.pdf"
+        assert run("impose", "--no-page-info", "--gutter-v", f"{gutter}cm", "--margin", "1cm",
+                   EXAMPLE, "-o", out) == 0
+        (x1, s), (x2, _) = _placed(out, 1)
+        gap = x2 - (x1 + letter_w * s)
+        assert gap == pytest.approx(gutter * cm, abs=0.01)  # exactly the gutter, nothing more
+        outer_left, outer_right = x1, legal_long - (x2 + letter_w * s)
+        assert outer_left == pytest.approx(outer_right, abs=0.01) and outer_left >= cm - 0.01

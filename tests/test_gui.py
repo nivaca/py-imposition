@@ -486,3 +486,75 @@ def test_basic_locks_keep_two_sides_the_same(app, window):
     assert [btn.isChecked() for btn, _, _ in other.locks] == [True, False, False, True]
     b.set_tokens(["impose", "--margin-top", "1", "--margin-bottom", "2"])  # different values release a lock
     assert not tb.isChecked() and (b.m_top.value(), b.m_bottom.value()) == (1, 2)
+
+
+def test_save_as_pdfa_or_pdfx(app, window, tmp_path, monkeypatch):
+    """File ▸ Save as: what Save saves (running the command first if needed), then given to
+    py-pdfconform; greyed out without it."""
+    from py_imposition import conform
+    sample = tmp_path / "s.pdf"
+    assert main(["sample", "--count", "8", "--paper", "a5", "-o", str(sample), "-q"]) == 0
+    assert list(window.output_actions) == ["", "a-1b", "a-2b", "a-3b", "x-4"]
+    monkeypatch.setattr(conform, "command", lambda path=None: None)
+    window._show_output()
+    assert window.output_actions[""].isEnabled() and not window.output_actions["x-4"].isEnabled()
+    assert "py-pdfconform" in window.output_actions["x-4"].toolTip()
+    calls = []
+
+    def fake(source, target, standard, password=""):
+        calls.append((Path(target), standard))
+        return "structural check: PASS"
+
+    monkeypatch.setattr(conform, "command", lambda path=None: ["py-pdfconform"])
+    monkeypatch.setattr(conform, "convert", fake)
+    window._show_output()
+    assert window.output_actions["x-4"].isEnabled()
+    targets = iter([tmp_path / "out1.pdf", tmp_path / "out2.pdf"])
+    monkeypatch.setattr(window, "_save_target", lambda title, suggested: next(targets))
+    window.auto.setChecked(False)
+    window.open_path(sample)
+    window.select_command("nup")
+    window.form("nup").set_tokens(["nup", "--cols", "2", "--rows", "1", "--scale", "fit"])
+    seen = []
+    monkeypatch.setattr(window, "status", lambda text, error=False: seen.append(text))
+    window.output_actions["x-4"].trigger()  # (no preview yet: the command runs first)
+    wait(app, window)
+    assert calls == [(tmp_path / "out1.pdf", "x-4")] and _pages(tmp_path / "out1.pdf") == 4
+    assert "Saved out1.pdf — PDF/X-4 (structural check: PASS)" in seen
+    window.output_actions[""].trigger()  # (a plain PDF: nothing converted)
+    assert len(calls) == 1 and _pages(tmp_path / "out2.pdf") == 4
+
+
+@pytest.mark.skipif(not __import__("shutil").which("py-pdfconform"), reason="py-pdfconform not installed")
+def test_save_as_pdfx_for_real(app, window, tmp_path, monkeypatch):
+    import pikepdf
+    sample = tmp_path / "s.pdf"
+    assert main(["sample", "--count", "4", "--paper", "a5", "-o", str(sample), "-q"]) == 0
+    monkeypatch.setattr(window, "_save_target", lambda title, suggested: tmp_path / "out.pdf")
+    window.auto.setChecked(False)
+    window.open_path(sample)
+    window.select_command("reverse")
+    window.preview()
+    wait(app, window)
+    window.save("x-4")
+    with pikepdf.open(tmp_path / "out.pdf") as pdf:
+        assert "/OutputIntents" in pdf.Root and "/TrimBox" in pdf.pages[0].obj
+
+
+def test_pdfconform_setting(app, window, tmp_path, monkeypatch):
+    from PySide6.QtWidgets import QDialog
+    from py_imposition import config
+    from py_imposition.gui.conform_dialog import ConformDialog
+    script = tmp_path / "my-pdfconform"
+    script.write_text("#!/bin/sh\n")
+    script.chmod(0o755)
+    d = ConformDialog("")
+    d.pdfconform.setText(str(tmp_path / "nothing"))
+    assert "no such file" in d.pdfconform_found.text()
+    d.pdfconform.setText(str(script))
+    assert str(script) in d.pdfconform_found.text()
+    monkeypatch.setattr(ConformDialog, "exec", lambda self: (self.pdfconform.setText(str(script)),
+                                                             QDialog.DialogCode.Accepted)[1])
+    assert window.pdfconform_dialog()
+    assert config.get("pdfconform") == str(script) and window.output_actions["a-2b"].isEnabled()
+    assert "conform" not in window.form("nup").tokens()

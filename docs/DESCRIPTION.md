@@ -12,7 +12,7 @@ variable data, and runs sequences of commands and hot folders.
 Nicolas Vaughan made it in 2026.  It has a window, with a basic mode for
 the usual impositions and an advanced mode with every command, and a
 command line with the same commands, in English or in Spanish.  Here I
-explain how it was made, in eight stages.
+explain how it was made, in nine stages.
 
 py-imposition is free software, under the GNU General Public License,
 version 3 or later.  It is written in Python and stands on two libraries:
@@ -196,10 +196,30 @@ document was opened or saved, the title bar shows an asterisk, and
 closing the window, opening another document or reverting to the
 original asks first whether to save it.
 
+9. Exact gutters, and PDF/A and PDF/X
+-------------------------------------
+
+Until version 0.10 each page was centred in its own place on the sheet,
+so the space left over was shared around every page: a gutter of 2 cm
+gave a gap of 2.1 cm between the pages, taken from the outside margins.
+Now the pages go together as one block, with exactly the gutters between
+them, and the block is centred within the margins.  What is left over goes
+to the outside, so the margins are a minimum and the gutters are exact,
+and in a booklet the fold falls in the middle of the gutter.  The same
+version keeps the preview on the page being looked at when the result is
+made again.
+
+It can also save the result as PDF/A, for archiving, or PDF/X-4, for
+printing (*File ▸ Save as* in the window, `--conform` on the command
+line).  This conversion is not made by py-imposition but by another
+program of mine, py-pdfconform, with Ghostscript: py-imposition writes a
+plain PDF and gives it to py-pdfconform, which converts it and checks it.
+Without py-pdfconform everything else works.
+
 Testing
 -------
 
-The program has 101 automated tests (`tests/`), run with pytest.  They
+The program has 114 automated tests (`tests/`), run with pytest.  They
 check the page orders against worked examples of standard impositions,
 run every command from beginning to end on generated documents and read
 the results with pdftotext and `qpdf --check`, and impose the example

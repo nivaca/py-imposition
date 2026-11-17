@@ -10,7 +10,7 @@
 # Build with packaging/build-rpm.sh, which makes the source tarball.
 
 Name:           py-imposition
-Version:        0.9
+Version:        0.10
 Release:        1%{?dist}
 Summary:        PDF imposition toolkit: booklets, n-up, step and repeat and more
 
@@ -80,6 +80,10 @@ export HOME="$PWD/check-home" PY_IMPOSITION_CONFIG="$PWD/check-home/config" QT_Q
 %{_datadir}/icons/hicolor/*/apps/py-imposition.*
 
 %changelog
+* Tue Nov 17 2026 Nicolas Vaughan <nivaca@fastmail.com> - 0.10-1
+- impose: exact gutters, pages together within the margins; the preview keeps
+  its page; PDF/A and PDF/X output through py-pdfconform
+
 * Tue Nov 17 2026 Nicolas Vaughan <nivaca@fastmail.com> - 0.9-1
 - impose: page information on by default (--no-page-info); basic mode: locks for
   top/bottom and left/right margins and trims

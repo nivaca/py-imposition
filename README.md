@@ -120,7 +120,10 @@ uv tool install '.[gui]'   # installs both py-imposition and py-imposition-gui
 Dependencies: [pikepdf](https://pikepdf.readthedocs.io/) (based on QPDF)
 and [reportlab](https://www.reportlab.com/) (text and fonts). The GUI also
 needs [PySide6](https://doc.qt.io/qtforpython-6/) (Qt 6): the
-`pyside6-essentials` and `pyside6-pdf` packages, about 250 MB.
+`pyside6-essentials` and `pyside6-pdf` packages, about 250 MB. To save
+PDF/A or PDF/X, any of the three ways needs
+[py-pdfconform](https://github.com/nivaca/py-pdfconform) (see "PDF/A and
+PDF/X").
 
 ### A menu entry
 
@@ -142,6 +145,26 @@ same Python that ran the installer. Where it goes depends on the system:
 It doesn't need administrator rights. If the Python environment moves or is
 rebuilt (for example, after `uv tool install` again into a new place), run it
 again. It needs the `gui` extra, and says so if PySide6 is missing.
+
+### PDF/A and PDF/X
+
+To save the result as PDF/A (for archiving) or PDF/X-4 (for printing),
+py-imposition uses another program of mine,
+[py-pdfconform](https://github.com/nivaca/py-pdfconform) (it needs
+Ghostscript). The result is written first as a plain PDF and then given to
+py-pdfconform, which converts it and checks it. py-imposition looks for it,
+as `py-pdfconform` or `py-pdfconform.py`, on the PATH and in `~/bin` and
+`~/.local/bin`; a program started from the menu of the desktop often doesn't
+have those two folders on its PATH. If it is elsewhere, give its path in
+*Settings ▸ py-pdfconform…* in the window (kept as `pdfconform` in
+`config.toml`), which says which one will be used. A script that can't be
+run by itself is run with `python3`. Without it, *File ▸ Save as ▸ PDF/A…*
+and *PDF/X-4…* are greyed out, `--conform` stops with an error, and
+everything else works.
+
+This is not the `--pdfx` preference, which only keeps a TrimBox when bleeds
+are removed. PDF/X-4 keeps the trim and bleed boxes of the pages; a page
+without a trim box gets one the size of the page.
 
 ### Uninstalling
 
@@ -223,7 +246,10 @@ command:
   spread between the middle columns of an 8-up booklet, and the creep. A
   gutter is greyed out where it can't apply: the horizontal one when there is
   a single row of pages (a 2-up booklet, for example), the vertical one when
-  there is a single column.
+  there is a single column. The pages sit together, with exactly the gutters
+  between them, and the whole block is centred within the margins: space left
+  over goes to the outside, never between the pages, so the margins are a
+  minimum.
 - **Paper:** *Autosize Media* (the sheet fits the pages), or *Fit to Media
   Size* with a standard or custom size and portrait or landscape;
   *Auto-rotate*, *Auto Scale* (shrink pages that are too large) and
@@ -254,6 +280,11 @@ In both modes:
   (fronts and backs, for example), they are all saved, with a suffix.
   *File ▸ Save the document as it is…* (Ctrl+Shift+S) saves the current
   document instead: the commands applied so far, without the current one.
+- **File ▸ Save as** saves what *Save…* saves, this once, as a plain PDF,
+  PDF/A-1b, PDF/A-2b or PDF/A-3b (for archiving), or PDF/X-4 (for printing),
+  made by py-pdfconform (see [PDF/A and PDF/X](#pdfa-and-pdfx)); each file is
+  converted when a command makes several. The status bar says what
+  py-pdfconform's check found. If the conversion fails, the plain PDFs stay.
 - **Unsaved changes:** when commands have been applied, or options changed
   and a result made, since the document was opened or saved, the title bar
   shows an asterisk. Closing the window, opening another document or
@@ -283,8 +314,10 @@ In both modes:
   options again. *Undo apply* (Ctrl+Z) steps back, and *File ▸ Revert to
   original* starts over.
 - **Preferences** (units, registration colour, bleed handling, PDF/X) are
-  on the toolbar and apply to every command. The language is under
-  *Settings ▸ Language of the interface*.
+  on the toolbar and apply to every command; the PDF/X box only keeps a
+  TrimBox when bleeds are removed (a PDF/X-4 file is made by *File ▸ Save as
+  ▸ PDF/X-4…*). The language is under *Settings ▸ Language of the
+  interface*, and where py-pdfconform is under *Settings ▸ py-pdfconform…*.
 - **Sequence panel:**
   - Collect steps from the form (*Add current*), or reorder them by dragging.
   - Load steps from a document's recorded commands (*From document*, i.e.
@@ -317,7 +350,8 @@ The choice is kept in a small configuration file, `config.toml`, in
 Support/py-imposition/` (macOS) or `%APPDATA%\py-imposition\` (Windows);
 `$PY_IMPOSITION_CONFIG` names another folder. Both the command line and the
 window read it. The window also keeps there whether it shows the original
-document (`show_document = true` or `false`).
+document (`show_document = true` or `false`), and where py-pdfconform is
+(`pdfconform`, empty to look for it; see [PDF/A and PDF/X](#pdfa-and-pdfx)).
 
 The translations are in `src/py_imposition/locale/es.xml`, with one `<text>`
 for each text of the program, giving the English (`<en>`) and its
@@ -348,7 +382,8 @@ choose whichever fits more) or `as-is`.
 | `--units cm\|mm\|in\|pt` | unit for bare numbers (default `cm`) |
 | `--registration black\|cmyk\|all` | colour of crop marks and "registration" text: black only, CMYK (all four process plates), or all separations |
 | `--bleed use\|ignore` | use pages' bleed boxes when imposing (default), or impose the visible page only |
-| `--pdfx` | when bleeds are removed, keep a TrimBox (PDF/X) |
+| `--pdfx` | when bleeds are removed, keep a TrimBox (PDF/X); this doesn't make a PDF/X file |
+| `--conform a-1b\|a-2b\|a-3b\|x-4` | save the output as PDF/A (`a-…`, for archiving) or PDF/X-4 (`x-4`, for printing), made by py-pdfconform (see [PDF/A and PDF/X](#pdfa-and-pdfx)); with `run`, `replay` and `watch`, every output. It is not recorded in the output's history |
 | `-q` | no warnings |
 | `--interface en\|es` | the language of the interface, for this run only (see [The language of the interface](#the-language-of-the-interface)) |
 
@@ -776,10 +811,11 @@ that no translation is left unused. The code lives in
 | `pdfutil.py` | page boxes, placing pages as Form XObjects, crop marks |
 | `units.py`, `pagesel.py` | lengths, paper sizes, page ranges |
 | `common.py`, `runner.py` | command framework and CLI |
-| `gui/` | the PySide6 interface: `basic.py` (basic mode: the imposition form and its profiles), `forms.py` (option forms built from the CLI parser), `preview.py` (PDF viewer), `window.py` (main window, menus, recent documents, sequence panel, process runner) |
+| `conform.py` | PDF/A and PDF/X, through py-pdfconform |
+| `gui/` | the PySide6 interface: `basic.py` (basic mode: the imposition form and its profiles), `forms.py` (option forms built from the CLI parser), `preview.py` (PDF viewer), `window.py` (main window, menus, recent documents, sequence panel, process runner), `conform_dialog.py` (where py-pdfconform is) |
 | `install.py` | `py-imposition-install`: the menu entry on Linux, Windows and macOS |
 | `interface.py`, `locale/` | the language of the interface: `tr()` translates its texts; `locale/es.xml` holds the Spanish |
-| `config.py` | the configuration file (`config.toml`): the language of the interface, and whether the window shows the original document |
+| `config.py` | the configuration file (`config.toml`): the language of the interface, whether the window shows the original document, and where py-pdfconform is |
 | `icons/` | the icon: `py-imposition.svg` and every size made from it |
 
 ### Tools

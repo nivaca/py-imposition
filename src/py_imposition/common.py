@@ -26,6 +26,7 @@ class Context:
     registration: str = "black"  # black | cmyk | all
     use_bleed: bool = True
     pdfx: bool = False
+    conform: str = ""  # PDF/A or PDF/X made of the outputs ('a-2b', 'x-4'...; see conform.py), '' for none
     input_path: Path | None = None
     quiet: bool = False
     warnings: list[str] = field(default_factory=list)

@@ -244,16 +244,22 @@ def impose(pdf: Pdf, a, ctx: Context):
     elif not a.enlarge:
         s = min(s, 1.0)
 
-    # cell rectangles, row by row from the top left
-    xs, x = [], ml
+    # The pages go together as one block, with exactly the gutters between them, centred within
+    # the margins: whatever space is left over goes to the outside, never between the pages, so
+    # the margins are a minimum and the gutters are what they say.
+    slot_w = max(d[0] for d in dims) * s
+    slot_h = max(d[1] for d in dims) * s
+    block_w = cols * slot_w + sum(vgaps)
+    block_h = rows * slot_h + sum(hgaps)
+    xs, x = [], ml + ((W - ml - mr) - block_w) / 2
     for c in range(cols):
         xs.append(x)
-        x += cw + (vgaps[c] if c < cols - 1 else 0)
-    ys, y = [], H - mt
+        x += slot_w + (vgaps[c] if c < cols - 1 else 0)
+    ys, y = [], H - mt - ((H - mt - mb) - block_h) / 2
     for r in range(rows):
-        ys.append(y - ch)
-        y -= ch + (hgaps[r] if r < rows - 1 else 0)
-    cells = [(xs[c], ys[r], xs[c] + cw, ys[r] + ch) for r in range(rows) for c in range(cols)]
+        ys.append(y - slot_h)
+        y -= slot_h + (hgaps[r] if r < rows - 1 else 0)
+    cells = [(xs[c], ys[r], xs[c] + slot_w, ys[r] + slot_h) for r in range(rows) for c in range(cols)]
 
     def clip_for(cell: pu.Rect, c: int, r: int) -> pu.Rect:
         left = cell[0] - (vgaps[c - 1] / 2 if c > 0 else cell[0])
@@ -278,8 +284,8 @@ def impose(pdf: Pdf, a, ctx: Context):
             pw, ph = geom.size(total)
             pw, ph = pw * s, ph * s
             cell = cells[k]
-            x0 = cell[0] + (cw - pw) / 2
-            y0 = cell[1] + (ch - ph) / 2
+            x0 = cell[0] + (slot_w - pw) / 2  # (a smaller page is centred in its place)
+            y0 = cell[1] + (slot_h - ph) / 2
             clip = clip_for(cell, k % cols, k // cols)
             rect = pu.place_page(canvas, imp, page, geom, x0, y0, s, rotate_cw=total, clip=clip)
             trims.append(rect)

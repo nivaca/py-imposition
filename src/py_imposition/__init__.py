@@ -12,10 +12,10 @@ from . import (  # noqa: F401  (importing registers the commands)
 )
 from .common import COMMANDS, Context, ImpositionError
 from .runner import build_parser, make_context, record, save_result, strip_io
-from . import interface
+from . import conform, interface
 from .interface import ntr, tr
 
-__version__ = "0.9"
+__version__ = "0.10"
 
 __all__ = ["main", "COMMANDS", "Context", "ImpositionError", "__version__"]
 
@@ -60,7 +60,8 @@ def main(argv: list[str] | None = None) -> int:
         if out is None:
             stem = inp.with_suffix("") if inp is not None else Path(ns.command)
             out = Path(f"{stem}-{ns.command}.pdf")
-        paths = save_result(result, out)
+        checks: dict[Path, str] = {}
+        paths = save_result(result, out, ctx.conform, checks)
     except ImpositionError as e:
         print(tr('error: {error}', error=e), file=sys.stderr)
         return 1
@@ -70,4 +71,6 @@ def main(argv: list[str] | None = None) -> int:
             print(ntr('Wrote {path} ({count} page)', 'Wrote {path} ({count} pages)', n, path=p))
         except Exception:
             print(tr("Wrote {path}", path=p))
+        if ctx.conform:
+            print("  " + conform.label(ctx.conform) + (f" ({checks[p]})" if checks.get(p) else ""))
     return 0

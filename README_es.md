@@ -125,7 +125,10 @@ uv tool install '.[gui]'   # instala py-imposition y py-imposition-gui
 Dependencias: [pikepdf](https://pikepdf.readthedocs.io/) (basado en QPDF)
 y [reportlab](https://www.reportlab.com/) (texto y fuentes). La interfaz
 gráfica necesita además [PySide6](https://doc.qt.io/qtforpython-6/) (Qt 6):
-los paquetes `pyside6-essentials` y `pyside6-pdf`, unos 250 MB.
+los paquetes `pyside6-essentials` y `pyside6-pdf`, unos 250 MB. Para guardar
+PDF/A o PDF/X, cualquiera de las tres formas de instalarlo necesita
+[py-pdfconform](https://github.com/nivaca/py-pdfconform) (véase "PDF/A y
+PDF/X").
 
 ### Una entrada de menú
 
@@ -149,6 +152,27 @@ No requiere permisos de administrador. Si el entorno de Python se mueve o se
 reconstruye (por ejemplo, tras volver a ejecutar `uv tool install` en otro
 lugar), ejecútelo de nuevo. Necesita el extra `gui`, y lo indica si falta
 PySide6.
+
+### PDF/A y PDF/X
+
+Para guardar el resultado como PDF/A (para archivo) o PDF/X-4 (para
+imprenta), py-imposition usa otro programa mío,
+[py-pdfconform](https://github.com/nivaca/py-pdfconform) (necesita
+Ghostscript). El resultado se escribe primero como PDF corriente y luego
+pasa a py-pdfconform, que lo convierte y lo revisa. py-imposition lo busca,
+como `py-pdfconform` o `py-pdfconform.py`, en el PATH y en `~/bin` y
+`~/.local/bin`; un programa abierto desde el menú del escritorio a menudo no
+tiene esas dos carpetas en su PATH. Si está en otra parte, se indica su ruta
+en *Ajustes ▸ py-pdfconform…* de la ventana (se guarda como `pdfconform` en
+`config.toml`), que dice cuál se usará. Un script que no puede ejecutarse
+por sí mismo se ejecuta con `python3`. Sin él, *Archivo ▸ Guardar como ▸
+PDF/A…* y *PDF/X-4…* aparecen desactivadas, `--conform` se detiene con un
+error, y todo lo demás funciona.
+
+No hay que confundirlo con la preferencia `--pdfx`, que solo conserva una
+TrimBox al quitar los sangrados. El PDF/X-4 conserva las cajas de corte y de
+sangrado de las páginas; a una página sin caja de corte se le da una del
+tamaño de la página.
 
 ### Desinstalación
 
@@ -231,7 +255,10 @@ orden [`impose`](#impose--imposición):
   separación central entre las columnas del medio de un folleto de 8, y el
   corrimiento. Un medianil aparece en gris donde no puede aplicarse: el
   horizontal cuando hay una sola fila de páginas (un folleto de 2, por
-  ejemplo), el vertical cuando hay una sola columna.
+  ejemplo), el vertical cuando hay una sola columna. Las páginas van juntas,
+  con exactamente los medianiles entre ellas, y el bloque entero se centra
+  dentro de los márgenes: el espacio que sobra va hacia afuera, nunca entre
+  las páginas, así que los márgenes son un mínimo.
 - **Papel:** *Ajustar el soporte a las páginas* (el pliego se ajusta a las
   páginas), o *Ajustar al tamaño del soporte* con un tamaño estándar o
   personalizado y orientación vertical o apaisada; *Giro automático* y
@@ -267,6 +294,12 @@ En ambos modos:
   ejemplo), se guardan todos, con un sufijo. *Archivo ▸ Guardar el documento
   tal como está…* (Ctrl+Mayús+S) guarda en cambio el documento actual: las
   órdenes aplicadas hasta ahora, sin la actual.
+- **Archivo ▸ Guardar como** guarda lo mismo que *Guardar…*, esa vez, como
+  PDF corriente, PDF/A-1b, PDF/A-2b o PDF/A-3b (para archivo) o PDF/X-4
+  (para imprenta), hechos por py-pdfconform (véase [PDF/A y
+  PDF/X](#pdfa-y-pdfx)); si una orden produce varios archivos, se convierte
+  cada uno. La barra de estado dice lo que encontró la revisión de
+  py-pdfconform. Si la conversión falla, quedan los PDF corrientes.
 - **Cambios sin guardar:** cuando se han aplicado órdenes, o se han cambiado
   opciones y se ha hecho un resultado, desde que se abrió o se guardó el
   documento, la barra de título muestra un asterisco. Al cerrar la ventana,
@@ -304,7 +337,10 @@ En ambos modos:
   que se vuelvan a cambiar las opciones.
 - **Las preferencias** (unidades, color de registro, tratamiento de los
   sangrados, PDF/X) están en la barra de herramientas y se aplican a todas
-  las órdenes. El idioma está en *Ajustes ▸ Idioma de la interfaz*.
+  las órdenes; la casilla PDF/X solo conserva una TrimBox al quitar los
+  sangrados (un archivo PDF/X-4 se hace con *Archivo ▸ Guardar como ▸
+  PDF/X-4…*). El idioma está en *Ajustes ▸ Idioma de la interfaz*, y dónde
+  está py-pdfconform, en *Ajustes ▸ py-pdfconform…*.
 - **Panel Secuencia:**
   - Reúna pasos desde el formulario (*Añadir actual*), o cambie su orden
     arrastrándolos.
@@ -341,7 +377,8 @@ en `~/.config/py-imposition/` (Linux), `~/Library/Application
 Support/py-imposition/` (macOS) o `%APPDATA%\py-imposition\` (Windows);
 `$PY_IMPOSITION_CONFIG` indica otra carpeta. Tanto la línea de órdenes como
 la ventana lo leen. La ventana guarda ahí también si muestra el documento
-original (`show_document = true` o `false`).
+original (`show_document = true` o `false`) y dónde está py-pdfconform
+(`pdfconform`, vacío para buscarlo; véase [PDF/A y PDF/X](#pdfa-y-pdfx)).
 
 Las traducciones están en `src/py_imposition/locale/es.xml`, con un `<text>`
 para cada texto del programa, que da el inglés (`<en>`) y su traducción
@@ -374,7 +411,8 @@ admiten también `--parity odd|even`.
 | `--units cm\|mm\|in\|pt` | unidad de los números sin unidad (por defecto, `cm`) |
 | `--registration black\|cmyk\|all` | color de las marcas de corte y del texto en "registro": solo negro, CMYK (las cuatro planchas de cuatricromía) o todas las separaciones |
 | `--bleed use\|ignore` | usar las cajas de sangrado de las páginas al imponer (por defecto), o imponer solo la página visible |
-| `--pdfx` | al quitar los sangrados, conservar una TrimBox (PDF/X) |
+| `--pdfx` | al quitar los sangrados, conservar una TrimBox (PDF/X); no hace un archivo PDF/X |
+| `--conform a-1b\|a-2b\|a-3b\|x-4` | guardar la salida como PDF/A (`a-…`, para archivo) o PDF/X-4 (`x-4`, para imprenta), hecho por py-pdfconform (véase [PDF/A y PDF/X](#pdfa-y-pdfx)); con `run`, `replay` y `watch`, cada salida. No queda registrado en el historial de la salida |
 | `-q` | sin advertencias |
 | `--interface en\|es` | el idioma de la interfaz, solo para esta ejecución (véase [El idioma de la interfaz](#el-idioma-de-la-interfaz)) |
 
@@ -822,10 +860,11 @@ código está en `src/py_imposition/`:
 | `pdfutil.py` | cajas de página, colocación de páginas como Form XObjects, marcas de corte |
 | `units.py`, `pagesel.py` | longitudes, tamaños de papel, intervalos de páginas |
 | `common.py`, `runner.py` | estructura de las órdenes y línea de órdenes |
-| `gui/` | la interfaz en PySide6: `basic.py` (modo básico: el formulario de imposición y sus perfiles), `forms.py` (formularios de opciones construidos a partir del analizador de la línea de órdenes), `preview.py` (visor de PDF), `window.py` (ventana principal, menús, documentos recientes, panel Secuencia, ejecución de procesos) |
+| `conform.py` | PDF/A y PDF/X, por medio de py-pdfconform |
+| `gui/` | la interfaz en PySide6: `basic.py` (modo básico: el formulario de imposición y sus perfiles), `forms.py` (formularios de opciones construidos a partir del analizador de la línea de órdenes), `preview.py` (visor de PDF), `window.py` (ventana principal, menús, documentos recientes, panel Secuencia, ejecución de procesos), `conform_dialog.py` (dónde está py-pdfconform) |
 | `install.py` | `py-imposition-install`: la entrada de menú en Linux, Windows y macOS |
 | `interface.py`, `locale/` | el idioma de la interfaz: `tr()` traduce sus textos; `locale/es.xml` contiene el español |
-| `config.py` | el archivo de configuración (`config.toml`): el idioma de la interfaz, y si la ventana muestra el documento original |
+| `config.py` | el archivo de configuración (`config.toml`): el idioma de la interfaz, si la ventana muestra el documento original y dónde está py-pdfconform |
 | `icons/` | el icono: `py-imposition.svg` y todos los tamaños hechos a partir de él |
 
 ### Herramientas

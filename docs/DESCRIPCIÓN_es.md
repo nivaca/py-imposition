@@ -1,4 +1,4 @@
-# py-imposition 0.9: descripción
+# py-imposition 0.10: descripción
 
 ## Análisis
 
@@ -44,13 +44,21 @@ El modo básico es un único formulario, dispuesto como un diálogo de imposici�
 
 Muchos PDF tienen márgenes blancos anchos, y al imponerlos de dos o de cuatro por pliego su texto se vuelve pequeño. `impose` tiene tres maneras de que el contenido ocupe más del pliego: `--page-trim` recorta los bordes blancos de cada página antes de colocarla (en los cuatro lados, o en cada uno); `--enlarge` permite que las páginas crezcan hasta llenar su lugar, y no solo que se reduzcan cuando no caben; y los márgenes y los medianiles pueden ser negativos, de modo que las páginas se salen del pliego o se solapan, y cada una se corta en el borde del pliego o en la mitad del solapamiento.
 
+### Medianiles y márgenes
+
+Hasta la versión 0.10, cada página se centraba en su propio lugar del pliego, y el espacio sobrante se repartía alrededor de todas: un medianil de 2 cm dejaba 2,1 cm entre las páginas, a costa de los márgenes de afuera. Ahora las páginas van juntas, como un bloque, con exactamente los medianiles entre ellas, y el bloque se centra dentro de los márgenes. Lo que sobra va hacia afuera; los márgenes son un mínimo, los medianiles son exactos y, en un folleto, el pliegue cae en la mitad del medianil.
+
+### PDF/A y PDF/X
+
+El resultado también se puede guardar como PDF/A, para archivar, o como PDF/X-4, para imprimir (*Archivo ▸ Guardar como* en la ventana, `--conform` en la línea de órdenes). No lo convierte py-imposition, sino otro programa mío, py-pdfconform, con Ghostscript: py-imposition escribe un PDF corriente y se lo pasa, y py-pdfconform lo convierte y lo comprueba. Sin py-pdfconform, todo lo demás funciona.
+
 ### Los idiomas
 
 Cada texto del programa, en la ventana y en la línea de órdenes, incluidos los mensajes propios de `argparse`, pasa por `tr()`, y las traducciones están en un solo archivo XML, `locale/es.xml`, con cada texto en inglés y en español. El idioma se elige en la ventana (*Ajustes*), con `--interface` en la línea de órdenes o en `config.toml` (`py-imposition interface es` lo guarda). El README tiene una versión en español, paralela a la inglesa, y las capturas se hacen en los dos idiomas.
 
 ### Proceso y distribución
 
-El trabajo pasó por ocho etapas: primero un folleto 2-up en la línea de órdenes; luego el conjunto completo de herramientas (versión 0.1); la ventana, con el instalador del menú, el icono y las capturas (0.2 y 0.3); la interfaz en español y los paquetes (0.4 y 0.4.1); el modo básico con la orden `impose` (0.5), y después las vistas del documento original y los documentos recientes (0.5.1 y 0.6); las maneras de llenar el pliego (0.7), y por último un solo *Guardar…* y el aviso de cambios sin guardar (0.8).
+El trabajo pasó por nueve etapas: primero un folleto 2-up en la línea de órdenes; luego el conjunto completo de herramientas (versión 0.1); la ventana, con el instalador del menú, el icono y las capturas (0.2 y 0.3); la interfaz en español y los paquetes (0.4 y 0.4.1); el modo básico con la orden `impose` (0.5), y después las vistas del documento original y los documentos recientes (0.5.1 y 0.6); las maneras de llenar el pliego (0.7), un solo *Guardar…* y el aviso de cambios sin guardar (0.8), y por último los medianiles exactos y la salida en PDF/A y PDF/X (0.10).
 
 La AppImage lleva su propio Python, Qt y bibliotecas, y funciona en casi cualquier Linux; su primer argumento decide entre la ventana y la línea de órdenes. La primera AppImage enseñó algo: en el equipo donde se hizo encontraba pikepdf entre los paquetes de Python del usuario, así que funcionaba allí y en ningún otro sitio. Desde la 0.4.1 los paquetes se instalan aislados, se comprueba que cada módulo se importe desde dentro de la AppImage, y esta se arranca una vez con una carpeta personal vacía antes de publicarla.
 
@@ -60,7 +68,7 @@ El código se gestiona con git, en un solo repositorio publicado en GitHub (http
 
 ## Validación
 
-Hay 101 pruebas automáticas (`tests/`), que se corren con `uv run pytest`. Comprueban el orden de las páginas con ejemplos resueltos de imposiciones habituales, ejecutan cada orden de principio a fin sobre documentos generados y leen los resultados con pdftotext y `qpdf --check`, e imponen el documento de ejemplo, cuyas páginas muestran cada una su número. La ventana se prueba sin pantalla, con la plataforma offscreen de Qt: los formularios, el modo básico y sus perfiles, las vistas previas, *Aplicar* y *Deshacer*, los documentos recientes y el idioma. Otras pruebas comprueban que cada texto tenga su traducción y que no sobre ninguna, el instalador del menú en cada sistema, los archivos de empaquetado y la clave de firma.
+Hay 114 pruebas automáticas (`tests/`), que se corren con `uv run pytest`. Comprueban el orden de las páginas con ejemplos resueltos de imposiciones habituales, ejecutan cada orden de principio a fin sobre documentos generados y leen los resultados con pdftotext y `qpdf --check`, e imponen el documento de ejemplo, cuyas páginas muestran cada una su número. La ventana se prueba sin pantalla, con la plataforma offscreen de Qt: los formularios, el modo básico y sus perfiles, las vistas previas, *Aplicar* y *Deshacer*, los documentos recientes y el idioma. Otras pruebas comprueban que cada texto tenga su traducción y que no sobre ninguna, el instalador del menú en cada sistema, los archivos de empaquetado y la clave de firma.
 
 Las pruebas corren con cada push en GitHub Actions, y otra vez dentro de cada construcción del RPM en Copr, con el Python de Fedora (3.15). Las capturas de los README se rehacen con cada cambio de la ventana y se revisan a ojo.
 

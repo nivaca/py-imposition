@@ -20,7 +20,7 @@ from PySide6.QtWidgets import (
 
 from .. import __version__
 from ..common import COMMANDS
-from .. import config, interface
+from .. import config, conform, interface
 from ..interface import N_, ntr, tr
 from .basic import BasicPanel
 from .forms import CommandForm, file_filter, subparsers
@@ -358,6 +358,7 @@ class MainWindow(QMainWindow):
         self._pending_key = None
         self._apply_after = False
         self._save_after = False
+        self._save_standard = ""  # (the kind of PDF the save waiting for a result will write; see conform.py)
         # unsaved work: commands applied, or options changed (and a result made), since the last save
         self._applied_unsaved = False
         self._options_changed = False
@@ -421,7 +422,8 @@ class MainWindow(QMainWindow):
         self.bleed.setToolTip(tr("Use page bleed boxes when imposing, or impose the visible page only"))
         self._advanced_only.append(tb.addWidget(self.bleed))
         self.pdfx = QCheckBox(tr("PDF/X"))
-        self.pdfx.setToolTip(tr("Keep a TrimBox when bleeds are removed"))
+        self.pdfx.setToolTip(tr("Keep a TrimBox when bleeds are removed (to make a PDF/X-4 file, use File ▸ "
+                                "Save as ▸ PDF/X-4)"))
         self._advanced_only.append(tb.addWidget(self.pdfx))
         for w in (self.units, self.registration, self.bleed):
             w.currentIndexChanged.connect(lambda _: self.schedule())
@@ -565,6 +567,16 @@ class MainWindow(QMainWindow):
                         "command"))
         m.addAction(a)
         m.setToolTipsVisible(True)
+        # Save as: what Save saves, as a plain PDF, PDF/A or PDF/X (Save is always a plain PDF)
+        self.m_output = m.addMenu(tr("Save as"))
+        self.m_output.setToolTipsVisible(True)
+        self.output_actions = {}
+        for value, name in [("", N_("PDF"))] + conform.STANDARDS:
+            act = QAction(tr(name) + "…", self)
+            act.triggered.connect(lambda _=False, v=value: self.save(v))
+            self.m_output.addAction(act)
+            self.output_actions[value] = act
+        self._show_output()
         m.addAction(QAction(tr("Revert to original"), self, triggered=self.revert))
         m.addSeparator()
         m.addAction(QAction(tr("Quit"), self, shortcut=QKeySequence.StandardKey.Quit, triggered=self.close))
@@ -596,6 +608,10 @@ class MainWindow(QMainWindow):
             act.triggered.connect(lambda _=False, c=code: self.change_language(c))
             group.addAction(act)
             lang.addAction(act)
+        a = QAction(tr("py-pdfconform…"), self, triggered=self.pdfconform_dialog)
+        a.setToolTip(tr("Where py-pdfconform is, which makes PDF/A and PDF/X (File ▸ Save as)"))
+        m.addAction(a)
+        m.setToolTipsVisible(True)
         m = self.menuBar().addMenu(tr("&Help"))
         m.addAction(QAction(tr("Command-line help for this command"), self, triggered=self.show_cli_help))
         m.addAction(QAction(tr("About"), self, triggered=self.about))
@@ -1003,7 +1019,7 @@ class MainWindow(QMainWindow):
             self._apply_result()
         elif self._save_after:
             self._save_after = False
-            self._write_result()
+            self._write_result(self._save_standard)
 
     def _suffix(self, f: Path) -> str:
         if self._out_base is not None and f.stem.startswith(self._out_base.stem + "-"):
@@ -1134,8 +1150,9 @@ class MainWindow(QMainWindow):
         self.settings.setValue("last_dir", str(p.parent))
         return p
 
-    def save_document(self) -> bool:
-        """Save the current document as it is: the commands applied so far, not the current one."""
+    def save_document(self, standard: str = "") -> bool:
+        """Save the current document as it is: the commands applied so far, not the current one
+        (as a plain PDF or, if given, as STANDARD: 'a-2b', 'x-4'...)."""
         if not self.source:
             self.status(tr("Nothing to save"), error=True)
             return False
@@ -1149,7 +1166,7 @@ class MainWindow(QMainWindow):
         shutil.copyfile(self.source, p)
         self._applied_unsaved = False
         self._update_modified()
-        self.status(tr('Saved {page}', page=p))
+        self.status(tr('Saved {page}', page=p) + self.make_standard([p], standard))
         return True
 
     def _result_is_fresh(self) -> bool:
@@ -1157,13 +1174,14 @@ class MainWindow(QMainWindow):
         return (bool(self.result_files) and not self.runner.busy()
                 and self.result_key in (self.key(), ("sequence", src), ("document", src)))
 
-    def save(self):
-        """Save what the right pane shows; if it isn't up to date, run the command first."""
+    def save(self, standard: str = ""):
+        """Save what the right pane shows, as a plain PDF or, this once, as STANDARD ('a-2b',
+        'x-4'...); if it isn't up to date, run the command first."""
         if not self.source:
             self.status(tr("Open a PDF first (File ▸ Open, or drop a file on the window)"), error=True)
             return
         if self._result_is_fresh():
-            self._write_result()
+            self._write_result(standard)
             return
         if self.current in NO_PREVIEW:
             self.status(tr("This command doesn't make a document to save"), error=True)
@@ -1174,15 +1192,18 @@ class MainWindow(QMainWindow):
         self._pending_key = self.key()
         self._apply_after = False
         self._save_after = True
+        self._save_standard = standard
         self.run_tokens(tokens, "preview")
 
-    def _write_result(self) -> bool:
-        """Ask where, and save the result shown (all its files), or else the current document."""
+    def _write_result(self, standard: str = "") -> bool:
+        """Ask where, and save the result shown (all its files), or else the current document; as
+        plain PDFs or, if given, as STANDARD ('a-2b', 'x-4'...)."""
         if not self.result_files:
-            return self.save_document()
+            return self.save_document(standard)
         stem = self.original.stem if self.original else "document"
         applied = self.result_key is not None and self.result_key[0] == "document"
-        p = self._save_target(tr("Save"), f"{stem}-imposed.pdf" if applied else f"{stem}-{self.current}.pdf")
+        title = tr("Save") if not standard else tr("Save as {standard}", standard=conform.label(standard))
+        p = self._save_target(title, f"{stem}-imposed.pdf" if applied else f"{stem}-{self.current}.pdf")
         if not p:
             return False
         if self.source and p.resolve() == self.source.resolve():
@@ -1193,10 +1214,64 @@ class MainWindow(QMainWindow):
             suffix = self._suffix(f)
             target = p.with_name(f"{p.stem}-{suffix}.pdf") if suffix and len(self.result_files) > 1 else p
             shutil.copyfile(f, target)
-            written.append(target.name)
+            written.append(target)
         self._applied_unsaved = self._options_changed = False
         self._update_modified()
-        self.status(tr('Saved {page}', page=", ".join(written)))
+        self.status(tr('Saved {page}', page=", ".join(t.name for t in written)) + self.make_standard(written,
+                                                                                                    standard))
+        return True
+
+    # ----------------------------------------------------------------- PDF/A and PDF/X
+
+    def make_standard(self, paths: list[Path], standard: str) -> str:
+        """Convert PATHS, just saved as plain PDFs, to STANDARD ('a-2b', 'x-4'...; '' for none)
+        with py-pdfconform. Returns what to add to the status bar."""
+        if not standard:
+            return ""
+        label = conform.label(standard)
+        if not conform.available():
+            QMessageBox.warning(self, label, tr("The result was saved as a plain PDF: {command} is not installed "
+                                                "(or not where Settings say)", command=conform.COMMAND))
+            return ""
+        checks = []
+        QApplication.setOverrideCursor(Qt.CursorShape.WaitCursor)
+        try:
+            for path in paths:
+                self.statusBar().showMessage(tr("Making {standard} with {command}…", standard=label,
+                                                command=conform.COMMAND))
+                QApplication.processEvents()
+                checks.append(conform.convert(path, path, standard))
+        except conform.ConformError as e:
+            QApplication.restoreOverrideCursor()
+            QMessageBox.warning(self, label, tr("The result was saved as a plain PDF, but it could not be made "
+                                                "{standard}:\n\n{error}", standard=label, error=e))
+            return ""
+        QApplication.restoreOverrideCursor()
+        check = "; ".join(dict.fromkeys(c for c in checks if c))
+        return " — " + label + (f" ({check})" if check else "")
+
+    def _show_output(self):
+        """The Save as menu: PDF/A and PDF/X greyed out if py-pdfconform isn't there."""
+        have = conform.available()
+        for value, act in self.output_actions.items():
+            if value:
+                act.setEnabled(have)
+                act.setToolTip("" if have else tr("Needs {command}: install it, or say where it is in Settings",
+                                                  command=conform.COMMAND))
+
+    def pdfconform_dialog(self) -> bool:
+        """Settings ▸ py-pdfconform: where it is (kept in the configuration file)."""
+        from .conform_dialog import ConformDialog
+
+        d = ConformDialog(conform.configured(), self)
+        if d.exec() != QDialog.DialogCode.Accepted:
+            return False
+        try:
+            config.set("pdfconform", d.path())
+        except OSError as e:
+            self.status(tr("Could not keep the setting: {error}", error=e), error=True)
+            return False
+        self._show_output()
         return True
 
     # ----------------------------------------------------------------- unsaved changes

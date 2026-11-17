@@ -512,8 +512,8 @@
     <tr>PDF/X</tr>
   </text>
   <text>
-    <en>Keep a TrimBox when bleeds are removed</en>
-    <tr>Conservar una TrimBox cuando se quitan los sangrados</tr>
+    <en>Keep a TrimBox when bleeds are removed (to make a PDF/X-4 file, use File ▸ Save as ▸ PDF/X-4)</en>
+    <tr>Conservar una TrimBox cuando se quitan los sangrados (para hacer un archivo PDF/X-4, use Archivo ▸ Guardar como ▸ PDF/X-4)</tr>
   </text>
   <text>
     <en>Preview</en>
@@ -1588,8 +1588,8 @@
     <tr>usar las cajas de sangrado de las páginas al imponer, o ignorarlas (por defecto: use)</tr>
   </text>
   <text>
-    <en>keep a TrimBox when removing bleeds (PDF/X)</en>
-    <tr>conservar una TrimBox al eliminar los sangrados (PDF/X)</tr>
+    <en>keep a TrimBox when removing bleeds (PDF/X); to make a PDF/X-4 file, use --conform x-4</en>
+    <tr>conservar una TrimBox al eliminar los sangrados (PDF/X); para hacer un archivo PDF/X-4, use --conform x-4</tr>
   </text>
   <text>
     <en>no warnings</en>
@@ -3122,5 +3122,121 @@
   <text>
     <en>Keep the left and the right the same</en>
     <tr>Mantener iguales el izquierdo y el derecho</tr>
+  </text>
+  <text>
+    <en>Choose…</en>
+    <tr>Elegir…</tr>
+  </text>
+  <text>
+    <en>It will be {path}</en>
+    <tr>Será {path}</tr>
+  </text>
+  <text>
+    <en>Look for it on the PATH, in ~/bin and in ~/.local/bin</en>
+    <tr>Buscarlo en el PATH, en ~/bin y en ~/.local/bin</tr>
+  </text>
+  <text>
+    <en>Making {standard} with {command}…</en>
+    <tr>Haciendo {standard} con {command}…</tr>
+  </text>
+  <text>
+    <en>Needs {command}: install it, or say where it is in Settings</en>
+    <tr>Necesita {command}: instálelo, o diga dónde está en Ajustes</tr>
+  </text>
+  <text>
+    <en>Not found: PDF/A and PDF/X can't be made until it is given here</en>
+    <tr>No se encontró: no se pueden hacer PDF/A ni PDF/X hasta que se indique aquí</tr>
+  </text>
+  <text>
+    <en>PDF</en>
+    <tr>PDF</tr>
+  </text>
+  <text>
+    <en>PDF/A-1b (archiving, the oldest)</en>
+    <tr>PDF/A-1b (archivo, la más antigua)</tr>
+  </text>
+  <text>
+    <en>PDF/A-2b (archiving)</en>
+    <tr>PDF/A-2b (archivo)</tr>
+  </text>
+  <text>
+    <en>PDF/A-3b (archiving, with attachments)</en>
+    <tr>PDF/A-3b (archivo, con adjuntos)</tr>
+  </text>
+  <text>
+    <en>PDF/X-4 (printing)</en>
+    <tr>PDF/X-4 (imprenta)</tr>
+  </text>
+  <text>
+    <en>Save as</en>
+    <tr>Guardar como</tr>
+  </text>
+  <text>
+    <en>Save as {standard}</en>
+    <tr>Guardar como {standard}</tr>
+  </text>
+  <text>
+    <en>The result was saved as a plain PDF, but it could not be made {standard}:
+
+{error}</en>
+    <tr>El resultado se guardó como PDF corriente, pero no se pudo hacer {standard}:
+
+{error}</tr>
+  </text>
+  <text>
+    <en>The result was saved as a plain PDF: {command} is not installed (or not where Settings say)</en>
+    <tr>El resultado se guardó como PDF corriente: {command} no está instalado (o no está donde dicen los Ajustes)</tr>
+  </text>
+  <text>
+    <en>The script py-pdfconform, which makes PDF/A and PDF/X (with or without the .py extension); empty to look for it</en>
+    <tr>El script py-pdfconform, que hace los PDF/A y PDF/X (con la extensión .py o sin ella); vacío para buscarlo</tr>
+  </text>
+  <text>
+    <en>There is no such file</en>
+    <tr>No existe ese archivo</tr>
+  </text>
+  <text>
+    <en>Where is py-pdfconform?</en>
+    <tr>¿Dónde está py-pdfconform?</tr>
+  </text>
+  <text>
+    <en>Where py-pdfconform is, which makes PDF/A and PDF/X (File ▸ Save as)</en>
+    <tr>Dónde está py-pdfconform, que hace los PDF/A y PDF/X (Archivo ▸ Guardar como)</tr>
+  </text>
+  <text>
+    <en>py-pdfconform (py-pdfconform py-pdfconform.py);;All files (*)</en>
+    <tr>py-pdfconform (py-pdfconform py-pdfconform.py);;Todos los archivos (*)</tr>
+  </text>
+  <text>
+    <en>py-pdfconform:</en>
+    <tr>py-pdfconform:</tr>
+  </text>
+  <text>
+    <en>py-pdfconform…</en>
+    <tr>py-pdfconform…</tr>
+  </text>
+  <text>
+    <en>save the output as PDF/A (a-1b, a-2b, a-3b: for archiving) or PDF/X-4 (x-4: for printing), made by py-pdfconform, which must be installed</en>
+    <tr>guardar la salida como PDF/A (a-1b, a-2b, a-3b: para archivo) o PDF/X-4 (x-4: para imprenta), hecho por py-pdfconform, que debe estar instalado</tr>
+  </text>
+  <text>
+    <en>{command} could not make {standard}: {error}</en>
+    <tr>{command} no pudo hacer {standard}: {error}</tr>
+  </text>
+  <text>
+    <en>{command} is not installed (or not on the PATH)</en>
+    <tr>{command} no está instalado (o no está en el PATH)</tr>
+  </text>
+  <text>
+    <en>{command} is not installed (or not on the PATH), and --conform needs it</en>
+    <tr>{command} no está instalado (o no está en el PATH), y --conform lo necesita</tr>
+  </text>
+  <text>
+    <en>{command} took too long</en>
+    <tr>{command} tardó demasiado</tr>
+  </text>
+  <text>
+    <en>{path} was saved as a plain PDF, but it could not be made {standard}: {error}</en>
+    <tr>{path} se guardó como PDF corriente, pero no se pudo hacer {standard}: {error}</tr>
   </text>
 </interface>

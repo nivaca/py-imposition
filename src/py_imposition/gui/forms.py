@@ -22,7 +22,8 @@ from ..interface import N_, tr
 from ..runner import build_parser, translate_paragraphs
 
 # Options handled elsewhere in the window (input/output files, global preferences).
-SKIP = {"help", "output", "units", "registration", "bleed", "pdfx", "quiet", "version", "interface"}
+SKIP = {"help", "output", "units", "registration", "bleed", "pdfx", "quiet", "version", "interface",
+        "conform"}
 PREFERENCE_DESTS = {"units", "registration", "bleed", "pdfx"}
 
 FILE_DESTS = {"file", "evens", "background", "layout", "fields", "data", "sequence", "example"}

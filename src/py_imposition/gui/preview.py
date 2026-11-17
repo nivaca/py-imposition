@@ -74,6 +74,10 @@ class PdfPane(QWidget):
     # ----------------------------------------------------------------- loading
 
     def load(self, path: Path | None, note: str = ""):
+        """Show PATH. A new version of what is shown (a result made again, which is always written
+        to the same folder) stays on the page being looked at; another document starts at page 1."""
+        keep = self.path is not None and path is not None and path.parent == self.path.parent
+        before = self.page.value() if keep else 1
         self.doc.close()
         self.path = path
         if path is None:
@@ -81,9 +85,10 @@ class PdfPane(QWidget):
             return
         self.doc.load(str(path))
         n = self.doc.pageCount()
+        target = min(before, max(n, 1))
         self.page.blockSignals(True)
         self.page.setMaximum(max(n, 1))
-        self.page.setValue(1)
+        self.page.setValue(target)
         self.page.setSuffix(f" / {n}")
         self.page.setEnabled(n > 1)
         self.page.blockSignals(False)
@@ -93,6 +98,8 @@ class PdfPane(QWidget):
                           + (", " + dims if dims else "") + (" — " + note if note else ""))
         self.info.setToolTip(self.info.text())
         self.view.setZoomMode(self.view.zoomMode())
+        if target > 1:
+            self._jump(target)
 
     def clear(self, note: str):
         self.doc.close()

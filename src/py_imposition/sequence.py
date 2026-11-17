@@ -53,6 +53,7 @@ def prefs_context(prefs: dict, ctx: Context, input_path: Path | None = None) -> 
         registration=prefs.get("registration", ctx.registration),
         use_bleed=(prefs["bleed"] != "ignore") if "bleed" in prefs else ctx.use_bleed,
         pdfx=bool(prefs.get("pdfx", ctx.pdfx)),
+        conform=ctx.conform,
         input_path=input_path or ctx.input_path,
         quiet=ctx.quiet,
         warnings=ctx.warnings,
@@ -77,7 +78,7 @@ def process_file(path: Path, steps, prefs, ctx: Context, output: Path) -> list[P
     pdf = Pdf.open(path)
     sctx = prefs_context(prefs, ctx, path)
     result = run_steps(pdf, steps, sctx)
-    return save_result(result, output)
+    return save_result(result, output, ctx.conform)
 
 
 def _run_args(p):

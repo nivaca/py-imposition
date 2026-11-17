@@ -1,5 +1,5 @@
 # py-imposition, a PDF imposition toolkit.
-# Copyright (C) 2026 Nicolas Vaughan <nivaca@fastmail.com>
+# Copyright (C) 2026 Nicolas Vaughan <nicolasvaughan@proton.me>
 #
 # This program is free software: you can redistribute it and/or modify it
 # under the terms of the GNU General Public License as published by the
@@ -80,61 +80,61 @@ export HOME="$PWD/check-home" PY_IMPOSITION_CONFIG="$PWD/check-home/config" QT_Q
 %{_datadir}/icons/hicolor/*/apps/py-imposition.*
 
 %changelog
-* Tue Nov 17 2026 Nicolas Vaughan <nivaca@fastmail.com> - 0.10.2-1
+* Tue Nov 17 2026 Nicolas Vaughan <nicolasvaughan@proton.me> - 0.10.2-1
 - impose: the gutters only move the pages apart or together, without changing
   their size; each session of the window starts with the default settings
 
-* Tue Nov 17 2026 Nicolas Vaughan <nivaca@fastmail.com> - 0.10.1-1
+* Tue Nov 17 2026 Nicolas Vaughan <nicolasvaughan@proton.me> - 0.10.1-1
 - impose: negative margins make the pages run off the sheet by that much; in
   booklets the fold stays in the middle
 
-* Tue Nov 17 2026 Nicolas Vaughan <nivaca@fastmail.com> - 0.10-1
+* Tue Nov 17 2026 Nicolas Vaughan <nicolasvaughan@proton.me> - 0.10-1
 - impose: exact gutters, pages together within the margins; the preview keeps
   its page; PDF/A and PDF/X output through py-pdfconform
 
-* Tue Nov 17 2026 Nicolas Vaughan <nivaca@fastmail.com> - 0.9-1
+* Tue Nov 17 2026 Nicolas Vaughan <nicolasvaughan@proton.me> - 0.9-1
 - impose: page information on by default (--no-page-info); basic mode: locks for
   top/bottom and left/right margins and trims
 
-* Tue Nov 17 2026 Nicolas Vaughan <nivaca@fastmail.com> - 0.8.3-1
+* Tue Nov 17 2026 Nicolas Vaughan <nicolasvaughan@proton.me> - 0.8.3-1
 - Basic mode: a gutter only where there are two columns or rows; impose warns
   about one that cannot apply
 
-* Sat Nov 14 2026 Nicolas Vaughan <nivaca@fastmail.com> - 0.8.2-1
+* Sat Nov 14 2026 Nicolas Vaughan <nicolasvaughan@proton.me> - 0.8.2-1
 - Python 3.15 or later is needed; no longer built for Fedora 44
 
-* Sat Nov 14 2026 Nicolas Vaughan <nivaca@fastmail.com> - 0.8.1-1
+* Sat Nov 14 2026 Nicolas Vaughan <nicolasvaughan@proton.me> - 0.8.1-1
 - Python 3.13 or later is needed
 
-* Thu Nov 12 2026 Nicolas Vaughan <nivaca@fastmail.com> - 0.8-1
+* Thu Nov 12 2026 Nicolas Vaughan <nicolasvaughan@proton.me> - 0.8-1
 - The window: one Save, and a warning about unsaved changes
 
-* Thu Nov 12 2026 Nicolas Vaughan <nivaca@fastmail.com> - 0.7-1
+* Thu Nov 12 2026 Nicolas Vaughan <nicolasvaughan@proton.me> - 0.7-1
 - impose: perfect binding in stacks of four sheets per fold by default
 - impose: page trim, enlarge, and negative margins and gutters
 
-* Thu Nov 12 2026 Nicolas Vaughan <nivaca@fastmail.com> - 0.6-1
+* Thu Nov 12 2026 Nicolas Vaughan <nicolasvaughan@proton.me> - 0.6-1
 - Open recent documents; the author in About; numbers-100.pdf as the only
   example; signing key pinned and shipped
 
-* Thu Nov 12 2026 Nicolas Vaughan <nivaca@fastmail.com> - 0.5.1-1
+* Thu Nov 12 2026 Nicolas Vaughan <nicolasvaughan@proton.me> - 0.5.1-1
 - View > Show the original document: the document's preview is optional, off by
   default, and kept in config.toml
 
-* Wed Nov 11 2026 Nicolas Vaughan <nivaca@fastmail.com> - 0.5-1
+* Wed Nov 11 2026 Nicolas Vaughan <nicolasvaughan@proton.me> - 0.5-1
 - Basic mode in the window: one imposition form (layout, profiles, binding,
   gutters, paper, margins, printer marks); a Basic | Advanced switch
 - The impose command: 2-, 4- and 8-up booklets, cut stacks, sequential and
   step and repeat in one step, with trim, bleed and registration marks and
   page information
 
-* Wed Nov 11 2026 Nicolas Vaughan <nivaca@fastmail.com> - 0.4.1-1
+* Wed Nov 11 2026 Nicolas Vaughan <nicolasvaughan@proton.me> - 0.4.1-1
 - The AppImage includes pikepdf and Pillow (0.4's did not run without them
   installed)
 - Empty fields in the window show an example of what they take, and the
   command line above the options is readable in dark themes
 - Signed with a new key (236EF043AB7A4434A05CA4ECB5549099FC0D6464)
 
-* Wed Nov 11 2026 Nicolas Vaughan <nivaca@fastmail.com> - 0.4-1
+* Wed Nov 11 2026 Nicolas Vaughan <nicolasvaughan@proton.me> - 0.4-1
 - First package: the command line and the window, in English or Spanish,
   with a menu entry that also opens PDF files

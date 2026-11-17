@@ -914,7 +914,7 @@ Codeberg y, con `--rpm`, en Copr:
 
 ```bash
 # 1. subir la versión en pyproject.toml, src/py_imposition/__init__.py y la spec:
-rpmdev-bumpspec -n X.Y -c "What changed" -u "Nicolas Vaughan <nivaca@fastmail.com>" packaging/py-imposition.spec
+rpmdev-bumpspec -n X.Y -c "What changed" -u "Nicolas Vaughan <nicolasvaughan@proton.me>" packaging/py-imposition.spec
 # 2. hacer el commit, y luego:
 uv run python tools/release.py --rpm --notes-file NOTES.md     # --dry-run para ver antes el plan
 ```

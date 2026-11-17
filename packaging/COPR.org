@@ -69,7 +69,7 @@ copr-cli create py-imposition \
    then the spec's, with a changelog entry:
    #+begin_src sh
    rpmdev-bumpspec -n 0.5 -c "Short description of the change" \
-       -u "Nicolas Vaughan <nivaca@fastmail.com>" packaging/py-imposition.spec
+       -u "Nicolas Vaughan <nicolasvaughan@proton.me>" packaging/py-imposition.spec
    #+end_src
    =tests/test_packaging.py= fails while the versions differ.
    - =-n VERSION= sets =Version:= and resets =Release:= to 1.

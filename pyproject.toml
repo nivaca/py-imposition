@@ -6,7 +6,7 @@ readme = "README.md"
 license = "GPL-3.0-or-later"
 license-files = ["LICENSE"]
 authors = [
-    { name = "Nicolas Vaughan", email = "nivaca@fastmail.com" }
+    { name = "Nicolas Vaughan", email = "nicolasvaughan@proton.me" }
 ]
 requires-python = ">=3.15"
 dependencies = [

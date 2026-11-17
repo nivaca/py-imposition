@@ -3239,4 +3239,8 @@
     <en>{path} was saved as a plain PDF, but it could not be made {standard}: {error}</en>
     <tr>{path} se guardó como PDF corriente, pero no se pudo hacer {standard}: {error}</tr>
   </text>
+  <text>
+    <en>the gutters push the pages off the sheet: make them or the margins smaller</en>
+    <tr>los medianiles empujan las páginas fuera del pliego: redúzcalos, o reduzca los márgenes</tr>
+  </text>
 </interface>

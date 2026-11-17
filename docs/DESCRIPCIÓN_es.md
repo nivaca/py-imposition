@@ -1,4 +1,4 @@
-# py-imposition 0.10.1: descripción
+# py-imposition 0.10.2: descripción
 
 ## Análisis
 
@@ -38,7 +38,7 @@ La ventana no impone nada por sí misma: ejecuta la línea de órdenes en un pro
 
 El modo básico es un único formulario, dispuesto como un diálogo de imposición corriente: la disposición (folletos de 2, 4 y 8, corte y apilado, secuencial, paso y repetición), la encuadernación, los medianiles, el papel, los márgenes, el recorte de páginas y las marcas de impresión, con perfiles con nombre que pueden ir en un menú. Las opciones que no se aplican a la disposición elegida aparecen en gris. Detrás está la orden `impose`, de modo que todo lo que hace el formulario puede hacerse también en la línea de órdenes, y el formulario muestra siempre la línea de órdenes que ejecuta.
 
-*Guardar…* guarda lo que muestra el panel de la derecha (si la vista previa no está al día, primero ejecuta la orden), y *Archivo ▸ Guardar el documento tal como está…* guarda el documento con las órdenes aplicadas, sin la actual. Mientras haya cambios sin guardar, la barra de título muestra un asterisco, y la ventana pregunta antes de cerrarse, de abrir otro documento o de volver al original. La ventana recuerda su modo, su disposición, las opciones de cada orden, la secuencia, los perfiles y los últimos diez documentos abiertos (*Archivo ▸ Abrir reciente*). El documento original se muestra junto al resultado solo si se marca *Ver ▸ Mostrar el documento original*.
+*Guardar…* guarda lo que muestra el panel de la derecha (si la vista previa no está al día, primero ejecuta la orden), y *Archivo ▸ Guardar el documento tal como está…* guarda el documento con las órdenes aplicadas, sin la actual. Mientras haya cambios sin guardar, la barra de título muestra un asterisco, y la ventana pregunta antes de cerrarse, de abrir otro documento o de volver al original. La ventana recuerda su modo, su disposición, los perfiles y los últimos diez documentos abiertos (*Archivo ▸ Abrir reciente*); las opciones de las órdenes, las preferencias y la secuencia, en cambio, empiezan cada sesión en sus valores por defecto. El documento original se muestra junto al resultado solo si se marca *Ver ▸ Mostrar el documento original*.
 
 ### Llenar el pliego
 
@@ -46,7 +46,9 @@ Muchos PDF tienen márgenes blancos anchos, y al imponerlos de dos o de cuatro p
 
 ### Medianiles y márgenes
 
-Hasta la versión 0.10, cada página se centraba en su propio lugar del pliego, y el espacio sobrante se repartía alrededor de todas: un medianil de 2 cm dejaba 2,1 cm entre las páginas, a costa de los márgenes de afuera. Ahora las páginas van juntas, como un bloque, con exactamente los medianiles entre ellas, y el bloque se centra dentro de los márgenes. Lo que sobra va hacia afuera; los márgenes son un mínimo, los medianiles son exactos y, en un folleto, el pliegue cae en la mitad del medianil.
+Hasta la versión 0.10, cada página se centraba en su propio lugar del pliego, y el espacio sobrante se repartía alrededor de todas: un medianil de 2 cm dejaba 2,1 cm entre las páginas, a costa de los márgenes de afuera. Ahora las páginas van juntas, como un bloque, con exactamente los medianiles entre ellas, y el bloque se centra dentro de los márgenes. Los medianiles son exactos y, en un folleto, el pliegue cae en la mitad del medianil.
+
+Después, el tamaño de las páginas dejó de depender de los medianiles. Sale del pliego y de los márgenes, y un medianil solo mueve las páginas: si es más ancho, se separan; si es más estrecho, se juntan. Antes, cuando ya no quedaba espacio libre por fuera, un medianil más ancho las hacía más pequeñas. Un margen negativo, por su parte, hace crecer las páginas hasta que se salen del pliego esa cantidad.
 
 ### PDF/A y PDF/X
 
@@ -68,7 +70,7 @@ El código se gestiona con git, en un solo repositorio publicado en GitHub (http
 
 ## Validación
 
-Hay 115 pruebas automáticas (`tests/`), que se corren con `uv run pytest`. Comprueban el orden de las páginas con ejemplos resueltos de imposiciones habituales, ejecutan cada orden de principio a fin sobre documentos generados y leen los resultados con pdftotext y `qpdf --check`, e imponen el documento de ejemplo, cuyas páginas muestran cada una su número. La ventana se prueba sin pantalla, con la plataforma offscreen de Qt: los formularios, el modo básico y sus perfiles, las vistas previas, *Aplicar* y *Deshacer*, los documentos recientes y el idioma. Otras pruebas comprueban que cada texto tenga su traducción y que no sobre ninguna, el instalador del menú en cada sistema, los archivos de empaquetado y la clave de firma.
+Hay 117 pruebas automáticas (`tests/`), que se corren con `uv run pytest`. Comprueban el orden de las páginas con ejemplos resueltos de imposiciones habituales, ejecutan cada orden de principio a fin sobre documentos generados y leen los resultados con pdftotext y `qpdf --check`, e imponen el documento de ejemplo, cuyas páginas muestran cada una su número. La ventana se prueba sin pantalla, con la plataforma offscreen de Qt: los formularios, el modo básico y sus perfiles, las vistas previas, *Aplicar* y *Deshacer*, los documentos recientes y el idioma. Otras pruebas comprueban que cada texto tenga su traducción y que no sobre ninguna, el instalador del menú en cada sistema, los archivos de empaquetado y la clave de firma.
 
 Las pruebas corren con cada push en GitHub Actions, y otra vez dentro de cada construcción del RPM en Copr, con el Python de Fedora (3.15). Las capturas de los README se rehacen con cada cambio de la ventana y se revisan a ojo.
 

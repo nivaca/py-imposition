@@ -227,8 +227,10 @@ def impose(pdf: Pdf, a, ctx: Context):
     else:
         named = not re.search(r"\d\s*[x×*]\s*\d", a.media)
         W, H = ctx.paper(a.media, a.orientation if named else "as-is")
-        cw = (W - ml - mr - sum(vgaps)) / cols
-        ch = (H - mb - mt - sum(hgaps)) / rows
+        # (the size of the pages comes from the sheet and the margins only: the gutters just move
+        # them apart or together, so a wider gutter never makes them smaller)
+        cw = (W - ml - mr) / cols
+        ch = (H - mb - mt) / rows
     if cw <= 0 or ch <= 0 or W <= 0 or H <= 0:
         raise ImpositionError(tr("margins and gutters leave no room for pages"))
 
@@ -265,7 +267,11 @@ def impose(pdf: Pdf, a, ctx: Context):
     slot_h = max(d[1] for d in dims) * s
     block_w = cols * slot_w + sum(vgaps)
     block_h = rows * slot_h + sum(hgaps)
-    xs, x = [], ml + ((W - ml - mr) - block_w) / 2
+    left = ml + ((W - ml - mr) - block_w) / 2
+    bottom = mb + ((H - mt - mb) - block_h) / 2
+    if left < min(ml, 0) - 0.5 or bottom < min(mb, 0) - 0.5:  # (more than the margins ask for)
+        ctx.warn(tr("the gutters push the pages off the sheet: make them or the margins smaller"))
+    xs, x = [], left
     for c in range(cols):
         xs.append(x)
         x += slot_w + (vgaps[c] if c < cols - 1 else 0)

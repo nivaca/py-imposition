@@ -246,10 +246,12 @@ command:
   spread between the middle columns of an 8-up booklet, and the creep. A
   gutter is greyed out where it can't apply: the horizontal one when there is
   a single row of pages (a 2-up booklet, for example), the vertical one when
-  there is a single column. The pages sit together, with exactly the gutters
-  between them, and the whole block is centred within the margins: space left
-  over goes to the outside, never between the pages, so the margins are a
-  minimum.
+  there is a single column. The size of the pages comes from the sheet and
+  the margins; the gutters only move them: a wider gutter spreads the pages
+  apart, a narrower one brings them together, and their size stays the same.
+  The pages sit together as one block, with exactly the gutters between them,
+  centred within the margins; if a gutter is so wide that it pushes the pages
+  off the sheet, `impose` warns.
 - **Paper:** *Autosize Media* (the sheet fits the pages), or *Fit to Media
   Size* with a standard or custom size and portrait or landscape;
   *Auto-rotate*, *Auto Scale* (shrink pages that are too large) and
@@ -269,7 +271,7 @@ command:
   In *Margins* and in *Page Trim*, a lock beside *Top*/*Bottom* and another
   beside *Left*/*Right* keep the two sides the same: while a lock is closed,
   changing one side changes the other too (closing it gives the second side
-  the value of the first). The window remembers the locks.
+  the value of the first). Each session starts with the locks open.
 - **Printer Marks:** trim marks, bleed marks, registration marks and page
   information (the document name, sheet number, date and time, on by
   default).
@@ -334,8 +336,12 @@ In both modes:
   *Hot folder* starts and stops a `watch` process. All commands run in a
   background process, so the window stays responsive. *Stop* (Esc) cancels a
   run, and the *Log* tab shows each command line and its output.
-- Drop a PDF on the window to open it. Window layout, preferences, the
-  options of each command and the sequence are remembered between sessions.
+- Drop a PDF on the window to open it. Each session starts with the default
+  settings: the options of every command (basic mode included), the
+  preferences on the toolbar and the sequence are not carried over from the
+  last session; save the settings you want back as a profile, or a sequence
+  as a file. The window keeps its size and layout, its mode, *Auto preview*,
+  the profiles and the recent documents.
 
 ## The language of the interface
 

@@ -203,11 +203,17 @@ Until version 0.10 each page was centred in its own place on the sheet,
 so the space left over was shared around every page: a gutter of 2 cm
 gave a gap of 2.1 cm between the pages, taken from the outside margins.
 Now the pages go together as one block, with exactly the gutters between
-them, and the block is centred within the margins.  What is left over goes
-to the outside, so the margins are a minimum and the gutters are exact,
+them, and the block is centred within the margins.  The gutters are exact,
 and in a booklet the fold falls in the middle of the gutter.  The same
 version keeps the preview on the page being looked at when the result is
 made again.
+
+Version 0.10.1 made negative margins work: the pages grow until they run
+off the sheet by that much.  Then the size of the pages stopped depending
+on the gutters at all.  It comes from the sheet and the margins, and a
+gutter only moves the pages: wider, they spread apart; narrower, they come
+together.  Before, once there was no spare space at the outside, a wider
+gutter made the pages smaller instead.
 
 It can also save the result as PDF/A, for archiving, or PDF/X-4, for
 printing (*File ▸ Save as* in the window, `--conform` on the command
@@ -219,7 +225,7 @@ Without py-pdfconform everything else works.
 Testing
 -------
 
-The program has 115 automated tests (`tests/`), run with pytest.  They
+The program has 117 automated tests (`tests/`), run with pytest.  They
 check the page orders against worked examples of standard impositions,
 run every command from beginning to end on generated documents and read
 the results with pdftotext and `qpdf --check`, and impose the example

@@ -255,10 +255,12 @@ orden [`impose`](#impose--imposición):
   separación central entre las columnas del medio de un folleto de 8, y el
   corrimiento. Un medianil aparece en gris donde no puede aplicarse: el
   horizontal cuando hay una sola fila de páginas (un folleto de 2, por
-  ejemplo), el vertical cuando hay una sola columna. Las páginas van juntas,
-  con exactamente los medianiles entre ellas, y el bloque entero se centra
-  dentro de los márgenes: el espacio que sobra va hacia afuera, nunca entre
-  las páginas, así que los márgenes son un mínimo.
+  ejemplo), el vertical cuando hay una sola columna. El tamaño de las páginas
+  sale del pliego y de los márgenes; los medianiles solo las mueven: un
+  medianil más ancho separa las páginas, uno más estrecho las junta, y su
+  tamaño no cambia. Las páginas van juntas, como un bloque, con exactamente
+  los medianiles entre ellas, centrado dentro de los márgenes; si un medianil
+  es tan ancho que empuja las páginas fuera del pliego, `impose` lo avisa.
 - **Papel:** *Ajustar el soporte a las páginas* (el pliego se ajusta a las
   páginas), o *Ajustar al tamaño del soporte* con un tamaño estándar o
   personalizado y orientación vertical o apaisada; *Giro automático* y
@@ -281,7 +283,7 @@ orden [`impose`](#impose--imposición):
   *Superior*/*Inferior* y otro junto a *Izquierda*/*Derecha* mantienen
   iguales los dos lados: mientras un candado está cerrado, al cambiar un
   lado cambia también el otro (al cerrarlo, el segundo lado toma el valor del
-  primero). La ventana recuerda los candados.
+  primero). Cada sesión empieza con los candados abiertos.
 - **Marcas de impresión:** marcas de corte, de sangrado y de registro, e
   información de página (el nombre del documento, el número de pliego, la
   fecha y la hora; activada por defecto).
@@ -360,9 +362,13 @@ En ambos modos:
   plano, así que la ventana sigue respondiendo. *Detener* (Esc) cancela una
   ejecución, y la pestaña *Mensajes* muestra cada línea de órdenes y su
   salida.
-- Suelte un PDF sobre la ventana para abrirlo. La disposición de la ventana,
-  las preferencias, las opciones de cada orden y la secuencia se recuerdan
-  de una sesión a otra.
+- Suelte un PDF sobre la ventana para abrirlo. Cada sesión empieza con los
+  ajustes por defecto: las opciones de todas las órdenes (también las del
+  modo básico), las preferencias de la barra de herramientas y la secuencia
+  no pasan de la sesión anterior; guarde como perfil los ajustes que quiera
+  recuperar, o la secuencia como archivo. La ventana conserva su tamaño y su
+  disposición, su modo, la *Vista previa automática*, los perfiles y los
+  documentos recientes.
 
 ## El idioma de la interfaz
 

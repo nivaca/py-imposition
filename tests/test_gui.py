@@ -482,8 +482,13 @@ def test_basic_locks_keep_two_sides_the_same(app, window):
     b.locks[3][0].setChecked(True)
     b.t_left.setValue(0.7)
     assert b.t_right.value() == 0.7
-    other = BasicPanel(window)  # the locks are remembered
-    assert [btn.isChecked() for btn, _, _ in other.locks] == [True, False, False, True]
+    assert [btn.isChecked() for btn, _, _ in BasicPanel(window).locks] == [False] * 4  # (a new session: open)
+    window.carry_options = True  # (as when the window is built again in another language)
+    try:
+        other = BasicPanel(window)  # the locks are carried over
+        assert [btn.isChecked() for btn, _, _ in other.locks] == [True, False, False, True]
+    finally:
+        window.carry_options = False
     b.set_tokens(["impose", "--margin-top", "1", "--margin-bottom", "2"])  # different values release a lock
     assert not tb.isChecked() and (b.m_top.value(), b.m_bottom.value()) == (1, 2)
 
@@ -558,3 +563,38 @@ def test_pdfconform_setting(app, window, tmp_path, monkeypatch):
     assert window.pdfconform_dialog()
     assert config.get("pdfconform") == str(script) and window.output_actions["a-2b"].isEnabled()
     assert "conform" not in window.form("nup").tokens()
+
+
+def test_a_new_window_starts_with_the_default_settings(app, window, tmp_path, monkeypatch):
+    from PySide6.QtWidgets import QMessageBox
+    from py_imposition.gui.window import MainWindow
+    window.set_mode("basic")
+    window.basic.set_tokens(["impose", "--layout", "4up-booklet", "--margin-top", "2"])
+    window.set_mode("advanced")
+    window.select_command("nup")
+    window.form("nup").set_tokens(["nup", "--cols", "3"])
+    window.units.setCurrentText("mm")
+    window.seq.set_steps([["reverse"]])
+    window.save_settings()
+    fresh = MainWindow()  # the next session
+    try:
+        assert fresh.basic.tokens() == ["impose"]
+        assert fresh.form("nup").tokens() == ["nup"]
+        assert fresh.units.currentText() == "cm" and fresh.seq.steps() == []
+        assert fresh.current != "nup"
+        assert fresh.mode == "advanced"  # (the window's own layout is kept)
+    finally:
+        fresh.ask_unsaved = lambda: QMessageBox.StandardButton.Discard
+        fresh.close()
+        fresh.deleteLater()
+    window.save_settings()  # (as change_language does, right before building the window again)
+    carried = MainWindow(window.export_state())  # (built again in another language: carried over)
+    try:
+        assert carried.form("nup").tokens() == ["nup", "--cols", "3"] and carried.seq.steps() == [["reverse"]]
+        assert carried.units.currentText() == "mm"
+    finally:
+        carried.ask_unsaved = lambda: QMessageBox.StandardButton.Discard
+        carried._tmpdir = None  # (the temporary folder belongs to the first window)
+        carried.close()
+        carried.deleteLater()
+        app.processEvents()

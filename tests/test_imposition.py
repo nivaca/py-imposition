@@ -285,3 +285,24 @@ def test_impose_negative_side_margins_make_the_pages_run_off(tmp_path):
     assert run("impose", "--no-page-info", "--margin-left=-2cm", EXAMPLE, "-o", uneven) == 0
     flat = lambda path: [v for xy in _placed(path, 1) for v in xy]  # noqa: E731
     assert flat(uneven) == pytest.approx(flat(plain))
+
+
+def test_impose_a_wider_gutter_moves_the_pages_apart_without_shrinking_them(tmp_path, capsys):
+    letter_w = parse_paper("letter")[0]
+    cm = parse_length("1cm")
+    placed = {}
+    for gutter in (0, 2, 4):
+        out = tmp_path / f"g{gutter}.pdf"
+        assert run("impose", "--no-page-info", "--margin-left=-1cm", "--margin-right=-1cm",
+                   "--gutter-v", f"{gutter}cm", EXAMPLE, "-o", out) == 0
+        placed[gutter] = _placed(out, 1)
+    s = placed[0][0][1]
+    for gutter, ((x1, s1), (x2, s2)) in placed.items():
+        assert s1 == pytest.approx(s) and s2 == pytest.approx(s)  # the same size...
+        assert x2 - (x1 + letter_w * s) == pytest.approx(gutter * cm, abs=0.01)  # ...only further apart
+        assert x1 == pytest.approx(-cm - gutter * cm / 2, abs=0.01)  # (each page moves half the gutter)
+    capsys.readouterr()
+    assert main(["impose", "--gutter-v", "4cm", str(EXAMPLE), "-o", str(tmp_path / "w.pdf")]) == 0
+    assert "the gutters push the pages off the sheet" in capsys.readouterr().err
+    assert main(["impose", "--gutter-v", "1cm", str(EXAMPLE), "-o", str(tmp_path / "w.pdf")]) == 0
+    assert "the gutters push" not in capsys.readouterr().err  # (there is room for 1 cm)

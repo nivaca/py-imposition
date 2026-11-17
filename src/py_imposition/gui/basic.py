@@ -293,6 +293,8 @@ class BasicPanel(QWidget):
             self.w.settings.setValue("basic/locks", json.dumps([btn.isChecked() for btn, _, _ in self.locks]))
 
     def _restore_locks(self):
+        if not getattr(self.w, "carry_options", False):  # (a new session starts with them open)
+            return
         try:
             states = json.loads(self.w.settings.value("basic/locks", "[]"))
         except (TypeError, ValueError):

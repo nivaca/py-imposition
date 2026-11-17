@@ -341,6 +341,9 @@ class MainWindow(QMainWindow):
         """STATE (from export_state) carries the document over when the window is
         built again, for instance in another language."""
         super().__init__()
+        # The options of the commands, the sequence and the preferences start at their defaults; they
+        # are carried over only when the window is built again (in another language) during a session.
+        self.carry_options = state is not None
         self.setWindowTitle("py-imposition")
         self.setAcceptDrops(True)
         self.settings = QSettings("py-imposition", "py-imposition")
@@ -629,24 +632,24 @@ class MainWindow(QMainWindow):
             self.restoreState(state)
         else:
             QTimer.singleShot(0, lambda: self.resizeDocks([self.docks[0]], [190], Qt.Orientation.Vertical))
-        self.apply_prefs({k: self.settings.value(f"prefs/{k}") for k in ("units", "registration", "bleed")
-                          if self.settings.value(f"prefs/{k}")})
-        self.pdfx.setChecked(self.settings.value("prefs/pdfx", "false") == "true")
         self.auto.setChecked(self.settings.value("auto_preview", "true") != "false")
-        try:
-            steps = json.loads(self.settings.value("sequence", "[]"))
-            self.seq.set_steps(steps)
-        except (TypeError, ValueError):
-            pass
-        try:
-            self.basic.set_tokens(json.loads(self.settings.value("basic/tokens", "[]")))
-        except (TypeError, ValueError):
-            pass
+        if self.carry_options:
+            self.apply_prefs({k: self.settings.value(f"prefs/{k}") for k in ("units", "registration", "bleed")
+                              if self.settings.value(f"prefs/{k}")})
+            self.pdfx.setChecked(self.settings.value("prefs/pdfx", "false") == "true")
+            try:
+                self.seq.set_steps(json.loads(self.settings.value("sequence", "[]")))
+            except (TypeError, ValueError):
+                pass
+            try:
+                self.basic.set_tokens(json.loads(self.settings.value("basic/tokens", "[]")))
+            except (TypeError, ValueError):
+                pass
         try:
             self._docks_shown = [bool(v) for v in json.loads(self.settings.value("advanced/docks", "[true, true]"))]
         except (TypeError, ValueError):
             self._docks_shown = [True, True]
-        last = self.settings.value("command", "booklet")
+        last = self.settings.value("command", "booklet") if self.carry_options else "booklet"
         self.select_command(last if last in COMMANDS else "booklet")
         self.set_mode(self.settings.value("mode", "basic"))
         self.show_document(self.a_show_document.isChecked(), save=False)
@@ -814,7 +817,7 @@ class MainWindow(QMainWindow):
             return self.basic  # (it answers like a command form)
         if name not in self.forms:
             f = CommandForm(name, self.parsers[name])
-            saved = self.settings.value(f"forms/{name}")
+            saved = self.settings.value(f"forms/{name}") if self.carry_options else None
             if saved:
                 try:
                     f.set_tokens(json.loads(saved))

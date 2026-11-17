@@ -254,9 +254,14 @@ command:
   Size* with a standard or custom size and portrait or landscape;
   *Auto-rotate*, *Auto Scale* (shrink pages that are too large) and
   *Enlarge* (also enlarge small pages to fill their place).
-- **Margins:** top, bottom, left and right. Margins and gutters can be
-  negative: the pages then run off the sheet's edges or overlap, and are cut
-  at the edge or in the middle of the overlap.
+- **Margins:** top, bottom, left and right. A margin can be negative: the
+  pages then grow until they run off the sheet by that much on that side,
+  and whatever runs off is cut at the edge. Since they keep their
+  proportions, negative left and right margins also make them run off at the
+  top and bottom (and the other way round). In booklets the fold stays in
+  the middle of the sheet, so if the left and right margins differ, the
+  larger one is used on both sides. A negative gutter makes the pages
+  overlap, each cut in the middle of the overlap.
 - **Page Trim:** cut this much off the edges of every page (its white
   margins), so that its content fills more of the sheet; with *Enlarge*, the
   pages grow to fill their place.
@@ -409,7 +414,7 @@ basic mode:
 | `--gutter-v`, `--gutter-h`, `--spread`, `--creep` | space between columns and rows (a gutter given where there is only one column or one row is ignored, with a warning); between the middle columns of an 8-up booklet; creep for the paper's thickness |
 | `--media SIZE\|auto`, `--orientation portrait\|landscape` | the sheet: a paper name or WxH, or `auto` to fit the pages (default: Legal landscape) |
 | `--auto-rotate`, `--no-auto-scale`, `--enlarge` | turn pages to fit their cells; don't shrink large pages; also enlarge small pages to fill their cells |
-| `--margin…` | margins; like the gutters, they can be negative (write `--margin=-1cm`): pages then run off the sheet or overlap, cut at the edge or in the middle of the overlap |
+| `--margin…` | margins; they can be negative (write `--margin=-1cm`): the pages grow until they run off the sheet by that much on those sides, cut at the edge. In booklets, uneven left and right margins count as the larger one on both sides, so the fold stays in the middle. Negative gutters make the pages overlap, cut in the middle of the overlap |
 | `--page-trim…` | cut this much off the edges of every page (all four, or `--page-trim-top` etc.), to leave out its white margins |
 | `--trim-marks`, `--bleed-marks`, `--registration-marks`, `--page-info` | printer marks; page information is the document name, sheet number, date and time, on by default (`--no-page-info` leaves it out) |
 

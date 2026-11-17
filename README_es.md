@@ -264,10 +264,15 @@ orden [`impose`](#impose--imposición):
   personalizado y orientación vertical o apaisada; *Giro automático* y
   *Escala automática* (reducir las páginas demasiado grandes) y *Ampliar*
   (ampliar también las páginas pequeñas para llenar su lugar).
-- **Márgenes:** superior, inferior, izquierdo y derecho. Los márgenes y los
-  medianiles pueden ser negativos: las páginas se salen entonces de los
-  bordes del pliego o se solapan, y se cortan en el borde o en la mitad del
-  solapamiento.
+- **Márgenes:** superior, inferior, izquierdo y derecho. Un margen puede ser
+  negativo: las páginas crecen entonces hasta salirse del pliego esa
+  cantidad por ese lado, y lo que se sale se corta en el borde. Como
+  conservan sus proporciones, los márgenes izquierdo y derecho negativos
+  también las hacen salirse por arriba y por abajo (y al revés). En los
+  folletos el pliegue queda en la mitad del pliego, así que si los márgenes
+  izquierdo y derecho son distintos, se usa el mayor en los dos lados. Un
+  medianil negativo hace que las páginas se solapen, cada una cortada en la
+  mitad del solapamiento.
 - **Recorte de páginas:** recortar esta cantidad de los bordes de cada
   página (sus márgenes en blanco), para que su contenido ocupe más del
   pliego; con *Ampliar*, las páginas crecen hasta llenar su lugar.
@@ -439,7 +444,7 @@ básico de la ventana:
 | `--gutter-v`, `--gutter-h`, `--spread`, `--creep` | espacio entre columnas y filas (un medianil dado donde solo hay una columna o una fila se ignora, con un aviso); entre las columnas del medio de un folleto de 8; corrimiento por el grosor del papel |
 | `--media SIZE\|auto`, `--orientation portrait\|landscape` | el pliego: un nombre de papel o WxH, o `auto` para ajustarse a las páginas (por defecto: Legal apaisado) |
 | `--auto-rotate`, `--no-auto-scale`, `--enlarge` | girar las páginas para que encajen en sus celdas; no reducir las páginas grandes; ampliar también las páginas pequeñas para llenar sus celdas |
-| `--margin…` | márgenes; como los medianiles, pueden ser negativos (escriba `--margin=-1cm`): las páginas se salen entonces del pliego o se solapan, cortadas en el borde o en la mitad del solapamiento |
+| `--margin…` | márgenes; pueden ser negativos (escriba `--margin=-1cm`): las páginas crecen hasta salirse del pliego esa cantidad por esos lados, cortadas en el borde. En los folletos, unos márgenes izquierdo y derecho distintos cuentan como el mayor en los dos lados, para que el pliegue quede en la mitad. Los medianiles negativos hacen que las páginas se solapen, cortadas en la mitad del solapamiento |
 | `--page-trim…` | recortar esta cantidad de los bordes de cada página (los cuatro, o `--page-trim-top`, etc.), para dejar fuera sus márgenes en blanco |
 | `--trim-marks`, `--bleed-marks`, `--registration-marks`, `--page-info` | marcas de impresión; la información de página es el nombre del documento, el número de pliego, la fecha y la hora, activada por defecto (`--no-page-info` la omite) |
 

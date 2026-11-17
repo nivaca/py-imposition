@@ -219,7 +219,7 @@ Without py-pdfconform everything else works.
 Testing
 -------
 
-The program has 114 automated tests (`tests/`), run with pytest.  They
+The program has 115 automated tests (`tests/`), run with pytest.  They
 check the page orders against worked examples of standard impositions,
 run every command from beginning to end on generated documents and read
 the results with pdftotext and `qpdf --check`, and impose the example

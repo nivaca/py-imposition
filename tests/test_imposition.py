@@ -264,3 +264,24 @@ def test_impose_gutter_is_the_space_between_the_pages(tmp_path):
         assert gap == pytest.approx(gutter * cm, abs=0.01)  # exactly the gutter, nothing more
         outer_left, outer_right = x1, legal_long - (x2 + letter_w * s)
         assert outer_left == pytest.approx(outer_right, abs=0.01) and outer_left >= cm - 0.01
+
+
+def test_impose_negative_side_margins_make_the_pages_run_off(tmp_path):
+    letter_w = parse_paper("letter")[0]
+    legal_long = parse_paper("legal")[1]
+    cm = parse_length("1cm")
+    plain = tmp_path / "plain.pdf"
+    assert run("impose", "--no-page-info", EXAMPLE, "-o", plain) == 0
+    (_, s0), _ = _placed(plain, 1)
+    out = tmp_path / "off.pdf"
+    assert run("impose", "--no-page-info", "--margin-left=-1cm", "--margin-right=-1cm", EXAMPLE, "-o", out) == 0
+    (x1, s), (x2, _) = _placed(out, 1)
+    assert s > s0  # the pages grew...
+    assert x1 == pytest.approx(-cm, abs=0.01)  # ...until they run 1 cm off each side
+    assert legal_long - (x2 + letter_w * s) == pytest.approx(-cm, abs=0.01)
+    assert x2 - (x1 + letter_w * s) == pytest.approx(0, abs=0.01)  # (and still meet at the fold)
+    # in a booklet the fold stays in the middle: an uneven pair counts as the larger margin on both sides
+    uneven = tmp_path / "uneven.pdf"
+    assert run("impose", "--no-page-info", "--margin-left=-2cm", EXAMPLE, "-o", uneven) == 0
+    flat = lambda path: [v for xy in _placed(path, 1) for v in xy]  # noqa: E731
+    assert flat(uneven) == pytest.approx(flat(plain))

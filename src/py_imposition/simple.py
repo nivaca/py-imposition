@@ -206,6 +206,9 @@ def impose(pdf: Pdf, a, ctx: Context):
     vgaps = [spread if a.layout == "8up-booklet" and k == 1 else gv for k in range(cols - 1)]
     hgaps = [gh] * (rows - 1)
     ml, mb, mr, mt = get_margins(a, ctx)
+    if a.layout in BOOKLETS and ml != mr:
+        # (the fold stays in the middle of the sheet: the larger margin, never exceeded, on both sides)
+        ml = mr = max(ml, mr)
     cut = get_margins(a, ctx, "page-trim")
     if min(cut) < 0:
         raise ImpositionError(tr("the page trim cannot be negative"))
@@ -238,7 +241,18 @@ def impose(pdf: Pdf, a, ctx: Context):
 
     # one scale for the whole document, from the largest page (as turned)
     dims = [(sizes[i][1], sizes[i][0]) if turn(i) else sizes[i] for i in range(count)]
-    s = min(cw / max(d[0] for d in dims), ch / max(d[1] for d in dims))
+    fit_w, fit_h = cw / max(d[0] for d in dims), ch / max(d[1] for d in dims)
+    # Negative margins ask the pages to run off the sheet by that much: the pages grow until they
+    # do on those sides, even if they then run off (and are cut) on the other two as well.
+    off_w, off_h = ml < 0 or mr < 0, mt < 0 or mb < 0
+    if off_w and off_h:
+        s = max(fit_w, fit_h)
+    elif off_w:
+        s = fit_w
+    elif off_h:
+        s = fit_h
+    else:
+        s = min(fit_w, fit_h)
     if a.no_auto_scale:
         s = 1.0
     elif not a.enlarge:

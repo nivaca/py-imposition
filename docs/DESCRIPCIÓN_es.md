@@ -1,4 +1,4 @@
-# py-imposition 0.10: descripción
+# py-imposition 0.10.1: descripción
 
 ## Análisis
 
@@ -68,7 +68,7 @@ El código se gestiona con git, en un solo repositorio publicado en GitHub (http
 
 ## Validación
 
-Hay 114 pruebas automáticas (`tests/`), que se corren con `uv run pytest`. Comprueban el orden de las páginas con ejemplos resueltos de imposiciones habituales, ejecutan cada orden de principio a fin sobre documentos generados y leen los resultados con pdftotext y `qpdf --check`, e imponen el documento de ejemplo, cuyas páginas muestran cada una su número. La ventana se prueba sin pantalla, con la plataforma offscreen de Qt: los formularios, el modo básico y sus perfiles, las vistas previas, *Aplicar* y *Deshacer*, los documentos recientes y el idioma. Otras pruebas comprueban que cada texto tenga su traducción y que no sobre ninguna, el instalador del menú en cada sistema, los archivos de empaquetado y la clave de firma.
+Hay 115 pruebas automáticas (`tests/`), que se corren con `uv run pytest`. Comprueban el orden de las páginas con ejemplos resueltos de imposiciones habituales, ejecutan cada orden de principio a fin sobre documentos generados y leen los resultados con pdftotext y `qpdf --check`, e imponen el documento de ejemplo, cuyas páginas muestran cada una su número. La ventana se prueba sin pantalla, con la plataforma offscreen de Qt: los formularios, el modo básico y sus perfiles, las vistas previas, *Aplicar* y *Deshacer*, los documentos recientes y el idioma. Otras pruebas comprueban que cada texto tenga su traducción y que no sobre ninguna, el instalador del menú en cada sistema, los archivos de empaquetado y la clave de firma.
 
 Las pruebas corren con cada push en GitHub Actions, y otra vez dentro de cada construcción del RPM en Copr, con el Python de Fedora (3.15). Las capturas de los README se rehacen con cada cambio de la ventana y se revisan a ojo.
 

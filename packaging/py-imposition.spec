@@ -10,7 +10,7 @@
 # Build with packaging/build-rpm.sh, which makes the source tarball.
 
 Name:           py-imposition
-Version:        0.10
+Version:        0.10.1
 Release:        1%{?dist}
 Summary:        PDF imposition toolkit: booklets, n-up, step and repeat and more
 
@@ -80,6 +80,10 @@ export HOME="$PWD/check-home" PY_IMPOSITION_CONFIG="$PWD/check-home/config" QT_Q
 %{_datadir}/icons/hicolor/*/apps/py-imposition.*
 
 %changelog
+* Tue Nov 17 2026 Nicolas Vaughan <nivaca@fastmail.com> - 0.10.1-1
+- impose: negative margins make the pages run off the sheet by that much; in
+  booklets the fold stays in the middle
+
 * Tue Nov 17 2026 Nicolas Vaughan <nivaca@fastmail.com> - 0.10-1
 - impose: exact gutters, pages together within the margins; the preview keeps
   its page; PDF/A and PDF/X output through py-pdfconform

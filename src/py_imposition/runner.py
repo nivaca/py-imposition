@@ -31,7 +31,7 @@ def global_parent() -> argparse.ArgumentParser:
                    help=tr("keep a TrimBox when removing bleeds (PDF/X); to make a PDF/X-4 file, use --conform x-4"))
     g.add_argument("--conform", choices=[s for s, _ in conform.STANDARDS], default=argparse.SUPPRESS,
                    help=tr("save the output as PDF/A (a-1b, a-2b, a-3b: for archiving) or PDF/X-4 (x-4: for "
-                           "printing), made by py-pdfconform, which must be installed"))
+                           "printing), made by pdf2iso, which must be installed"))
     g.add_argument("-q", "--quiet", action="store_true", default=argparse.SUPPRESS, help=tr("no warnings"))
     g.add_argument("--interface", choices=sorted(interface.names()), default=argparse.SUPPRESS,
                    help=tr("the language of the interface, for this run only (to keep a choice, use the "
@@ -131,7 +131,7 @@ def run_steps(pdf: Pdf | None, steps: list[list[str]], ctx: Context) -> Result:
 def save_result(result: Result, output: Path, standard: str = "", checks: dict | None = None) -> list[Path]:
     """Save RESULT as OUTPUT (a dict of documents: OUTPUT-<key> for each), as
     plain PDFs or, if given, as STANDARD ('a-2b', 'x-4'...; see conform.py).
-    CHECKS, if given, gets what py-pdfconform says of each file ({path: check})."""
+    CHECKS, if given, gets what pdf2iso says of each file ({path: check})."""
     if standard and not conform.available():
         raise ImpositionError(tr("{command} is not installed (or not on the PATH), and --conform needs it",
                                  command=conform.COMMAND))

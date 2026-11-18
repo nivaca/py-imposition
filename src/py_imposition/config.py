@@ -8,12 +8,12 @@ It is a small TOML file, ``config.toml``, in the user's configuration folder:
 
 ``$PY_IMPOSITION_CONFIG`` names another folder. It holds the language of
 the interface, whether the window shows the original document, and where
-py-pdfconform is (for PDF/A and PDF/X; empty to look for it, see conform.py):
+pdf2iso is (for PDF/A and PDF/X; empty to look for it, see conform.py):
 
     [parameters]
     interface = "es"
     show_document = false
-    pdfconform = "~/bin/py-pdfconform"
+    pdfconform = "~/bin/pdf2iso"
 """
 
 from __future__ import annotations

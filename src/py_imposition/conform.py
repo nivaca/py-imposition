@@ -1,4 +1,4 @@
-"""PDF/A and PDF/X output, made by the author's py-pdfconform (Ghostscript and
+"""PDF/A and PDF/X output, made by the author's pdf2iso (Ghostscript and
 pikepdf), which must be installed: the result is written first as a plain
 PDF, then converted (File > Save as in the window, --conform on the command
 line).
@@ -18,8 +18,10 @@ from pathlib import Path
 
 from .interface import N_, tr
 
-COMMAND = "py-pdfconform"
-# (value of py-pdfconform --target, name shown)
+COMMAND = "pdf2iso"
+#  Its name before version 2.0, still looked for after the new one
+OLD_COMMAND = "py-pdfconform"
+# (value of pdf2iso --target, name shown)
 STANDARDS = [("a-1b", N_("PDF/A-1b (archiving, the oldest)")), ("a-2b", N_("PDF/A-2b (archiving)")),
              ("a-3b", N_("PDF/A-3b (archiving, with attachments)")), ("x-4", N_("PDF/X-4 (printing)"))]
 TIMEOUT = 600  # seconds
@@ -31,7 +33,7 @@ class ConformError(Exception):
 
 def own_folders() -> list[Path]:
     """The folders of this program's own Python (its virtual environment, or the
-    AppImage), which py-pdfconform must not see: it would run with this Python,
+    AppImage), which pdf2iso must not see: it would run with this Python,
     which hasn't its libraries."""
     out = []
     if sys.prefix != sys.base_prefix:
@@ -43,7 +45,7 @@ def own_folders() -> list[Path]:
 
 
 def clean_env() -> dict[str, str]:
-    """The environment for py-pdfconform: the user's, without this program's Python."""
+    """The environment for pdf2iso: the user's, without this program's Python."""
     own = own_folders()
 
     def ours(folder: str) -> bool:
@@ -66,7 +68,7 @@ USER_FOLDERS = ("~/bin", "~/.local/bin")
 
 
 def configured() -> str:
-    """The path of py-pdfconform given in the configuration file ('' for none)."""
+    """The path of pdf2iso given in the configuration file ('' for none)."""
     from . import config
 
     value = config.get("pdfconform")
@@ -74,13 +76,14 @@ def configured() -> str:
 
 
 def find(path: str = "") -> Path | None:
-    """py-pdfconform: PATH if given (a file), or else the first of
-    py-pdfconform or py-pdfconform.py on the PATH or in ~/bin and ~/.local/bin."""
+    """pdf2iso: PATH if given (a file), or else the first of
+    pdf2iso or pdf2iso.py on the PATH or in ~/bin and ~/.local/bin, or of
+    py-pdfconform or py-pdfconform.py (its name before version 2.0)."""
     if path:
         p = Path(path).expanduser()
         return p if p.is_file() else None
     folders = clean_env()["PATH"].split(os.pathsep) + [str(Path(f).expanduser()) for f in USER_FOLDERS]
-    for name in (COMMAND, COMMAND + ".py"):
+    for name in (COMMAND, COMMAND + ".py", OLD_COMMAND, OLD_COMMAND + ".py"):
         found = shutil.which(name, path=os.pathsep.join(folders))
         if found:
             return Path(found)
@@ -88,7 +91,7 @@ def find(path: str = "") -> Path | None:
 
 
 def command(path: str | None = None) -> list[str] | None:
-    """How to run py-pdfconform (the one of the configuration file, or else the one found;
+    """How to run pdf2iso (the one of the configuration file, or else the one found;
     see find): [the script], or [python3, the script] for a script that can't
     be run by itself; None if there is none."""
     script = find(configured() if path is None else path)
@@ -110,7 +113,7 @@ def label(standard: str) -> str:
 
 def convert(source: Path, target: Path, standard: str, password: str = "") -> str:
     """SOURCE converted to STANDARD ('a-2b', 'x-4'...) as TARGET (safely: TARGET
-    may be SOURCE). Returns what py-pdfconform says about it (its check)."""
+    may be SOURCE). Returns what pdf2iso says about it (its check)."""
     exe = command()
     if exe is None:
         raise ConformError(tr("{command} is not installed (or not on the PATH)", command=COMMAND))

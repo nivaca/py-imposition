@@ -495,7 +495,7 @@ def test_basic_locks_keep_two_sides_the_same(app, window):
 
 def test_save_as_pdfa_or_pdfx(app, window, tmp_path, monkeypatch):
     """File ▸ Save as: what Save saves (running the command first if needed), then given to
-    py-pdfconform; greyed out without it."""
+    pdf2iso; greyed out without it."""
     from py_imposition import conform
     sample = tmp_path / "s.pdf"
     assert main(["sample", "--count", "8", "--paper", "a5", "-o", str(sample), "-q"]) == 0
@@ -503,14 +503,14 @@ def test_save_as_pdfa_or_pdfx(app, window, tmp_path, monkeypatch):
     monkeypatch.setattr(conform, "command", lambda path=None: None)
     window._show_output()
     assert window.output_actions[""].isEnabled() and not window.output_actions["x-4"].isEnabled()
-    assert "py-pdfconform" in window.output_actions["x-4"].toolTip()
+    assert "pdf2iso" in window.output_actions["x-4"].toolTip()
     calls = []
 
     def fake(source, target, standard, password=""):
         calls.append((Path(target), standard))
         return "structural check: PASS"
 
-    monkeypatch.setattr(conform, "command", lambda path=None: ["py-pdfconform"])
+    monkeypatch.setattr(conform, "command", lambda path=None: ["pdf2iso"])
     monkeypatch.setattr(conform, "convert", fake)
     window._show_output()
     assert window.output_actions["x-4"].isEnabled()
@@ -530,7 +530,7 @@ def test_save_as_pdfa_or_pdfx(app, window, tmp_path, monkeypatch):
     assert len(calls) == 1 and _pages(tmp_path / "out2.pdf") == 4
 
 
-@pytest.mark.skipif(not __import__("shutil").which("py-pdfconform"), reason="py-pdfconform not installed")
+@pytest.mark.skipif(not __import__("shutil").which("pdf2iso"), reason="pdf2iso not installed")
 def test_save_as_pdfx_for_real(app, window, tmp_path, monkeypatch):
     import pikepdf
     sample = tmp_path / "s.pdf"

@@ -3188,36 +3188,36 @@
     <tr>El resultado se guardó como PDF corriente: {command} no está instalado (o no está donde dicen los Ajustes)</tr>
   </text>
   <text>
-    <en>The script py-pdfconform, which makes PDF/A and PDF/X (with or without the .py extension); empty to look for it</en>
-    <tr>El script py-pdfconform, que hace los PDF/A y PDF/X (con la extensión .py o sin ella); vacío para buscarlo</tr>
+    <en>The script pdf2iso, which makes PDF/A and PDF/X (with or without the .py extension); empty to look for it</en>
+    <tr>El script pdf2iso, que hace los PDF/A y PDF/X (con la extensión .py o sin ella); vacío para buscarlo</tr>
   </text>
   <text>
     <en>There is no such file</en>
     <tr>No existe ese archivo</tr>
   </text>
   <text>
-    <en>Where is py-pdfconform?</en>
-    <tr>¿Dónde está py-pdfconform?</tr>
+    <en>Where is pdf2iso?</en>
+    <tr>¿Dónde está pdf2iso?</tr>
   </text>
   <text>
-    <en>Where py-pdfconform is, which makes PDF/A and PDF/X (File ▸ Save as)</en>
-    <tr>Dónde está py-pdfconform, que hace los PDF/A y PDF/X (Archivo ▸ Guardar como)</tr>
+    <en>Where pdf2iso is, which makes PDF/A and PDF/X (File ▸ Save as)</en>
+    <tr>Dónde está pdf2iso, que hace los PDF/A y PDF/X (Archivo ▸ Guardar como)</tr>
   </text>
   <text>
-    <en>py-pdfconform (py-pdfconform py-pdfconform.py);;All files (*)</en>
-    <tr>py-pdfconform (py-pdfconform py-pdfconform.py);;Todos los archivos (*)</tr>
+    <en>pdf2iso (pdf2iso pdf2iso.py);;All files (*)</en>
+    <tr>pdf2iso (pdf2iso pdf2iso.py);;Todos los archivos (*)</tr>
   </text>
   <text>
-    <en>py-pdfconform:</en>
-    <tr>py-pdfconform:</tr>
+    <en>pdf2iso:</en>
+    <tr>pdf2iso:</tr>
   </text>
   <text>
-    <en>py-pdfconform…</en>
-    <tr>py-pdfconform…</tr>
+    <en>pdf2iso…</en>
+    <tr>pdf2iso…</tr>
   </text>
   <text>
-    <en>save the output as PDF/A (a-1b, a-2b, a-3b: for archiving) or PDF/X-4 (x-4: for printing), made by py-pdfconform, which must be installed</en>
-    <tr>guardar la salida como PDF/A (a-1b, a-2b, a-3b: para archivo) o PDF/X-4 (x-4: para imprenta), hecho por py-pdfconform, que debe estar instalado</tr>
+    <en>save the output as PDF/A (a-1b, a-2b, a-3b: for archiving) or PDF/X-4 (x-4: for printing), made by pdf2iso, which must be installed</en>
+    <tr>guardar la salida como PDF/A (a-1b, a-2b, a-3b: para archivo) o PDF/X-4 (x-4: para imprenta), hecho por pdf2iso, que debe estar instalado</tr>
   </text>
   <text>
     <en>{command} could not make {standard}: {error}</en>

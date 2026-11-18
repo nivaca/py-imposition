@@ -1,4 +1,4 @@
-"""Tests of PDF/A and PDF/X output through py-pdfconform (conform.py, --conform)."""
+"""Tests of PDF/A and PDF/X output through pdf2iso (conform.py, --conform)."""
 
 from __future__ import annotations
 
@@ -12,7 +12,7 @@ from py_imposition import config, conform, main
 from py_imposition import pdfutil
 from py_imposition.runner import build_parser, strip_io
 
-HAVE_PDFCONFORM = shutil.which("py-pdfconform") is not None
+HAVE_PDFCONFORM = shutil.which("pdf2iso") is not None
 
 
 @pytest.fixture(autouse=True)
@@ -39,7 +39,7 @@ def test_finding_pdfconform(tmp_path, monkeypatch):
     monkeypatch.setenv("HOME", str(home))
     monkeypatch.setenv("PATH", "/usr/bin:/bin")  # (as a session started from the desktop menu may have it)
     assert conform.find() is None and not conform.available()
-    script = home / "bin" / "py-pdfconform"
+    script = home / "bin" / "pdf2iso"
     script.write_text("#!/bin/sh\n")
     script.chmod(0o755)
     assert conform.find() == script and conform.command() == [str(script)]
@@ -50,6 +50,23 @@ def test_finding_pdfconform(tmp_path, monkeypatch):
     assert cmd[-1] == str(other) and cmd[0].endswith("python3")
     config.set("pdfconform", str(tmp_path / "missing"))
     assert conform.command() is None
+
+
+def test_finding_the_old_name(tmp_path, monkeypatch):
+    """Before version 2.0, pdf2iso was called py-pdfconform: that name is
+    still found, but pdf2iso comes first."""
+    home = tmp_path / "home"
+    (home / "bin").mkdir(parents=True)
+    monkeypatch.setenv("HOME", str(home))
+    monkeypatch.setenv("PATH", "/usr/bin:/bin")
+    old = home / "bin" / "py-pdfconform.py"
+    old.write_text("#!/bin/sh\n")
+    old.chmod(0o755)
+    assert conform.find() == old
+    new = home / "bin" / "pdf2iso"
+    new.write_text("#!/bin/sh\n")
+    new.chmod(0o755)
+    assert conform.find() == new
 
 
 def test_conform_is_not_part_of_a_step():
@@ -64,11 +81,11 @@ def test_conform_is_not_part_of_a_step():
 def test_cli_conform_without_pdfconform(sample, tmp_path, monkeypatch, capsys):
     monkeypatch.setattr(conform, "command", lambda path=None: None)
     assert main(["reverse", str(sample), "--conform", "x-4", "-o", str(tmp_path / "out.pdf")]) == 1
-    assert "py-pdfconform" in capsys.readouterr().err
+    assert "pdf2iso" in capsys.readouterr().err
 
 
 def test_cli_conform_with_a_fake_pdfconform(sample, tmp_path, monkeypatch, capsys):
-    """The output is given to py-pdfconform with the standard chosen (each file, if several)."""
+    """The output is given to pdf2iso with the standard chosen (each file, if several)."""
     calls = []
 
     def fake(source, target, standard, password=""):
@@ -86,7 +103,7 @@ def test_cli_conform_with_a_fake_pdfconform(sample, tmp_path, monkeypatch, capsy
         assert pdfutil.get_history(pdf)[-1] == ["reverse"]
 
 
-@pytest.mark.skipif(not HAVE_PDFCONFORM, reason="py-pdfconform not installed")
+@pytest.mark.skipif(not HAVE_PDFCONFORM, reason="pdf2iso not installed")
 @pytest.mark.parametrize("standard", ["x-4", "a-2b"])
 def test_cli_conform_for_real(sample, tmp_path, standard):
     out = tmp_path / "out.pdf"
@@ -97,7 +114,7 @@ def test_cli_conform_for_real(sample, tmp_path, standard):
             assert all("/TrimBox" in p.obj for p in pdf.pages)
 
 
-@pytest.mark.skipif(not HAVE_PDFCONFORM, reason="py-pdfconform not installed")
+@pytest.mark.skipif(not HAVE_PDFCONFORM, reason="pdf2iso not installed")
 def test_x4_keeps_the_boxes(tmp_path):
     pdf = pikepdf.Pdf.new()
     for _ in range(2):

@@ -611,8 +611,8 @@ class MainWindow(QMainWindow):
             act.triggered.connect(lambda _=False, c=code: self.change_language(c))
             group.addAction(act)
             lang.addAction(act)
-        a = QAction(tr("py-pdfconform…"), self, triggered=self.pdfconform_dialog)
-        a.setToolTip(tr("Where py-pdfconform is, which makes PDF/A and PDF/X (File ▸ Save as)"))
+        a = QAction(tr("pdf2iso…"), self, triggered=self.pdfconform_dialog)
+        a.setToolTip(tr("Where pdf2iso is, which makes PDF/A and PDF/X (File ▸ Save as)"))
         m.addAction(a)
         m.setToolTipsVisible(True)
         m = self.menuBar().addMenu(tr("&Help"))
@@ -1228,7 +1228,7 @@ class MainWindow(QMainWindow):
 
     def make_standard(self, paths: list[Path], standard: str) -> str:
         """Convert PATHS, just saved as plain PDFs, to STANDARD ('a-2b', 'x-4'...; '' for none)
-        with py-pdfconform. Returns what to add to the status bar."""
+        with pdf2iso. Returns what to add to the status bar."""
         if not standard:
             return ""
         label = conform.label(standard)
@@ -1254,7 +1254,7 @@ class MainWindow(QMainWindow):
         return " — " + label + (f" ({check})" if check else "")
 
     def _show_output(self):
-        """The Save as menu: PDF/A and PDF/X greyed out if py-pdfconform isn't there."""
+        """The Save as menu: PDF/A and PDF/X greyed out if pdf2iso isn't there."""
         have = conform.available()
         for value, act in self.output_actions.items():
             if value:
@@ -1263,7 +1263,7 @@ class MainWindow(QMainWindow):
                                                   command=conform.COMMAND))
 
     def pdfconform_dialog(self) -> bool:
-        """Settings ▸ py-pdfconform: where it is (kept in the configuration file)."""
+        """Settings ▸ pdf2iso: where it is (kept in the configuration file)."""
         from .conform_dialog import ConformDialog
 
         d = ConformDialog(conform.configured(), self)

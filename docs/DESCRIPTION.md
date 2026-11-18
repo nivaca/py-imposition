@@ -218,9 +218,9 @@ gutter made the pages smaller instead.
 It can also save the result as PDF/A, for archiving, or PDF/X-4, for
 printing (*File ▸ Save as* in the window, `--conform` on the command
 line).  This conversion is not made by py-imposition but by another
-program of mine, py-pdfconform, with Ghostscript: py-imposition writes a
-plain PDF and gives it to py-pdfconform, which converts it and checks it.
-Without py-pdfconform everything else works.
+program of mine, pdf2iso, with Ghostscript: py-imposition writes a
+plain PDF and gives it to pdf2iso, which converts it and checks it.
+Without pdf2iso everything else works.
 
 Testing
 -------

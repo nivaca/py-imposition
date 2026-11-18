@@ -122,7 +122,7 @@ and [reportlab](https://www.reportlab.com/) (text and fonts). The GUI also
 needs [PySide6](https://doc.qt.io/qtforpython-6/) (Qt 6): the
 `pyside6-essentials` and `pyside6-pdf` packages, about 250 MB. To save
 PDF/A or PDF/X, any of the three ways needs
-[py-pdfconform](https://github.com/nivaca/py-pdfconform) (see "PDF/A and
+[pdf2iso](https://github.com/nivaca/pdf2iso) (see "PDF/A and
 PDF/X").
 
 ### A menu entry
@@ -150,13 +150,13 @@ again. It needs the `gui` extra, and says so if PySide6 is missing.
 
 To save the result as PDF/A (for archiving) or PDF/X-4 (for printing),
 py-imposition uses another program of mine,
-[py-pdfconform](https://github.com/nivaca/py-pdfconform) (it needs
+[pdf2iso](https://github.com/nivaca/pdf2iso) (it needs
 Ghostscript). The result is written first as a plain PDF and then given to
-py-pdfconform, which converts it and checks it. py-imposition looks for it,
-as `py-pdfconform` or `py-pdfconform.py`, on the PATH and in `~/bin` and
-`~/.local/bin`; a program started from the menu of the desktop often doesn't
+pdf2iso, which converts it and checks it. py-imposition looks for it,
+as `pdf2iso` or `pdf2iso.py`, on the PATH and in `~/bin` and
+`~/.local/bin` (or, if it is older than its version 2.0, as `py-pdfconform` or `py-pdfconform.py`); a program started from the menu of the desktop often doesn't
 have those two folders on its PATH. If it is elsewhere, give its path in
-*Settings ▸ py-pdfconform…* in the window (kept as `pdfconform` in
+*Settings ▸ pdf2iso…* in the window (kept as `pdfconform` in
 `config.toml`), which says which one will be used. A script that can't be
 run by itself is run with `python3`. Without it, *File ▸ Save as ▸ PDF/A…*
 and *PDF/X-4…* are greyed out, `--conform` stops with an error, and
@@ -289,9 +289,9 @@ In both modes:
   document instead: the commands applied so far, without the current one.
 - **File ▸ Save as** saves what *Save…* saves, this once, as a plain PDF,
   PDF/A-1b, PDF/A-2b or PDF/A-3b (for archiving), or PDF/X-4 (for printing),
-  made by py-pdfconform (see [PDF/A and PDF/X](#pdfa-and-pdfx)); each file is
+  made by pdf2iso (see [PDF/A and PDF/X](#pdfa-and-pdfx)); each file is
   converted when a command makes several. The status bar says what
-  py-pdfconform's check found. If the conversion fails, the plain PDFs stay.
+  pdf2iso's check found. If the conversion fails, the plain PDFs stay.
 - **Unsaved changes:** when commands have been applied, or options changed
   and a result made, since the document was opened or saved, the title bar
   shows an asterisk. Closing the window, opening another document or
@@ -324,7 +324,7 @@ In both modes:
   on the toolbar and apply to every command; the PDF/X box only keeps a
   TrimBox when bleeds are removed (a PDF/X-4 file is made by *File ▸ Save as
   ▸ PDF/X-4…*). The language is under *Settings ▸ Language of the
-  interface*, and where py-pdfconform is under *Settings ▸ py-pdfconform…*.
+  interface*, and where pdf2iso is under *Settings ▸ pdf2iso…*.
 - **Sequence panel:**
   - Collect steps from the form (*Add current*), or reorder them by dragging.
   - Load steps from a document's recorded commands (*From document*, i.e.
@@ -361,7 +361,7 @@ The choice is kept in a small configuration file, `config.toml`, in
 Support/py-imposition/` (macOS) or `%APPDATA%\py-imposition\` (Windows);
 `$PY_IMPOSITION_CONFIG` names another folder. Both the command line and the
 window read it. The window also keeps there whether it shows the original
-document (`show_document = true` or `false`), and where py-pdfconform is
+document (`show_document = true` or `false`), and where pdf2iso is
 (`pdfconform`, empty to look for it; see [PDF/A and PDF/X](#pdfa-and-pdfx)).
 
 The translations are in `src/py_imposition/locale/es.xml`, with one `<text>`
@@ -394,7 +394,7 @@ choose whichever fits more) or `as-is`.
 | `--registration black\|cmyk\|all` | colour of crop marks and "registration" text: black only, CMYK (all four process plates), or all separations |
 | `--bleed use\|ignore` | use pages' bleed boxes when imposing (default), or impose the visible page only |
 | `--pdfx` | when bleeds are removed, keep a TrimBox (PDF/X); this doesn't make a PDF/X file |
-| `--conform a-1b\|a-2b\|a-3b\|x-4` | save the output as PDF/A (`a-…`, for archiving) or PDF/X-4 (`x-4`, for printing), made by py-pdfconform (see [PDF/A and PDF/X](#pdfa-and-pdfx)); with `run`, `replay` and `watch`, every output. It is not recorded in the output's history |
+| `--conform a-1b\|a-2b\|a-3b\|x-4` | save the output as PDF/A (`a-…`, for archiving) or PDF/X-4 (`x-4`, for printing), made by pdf2iso (see [PDF/A and PDF/X](#pdfa-and-pdfx)); with `run`, `replay` and `watch`, every output. It is not recorded in the output's history |
 | `-q` | no warnings |
 | `--interface en\|es` | the language of the interface, for this run only (see [The language of the interface](#the-language-of-the-interface)) |
 
@@ -822,11 +822,11 @@ that no translation is left unused. The code lives in
 | `pdfutil.py` | page boxes, placing pages as Form XObjects, crop marks |
 | `units.py`, `pagesel.py` | lengths, paper sizes, page ranges |
 | `common.py`, `runner.py` | command framework and CLI |
-| `conform.py` | PDF/A and PDF/X, through py-pdfconform |
-| `gui/` | the PySide6 interface: `basic.py` (basic mode: the imposition form and its profiles), `forms.py` (option forms built from the CLI parser), `preview.py` (PDF viewer), `window.py` (main window, menus, recent documents, sequence panel, process runner), `conform_dialog.py` (where py-pdfconform is) |
+| `conform.py` | PDF/A and PDF/X, through pdf2iso |
+| `gui/` | the PySide6 interface: `basic.py` (basic mode: the imposition form and its profiles), `forms.py` (option forms built from the CLI parser), `preview.py` (PDF viewer), `window.py` (main window, menus, recent documents, sequence panel, process runner), `conform_dialog.py` (where pdf2iso is) |
 | `install.py` | `py-imposition-install`: the menu entry on Linux, Windows and macOS |
 | `interface.py`, `locale/` | the language of the interface: `tr()` translates its texts; `locale/es.xml` holds the Spanish |
-| `config.py` | the configuration file (`config.toml`): the language of the interface, whether the window shows the original document, and where py-pdfconform is |
+| `config.py` | the configuration file (`config.toml`): the language of the interface, whether the window shows the original document, and where pdf2iso is |
 | `icons/` | the icon: `py-imposition.svg` and every size made from it |
 
 ### Tools

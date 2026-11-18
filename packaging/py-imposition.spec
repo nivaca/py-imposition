@@ -10,7 +10,7 @@
 # Build with packaging/build-rpm.sh, which makes the source tarball.
 
 Name:           py-imposition
-Version:        0.10.2
+Version:        0.10.3
 Release:        1%{?dist}
 Summary:        PDF imposition toolkit: booklets, n-up, step and repeat and more
 
@@ -80,6 +80,10 @@ export HOME="$PWD/check-home" PY_IMPOSITION_CONFIG="$PWD/check-home/config" QT_Q
 %{_datadir}/icons/hicolor/*/apps/py-imposition.*
 
 %changelog
+* Tue Nov 17 2026 Nicolas Vaughan <nicolasvaughan@proton.me> - 0.10.3-1
+- PDF/A and PDF/X are made by pdf2iso, the new name of py-pdfconform (the
+  old name is still looked for)
+
 * Tue Nov 17 2026 Nicolas Vaughan <nicolasvaughan@proton.me> - 0.10.2-1
 - impose: the gutters only move the pages apart or together, without changing
   their size; each session of the window starts with the default settings

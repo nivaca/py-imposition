@@ -1,4 +1,4 @@
-# py-imposition 0.10.2: descripción
+# py-imposition 0.10.3: descripción
 
 ## Análisis
 
@@ -52,7 +52,7 @@ Después, el tamaño de las páginas dejó de depender de los medianiles. Sale d
 
 ### PDF/A y PDF/X
 
-El resultado también se puede guardar como PDF/A, para archivar, o como PDF/X-4, para imprimir (*Archivo ▸ Guardar como* en la ventana, `--conform` en la línea de órdenes). No lo convierte py-imposition, sino otro programa mío, py-pdfconform, con Ghostscript: py-imposition escribe un PDF corriente y se lo pasa, y py-pdfconform lo convierte y lo comprueba. Sin py-pdfconform, todo lo demás funciona.
+El resultado también se puede guardar como PDF/A, para archivar, o como PDF/X-4, para imprimir (*Archivo ▸ Guardar como* en la ventana, `--conform` en la línea de órdenes). No lo convierte py-imposition, sino otro programa mío, pdf2iso, con Ghostscript: py-imposition escribe un PDF corriente y se lo pasa, y pdf2iso lo convierte y lo comprueba. Sin pdf2iso, todo lo demás funciona.
 
 ### Los idiomas
 

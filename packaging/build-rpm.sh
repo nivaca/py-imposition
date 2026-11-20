@@ -140,11 +140,24 @@ if [ "$SIGN" = 1 ]; then
     done
 fi
 
+# The newest RPM goes to dist/ too, next to the wheel, the source package and
+# the AppImage, in place of the older ones (it stays in build/rpm/ as well,
+# where the release tools look for it).
+mkdir -p "$DIR/dist"
+find "$DIR/dist" -maxdepth 1 -name 'py-imposition-*.rpm' ! -name '*.src.rpm' -delete
+for rpm in "${RPMS[@]}"; do
+    case "$rpm" in
+        *.src.rpm) ;;
+        *) cp -p "$rpm" "$DIR/dist/" ;;
+    esac
+done
+
 echo
 echo "Built:"
 for rpm in "${RPMS[@]}"; do
     echo "  $rpm"
 done
+echo "Copied to dist/: $(cd "$DIR/dist" && ls py-imposition-*.rpm 2>/dev/null | grep -v '\.src\.rpm$' | tr '\n' ' ')"
 if [ "$SIGN" = 1 ]; then
     echo "Signed by $FPR; public key: $TOP/RPM-GPG-KEY-py-imposition"
 fi

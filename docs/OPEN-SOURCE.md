@@ -5,7 +5,7 @@ py-imposition is free software, under the GNU General Public License,
 version 3 or later (GPL-3.0-or-later).  It is made with, and runs on, the
 open-source software listed here, with the licence of each.  Licences are
 given as SPDX identifiers; the versions are those of `uv.lock` for
-py-imposition 0.10.3.  Each package carries the full text of its own
+py-imposition 0.10.4.  Each package carries the full text of its own
 licence.
 
 

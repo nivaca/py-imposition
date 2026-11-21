@@ -6,8 +6,11 @@ paquete wheel, el paquete fuente, la AppImage y el RPM, están en
 [GitHub](https://github.com/nivaca/py-imposition/releases); el RPM está
 también en el proyecto de Copr nivaca/py-imposition.
 
-## Sin publicar
+## 0.10.4 — 2026-11-21
 
+- `docs/OPEN-SOURCE_es.md` (y `docs/OPEN-SOURCE.md`, en inglés) recoge el
+  software de código abierto que usa py-imposition, con la licencia de
+  cada uno; los README enlazan con él.
 - Se necesita Python 3.14 o posterior (antes, 3.15), en
   `requires-python` y los README. Las pruebas pasan con 3.14; la AppImage
   sigue llevando Python 3.15.

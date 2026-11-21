@@ -15,7 +15,7 @@ from .runner import build_parser, make_context, record, save_result, strip_io
 from . import conform, interface
 from .interface import ntr, tr
 
-__version__ = "0.10.3"
+__version__ = "0.10.4"
 
 __all__ = ["main", "COMMANDS", "Context", "ImpositionError", "__version__"]
 

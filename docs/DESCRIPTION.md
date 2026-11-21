@@ -17,7 +17,9 @@ explain how it was made, in nine stages.
 py-imposition is free software, under the GNU General Public License,
 version 3 or later.  It is written in Python and stands on two libraries:
 pikepdf (based on QPDF), which reads and writes the PDF files, and
-reportlab, for text and fonts; the window uses PySide6 (Qt 6).
+reportlab, for text and fonts; the window uses PySide6 (Qt 6).  The
+open-source software it uses, with the licence of each, is listed in
+`docs/OPEN-SOURCE.md`.
 
 Nicolas Vaughan is Associate Professor of Literature at the School of Arts
 and Humanities of the Universidad de los Andes, Bogotá, Colombia.
@@ -222,10 +224,15 @@ program of mine, pdf2iso, with Ghostscript: py-imposition writes a
 plain PDF and gives it to pdf2iso, which converts it and checks it.
 Without pdf2iso everything else works.
 
+Version 0.10.4 asks for Python 3.14 or later, not 3.15: the tests pass
+with 3.14, and nothing in the program needs more (the AppImage still
+carries 3.15).  It also lists, in `docs/OPEN-SOURCE.md`, the open-source
+software the program is made with and runs on, with the licence of each.
+
 Testing
 -------
 
-The program has 117 automated tests (`tests/`), run with pytest.  They
+The program has 118 automated tests (`tests/`), run with pytest.  They
 check the page orders against worked examples of standard impositions,
 run every command from beginning to end on generated documents and read
 the results with pdftotext and `qpdf --check`, and impose the example

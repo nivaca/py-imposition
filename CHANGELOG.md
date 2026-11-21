@@ -6,8 +6,11 @@ source package, the AppImage and the RPM, are on
 [GitHub](https://github.com/nivaca/py-imposition/releases); the RPM is also
 in the Copr project nivaca/py-imposition.
 
-## Unreleased
+## 0.10.4 — 2026-11-21
 
+- `docs/OPEN-SOURCE.md` (and `docs/OPEN-SOURCE_es.md`, in Spanish) lists
+  the open-source software py-imposition uses, with the licence of each;
+  the READMEs link to it.
 - Python 3.14 or later is needed (it was 3.15), in `requires-python`
   and the READMEs. The tests pass with 3.14; the AppImage still carries
   Python 3.15.

@@ -953,3 +953,6 @@ de GNU](LICENSE) para más detalles.
 Esta es una traducción no oficial, solo a título informativo: el texto que
 rige es el de la Licencia Pública General de GNU en inglés, en el archivo
 [LICENSE](LICENSE).
+
+El software de código abierto que usa py-imposition, con la licencia de
+cada uno, está en [docs/OPEN-SOURCE_es.md](docs/OPEN-SOURCE_es.md).

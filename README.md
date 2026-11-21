@@ -899,3 +899,6 @@ This program is distributed in the hope that it will be useful, but WITHOUT ANY
 WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
 PARTICULAR PURPOSE. See the [GNU General Public License](LICENSE) for more
 details.
+
+The open-source software py-imposition uses, and the licence of each, is
+listed in [docs/OPEN-SOURCE.md](docs/OPEN-SOURCE.md).

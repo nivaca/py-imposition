@@ -8,9 +8,11 @@ Copr (https://copr.fedorainfracloud.org) builds RPMs from a source RPM
 - Project URL :: https://copr.fedorainfracloud.org/coprs/nivaca/py-imposition/
 - Users install with :: =sudo dnf copr enable nivaca/py-imposition && sudo dnf install py-imposition=
 
-Releases go through =tools/release.py --rpm= (see [[*Releasing a new version]]):
-it builds and signs the RPM here, attaches it and its public key to the
-GitHub and Codeberg releases, and sends the signed SRPM to Copr.
+Releases go through =tools/release.py= (see [[*Releasing a new version]]):
+it builds and signs the RPM here (always now; =--no-rpm= leaves it out),
+signs every file of the release, attaches them, their signatures and the
+public key to the GitHub and Codeberg releases, and sends the signed SRPM
+to Copr.
 
 * One-time setup
 ** 1. Tools
@@ -33,10 +35,23 @@ and =BuildRequires=), so they must be installed here too.
 All RPMs are signed with one key, the same on all the author's machines:
 =81870643CA221AF90C30554EBE6832CD35994948= (Nicolas Vaughan, RPM signing, ed25519, 2026).
 =build-rpm.sh= pins it (=SIGNING_KEY=); =--sign= uses only that key and stops if
-it isn't in this machine's keyring, and =release.py --rpm= checks for it first.
+it isn't in this machine's keyring, and =release.py= checks for it first.
 gpg asks for the passphrase. A copy of the public key is in the repository,
-=packaging/RPM-GPG-KEY-py-imposition=; the one exported next to the RPMs
-(=build/rpm/RPM-GPG-KEY-py-imposition=, attached to the releases) must match it.
+=packaging/RPM-GPG-KEY-py-imposition=, published with every release; the one
+exported next to the RPMs (=build/rpm/RPM-GPG-KEY-py-imposition=) must match it.
+
+The same key signs everything a release publishes: the RPM (inside it), each
+file (a detached signature, =FILE.asc=), =SHA256SUMS=, and the tag
+(=git tag --sign=, checked with =git tag -v=). =tools/sign_release.py= makes
+the signatures and checks each one with only the published public key, in a
+keyring of its own; the release stops before publishing anything if one
+doesn't verify. gpg must have the key's passphrase cached when the release
+runs in the background (sign anything once first, e.g.
+=echo test | gpg --clearsign -u 81870643CA221AF90C30554EBE6832CD35994948 > /dev/null=).
+
+For GitHub to show the tags as "Verified", the public key must be added to
+the GitHub account (Settings > SSH and GPG keys), and its e-mail address be
+one of the account's verified addresses.
 
 To set up another machine, copy the key over and trust it:
 #+begin_src sh
@@ -74,15 +89,16 @@ copr-cli create py-imposition \
    =tests/test_packaging.py= fails while the versions differ.
    - =-n VERSION= sets =Version:= and resets =Release:= to 1.
    - For a packaging-only fix with the same version, leave out =-n= (Release
-     1 → 2), and release with =tools/release.py --rpm --redo= or build by hand.
+     1 → 2), and release with =tools/release.py --redo= or build by hand.
 2. Commit, then publish:
    #+begin_src sh
-   uv run python tools/release.py --rpm --notes-file NOTES.md
+   uv run python tools/release.py --notes-file NOTES.md
    #+end_src
    It shows the plan and asks before running it: the tests, the wheel and
    source package, the AppImage, the signed RPM (gpg asks for the
-   passphrase), the tag, the pushes to GitHub and Codeberg, the releases with
-   all the files, and =copr-cli build py-imposition build/rpm/SRPMS/....src.rpm=.
+   passphrase), the signature of every file and =SHA256SUMS=, each checked
+   with the published key, the signed tag, the pushes to GitHub and
+   Codeberg, the releases with all the files, and =copr-cli build py-imposition build/rpm/SRPMS/....src.rpm=.
    =--no-copr= leaves the Copr build out; to do it by hand:
    #+begin_src sh
    packaging/build-rpm.sh --sign

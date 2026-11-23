@@ -12,7 +12,7 @@ variable data, and runs sequences of commands and hot folders.
 Nicolas Vaughan made it in 2026.  It has a window, with a basic mode for
 the usual impositions and an advanced mode with every command, and a
 command line with the same commands, in English or in Spanish.  Here I
-explain how it was made, in nine stages.
+explain how it was made, in ten stages.
 
 py-imposition is free software, under the GNU General Public License,
 version 3 or later.  It is written in Python and stands on two libraries:
@@ -229,10 +229,26 @@ with 3.14, and nothing in the program needs more (the AppImage still
 carries 3.15).  It also lists, in `docs/OPEN-SOURCE.md`, the open-source
 software the program is made with and runs on, with the licence of each.
 
+10. Every release signed
+------------------------
+
+Only the RPM was signed, and only when the release was asked for it; the
+wheel, the source package and the AppImage went out with nothing to show
+where they came from, and so did the tag.  Now the RPM is always made, and
+a release signs everything with the same key: a detached signature for
+each file, a list of their SHA-256 sums with its own signature, and the
+tag, signed by git.  A signature nobody checks proves little, so the
+release checks each one before publishing, the way a user would, in a
+keyring of its own that holds only the public key published with the
+files.  A file changed after signing, or a published key that is not the
+one that signed, stops the release.  The tests sign with a key made for
+them, in a folder of their own, never with mine.  The same was done, at
+the same time, in py-foliation and py-pdftools.
+
 Testing
 -------
 
-The program has 118 automated tests (`tests/`), run with pytest.  They
+The program has 121 automated tests (`tests/`), run with pytest.  They
 check the page orders against worked examples of standard impositions,
 run every command from beginning to end on generated documents and read
 the results with pdftotext and `qpdf --check`, and impose the example
@@ -240,7 +256,8 @@ document.  The window is tested headless, with Qt's offscreen platform:
 the forms, the basic mode and its profiles, the previews, *Apply* and
 *Undo*, the recent documents, and the language.  Other tests check that
 every text is translated, the menu installer on each system, the
-packaging files, and the signing key.
+packaging files, the signing key, and the signing of a release (with a
+key made in the test).
 
 The tests run on every push, on GitHub Actions, and again inside every
 RPM build on Copr, with the Python of Fedora (3.15).  The

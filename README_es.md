@@ -104,6 +104,25 @@ sudo rpm --import RPM-GPG-KEY-py-imposition
 sudo dnf install ./py-imposition-*.noarch.rpm
 ```
 
+### Comprobar una descarga
+
+Cada archivo de una versión publicada se firma con esa misma clave, y
+también la etiqueta de la versión. Cada archivo va con su firma
+(`ARCHIVO.asc`), y la versión trae `SHA256SUMS`, las sumas de comprobación
+de todos, con su propia firma (`SHA256SUMS.asc`), y la clave,
+`RPM-GPG-KEY-py-imposition`. Para comprobar una descarga, se importa la clave una
+vez y luego se comprueban la firma del archivo y su suma:
+
+```bash
+gpg --import RPM-GPG-KEY-py-imposition
+gpg --verify py-imposition-VERSIÓN-x86_64.AppImage.asc py-imposition-VERSIÓN-x86_64.AppImage
+gpg --verify SHA256SUMS.asc SHA256SUMS && sha256sum -c --ignore-missing SHA256SUMS
+```
+
+El RPM lleva además su firma dentro, que `rpm -K` comprueba después de
+`sudo rpm --import RPM-GPG-KEY-py-imposition`. La etiqueta puede comprobarse en un
+clon con `git tag -v vVERSIÓN`.
+
 ### Desde el código fuente
 
 Se necesita Python 3.14 o posterior y [uv](https://docs.astral.sh/uv/).
@@ -909,14 +928,14 @@ uv run python tools/icons.py [--dry-run]
 
 ### Publicar una versión
 
-Cada versión se publica con `tools/release.py`, que la publica en GitHub y en
-Codeberg y, con `--rpm`, en Copr:
+Cada versión se publica con `tools/release.py`, que la publica en GitHub, en
+Codeberg y en Copr (`--no-rpm` deja fuera el RPM y Copr):
 
 ```bash
 # 1. subir la versión en pyproject.toml, src/py_imposition/__init__.py y la spec:
 rpmdev-bumpspec -n X.Y -c "What changed" -u "Nicolas Vaughan <nicolasvaughan@proton.me>" packaging/py-imposition.spec
 # 2. hacer el commit, y luego:
-uv run python tools/release.py --rpm --notes-file NOTES.md     # --dry-run para ver antes el plan
+uv run python tools/release.py --notes-file NOTES.md     # --dry-run para ver antes el plan
 ```
 
 Muestra su plan y pregunta antes de ejecutarlo:
@@ -925,10 +944,15 @@ Muestra su plan y pregunta antes de ejecutarlo:
 2. hace la wheel, el paquete fuente, la AppImage (`tools/bundle-appimage.py`)
    y el RPM firmado (`packaging/build-rpm.sh --sign`; gpg pide la frase de
    contraseña);
-3. etiqueta la versión y sube `main` y la etiqueta a ambas forjas;
-4. crea las versiones en GitHub y Codeberg con todos los archivos (la wheel,
-   el paquete fuente, la AppImage, el RPM y su clave pública);
-5. envía el RPM fuente firmado a Copr, que lo construye para cada Fedora.
+3. firma cada archivo (`ARCHIVO.asc`), con `SHA256SUMS` y su firma, y
+   comprueba cada firma con solo la clave pública que se publica
+   (`tools/sign_release.py`);
+4. pone la etiqueta de la versión, firmada, la comprueba (`git tag -v`) y
+   sube `main` y la etiqueta a ambas forjas;
+5. crea las versiones en GitHub y Codeberg con todos los archivos (la wheel,
+   el paquete fuente, la AppImage, el RPM, sus firmas, `SHA256SUMS` y la
+   clave pública);
+6. envía el RPM fuente firmado a Copr, que lo construye para cada Fedora.
 
 `packaging/COPR.org` explica la configuración inicial (las herramientas, el
 token de Copr, el proyecto) y los detalles. Las piezas pueden ejecutarse

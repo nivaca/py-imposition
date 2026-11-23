@@ -99,6 +99,25 @@ sudo rpm --import RPM-GPG-KEY-py-imposition
 sudo dnf install ./py-imposition-*.noarch.rpm
 ```
 
+### Checking a download
+
+Every file of a release is signed with that same key, and so is the tag
+of the version. Each file comes with its signature (`FILE.asc`), and the
+release has `SHA256SUMS`, the checksums of all of them, with its own
+signature (`SHA256SUMS.asc`), and the key, `RPM-GPG-KEY-py-imposition`. To check
+a download, import the key once, then check the file's signature and its
+checksum:
+
+```bash
+gpg --import RPM-GPG-KEY-py-imposition
+gpg --verify py-imposition-VERSION-x86_64.AppImage.asc py-imposition-VERSION-x86_64.AppImage
+gpg --verify SHA256SUMS.asc SHA256SUMS && sha256sum -c --ignore-missing SHA256SUMS
+```
+
+The RPM carries its signature inside too, which `rpm -K` checks after
+`sudo rpm --import RPM-GPG-KEY-py-imposition`. The tag can be checked in a clone
+with `git tag -v vVERSION`.
+
 ### From the source
 
 You need Python 3.14+ and [uv](https://docs.astral.sh/uv/).
@@ -860,14 +879,14 @@ uv run python tools/icons.py [--dry-run]
 
 ### Releasing
 
-Every release is made with `tools/release.py`, which publishes it on GitHub
-and Codeberg and, with `--rpm`, on Copr:
+Every release is made with `tools/release.py`, which publishes it on GitHub,
+Codeberg and Copr (`--no-rpm` leaves the RPM and Copr out):
 
 ```bash
 # 1. bump the version in pyproject.toml, src/py_imposition/__init__.py and the spec:
 rpmdev-bumpspec -n X.Y -c "What changed" -u "Nicolas Vaughan <nicolasvaughan@proton.me>" packaging/py-imposition.spec
 # 2. commit, then:
-uv run python tools/release.py --rpm --notes-file NOTES.md     # --dry-run to see the plan first
+uv run python tools/release.py --notes-file NOTES.md     # --dry-run to see the plan first
 ```
 
 It shows its plan and asks before running it:
@@ -876,10 +895,15 @@ It shows its plan and asks before running it:
 2. it makes the wheel, the source package, the AppImage
    (`tools/bundle-appimage.py`) and the signed RPM (`packaging/build-rpm.sh
    --sign`; gpg asks for the passphrase);
-3. it tags the version and pushes `main` and the tag to both forges;
-4. it makes the GitHub and Codeberg releases with all the files (the wheel,
-   the source package, the AppImage, the RPM and its public key);
-5. it sends the signed source RPM to Copr, which builds it for each Fedora.
+3. it signs every file (`FILE.asc`), with `SHA256SUMS` and its signature,
+   and checks each signature with only the public key that is published
+   (`tools/sign_release.py`);
+4. it tags the version, a signed tag, checks it (`git tag -v`), and pushes
+   `main` and the tag to both forges;
+5. it makes the GitHub and Codeberg releases with all the files (the wheel,
+   the source package, the AppImage, the RPM, their signatures,
+   `SHA256SUMS` and the public key);
+6. it sends the signed source RPM to Copr, which builds it for each Fedora.
 
 `packaging/COPR.org` has the one-time setup (tools, the Copr token, the
 project) and the details. The pieces can also be run on their own:

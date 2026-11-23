@@ -1,31 +1,40 @@
 #!/usr/bin/env python3
 """Publish a release of py-imposition on GitHub (with gh) and Codeberg (with
-tea): the tag vVERSION (the version of pyproject.toml), with the wheel, the
-source package and the AppImage attached, and (--rpm) the signed RPM and its
-public key, also published on Copr.
+tea): the tag vVERSION (the version of pyproject.toml), signed, with the
+wheel, the source package, the AppImage and the signed RPM attached (the RPM
+also published on Copr), each with its signature (FILE.asc), with SHA256SUMS
+and its signature, and with the public key that checks them all.
 
-    uv run python tools/release.py [--notes TEXT | --notes-file FILE] [--rpm [--no-copr]]
+Everything is signed with the project's key (SIGNING_KEY of
+packaging/build-rpm.sh), and every signature is checked, against the public
+key published, before anything is published.
+
+    uv run python tools/release.py [--notes TEXT | --notes-file FILE] [--no-rpm | --no-copr]
                                    [--no-build] [--no-appimage] [--no-tests] [--redo]
                                    [--only github|codeberg] [--dry-run] [--yes]
 
 In order, each step only if it is needed:
 
 1. checks that the repository is on main, with nothing left to commit, that
-   the versions agree (pyproject.toml, __init__.py and, with --rpm, the spec)
-   and that the tools are installed (gh, tea; with --rpm, rpmbuild and
-   copr-cli);
+   the versions agree (pyproject.toml, __init__.py and, unless --no-rpm, the
+   spec), that the tools are installed (gh, tea, gpg; unless --no-rpm,
+   rpmbuild and copr-cli) and that the signing key is in gpg;
 2. runs the tests (unless --no-tests);
 3. makes the wheel and the source package (uv build) and the AppImage
    (tools/bundle-appimage.py) in dist/, unless --no-build (then those in
-   dist/ are used); with --rpm, also the signed RPM and its public key in
-   build/rpm/ (packaging/build-rpm.sh --sign; gpg asks for the passphrase);
-4. tags HEAD as vVERSION. If the tag is already on another commit, it stops,
-   unless --redo moves it;
+   dist/ are used); unless --no-rpm, also the signed RPM in build/rpm/
+   (packaging/build-rpm.sh --sign, which checks its signature; gpg asks for
+   the passphrase); then signs every file (tools/sign_release.py: FILE.asc,
+   dist/SHA256SUMS and its .asc), and checks each signature with only the
+   public key that is published (packaging/RPM-GPG-KEY-py-imposition);
+4. tags HEAD as vVERSION, a tag signed with the same key (git tag --sign),
+   and checks it (git tag -v). If the tag is already on another commit, it
+   stops, unless --redo moves it;
 5. pushes main and the tag to each remote (origin is GitHub, codeberg is
    Codeberg; --redo pushes the tag with --force);
 6. on each forge, makes the release of the tag, or keeps the one there is,
    and attaches the files to it, replacing those of the same name;
-7. with --rpm, sends the signed source RPM to Copr (copr-cli build, project
+7. unless --no-rpm or --no-copr, sends the signed source RPM to Copr (copr-cli build, project
    nivaca/py-imposition), unless --no-copr. Copr builds it for each Fedora of
    the project and signs it with its own key. Each build needs a higher
    version-release than the last, so the spec must have been bumped
@@ -58,7 +67,8 @@ WHEEL = f"dist/py_imposition-{VERSION}-py3-none-any.whl"
 SDIST = f"dist/py_imposition-{VERSION}.tar.gz"
 APPIMAGE = f"dist/py-imposition-{VERSION}-x86_64.AppImage"
 SPEC = "packaging/py-imposition.spec"
-RPM_KEY = "build/rpm/RPM-GPG-KEY-py-imposition"
+PUBLIC_KEY = "packaging/RPM-GPG-KEY-py-imposition"  # (the public key published with every release)
+SUMS = "dist/SHA256SUMS"
 COPR_PROJECT = "py-imposition"  # (of the copr-cli user, nivaca)
 REMOTES = {"github": "origin", "codeberg": "codeberg"}
 
@@ -133,17 +143,20 @@ class Release:
 
     def check(self):
         tools = ["git", "uv"] + [t for t, f in (("gh", "github"), ("tea", "codeberg")) if f in self.forges]
+        tools += ["gpg"]
         if self.args.rpm:
             tools += ["rpmbuild", "rpmsign"] + ([] if self.args.no_copr else ["copr-cli"])
         for tool in tools:
             if not shutil.which(tool):
                 sys.exit(f"release.py: {tool} is not installed")
-        if self.args.rpm:
-            key = signing_key()
-            have = subprocess.run(["gpg", "--batch", "--list-secret-keys", key], capture_output=True).returncode
-            if not key or have != 0:
-                sys.exit(f"release.py: the signing key {key or '(none pinned)'} is not in this machine's gpg "
-                         "keyring; import it first (see packaging/COPR.org)")
+        # Todo se firma, siempre: sin la clave no hay versión.
+        key = signing_key()
+        have = subprocess.run(["gpg", "--batch", "--list-secret-keys", key], capture_output=True).returncode
+        if not key or have != 0:
+            sys.exit(f"release.py: the signing key {key or '(none pinned)'} is not in this machine's gpg "
+                     "keyring; import it first (see packaging/COPR.org)")
+        if not (ROOT / PUBLIC_KEY).is_file():
+            sys.exit(f"release.py: there is no {PUBLIC_KEY}, the public key published with the release")
         if init_version() != VERSION:
             sys.exit(f"release.py: pyproject.toml says {VERSION}, src/py_imposition/__init__.py says "
                      f"{init_version()}")
@@ -185,6 +198,14 @@ class Release:
         if self.args.rpm:
             self.plan("Make the signed RPM", "packaging/build-rpm.sh", "--sign")
 
+    def sign(self):
+        """Every file published signed (FILE.asc), with SHA256SUMS and its signature, and each signature checked
+        with only the public key published."""
+        signed = [f for f in self.files if f != PUBLIC_KEY]
+        self.plan("Sign the files, and check each signature with the published key", sys.executable,
+                  "tools/sign_release.py", "--key", signing_key(), "--public", PUBLIC_KEY, "--sums", SUMS, *signed)
+        self.files = signed + [f"{f}.asc" for f in signed] + [SUMS, f"{SUMS}.asc", PUBLIC_KEY]
+
     def tag(self):
         head = self.read("git", "rev-parse", "HEAD")
         tagged = self.read("git", "rev-parse", "--verify", "--quiet", f"refs/tags/{TAG}^{{commit}}", check=False)
@@ -192,8 +213,9 @@ class Release:
             sys.exit(f"release.py: {TAG} is already the tag of {tagged[:7]}, not of HEAD ({head[:7]}); --redo "
                      "moves it (and replaces the files of the releases)")
         if tagged != head:
-            self.plan("Move the tag to HEAD" if tagged else "Tag HEAD", "git", "tag", "--force", "--annotate", TAG,
-                      "--message", TITLE)
+            self.plan("Move the tag to HEAD, signed" if tagged else "Tag HEAD, signed", "git", "tag", "--force",
+                      "--sign", "--local-user", signing_key(), TAG, "--message", TITLE)
+            self.plan("Check the signature of the tag", "git", "tag", "--verify", TAG)
         for forge in self.forges:
             remote = REMOTES[forge]
             self.plan(f"Push {BRANCH} to {remote}", "git", "push", remote, BRANCH)
@@ -259,13 +281,16 @@ class Release:
     def __call__(self):
         a = self.args
         self.forges = [a.only] if a.only else ["github", "codeberg"]
+        a.rpm = not a.no_rpm  # (el RPM firmado, siempre, salvo con --no-rpm)
         self.files = [WHEEL, SDIST] + ([] if a.no_appimage else [APPIMAGE])
         if a.rpm:
-            self.files += [rpm(), RPM_KEY]
+            self.files += [rpm()]
+        self.files += [PUBLIC_KEY]
         self.check()
         repos = self.repos()
         self.tests()
         self.build()
+        self.sign()
         self.tag()
         for forge in self.forges:
             getattr(self, forge)(repos[forge])
@@ -277,14 +302,14 @@ class Release:
 def main(argv=None):
     parser = argparse.ArgumentParser(prog="tools/release.py",
                                      description=f"Publish {TAG} on GitHub and Codeberg, with the wheel, the source "
-                                                 "package, the AppImage and (--rpm) the signed RPM, also on Copr.")
+                                                 "package, the AppImage and the RPM (also on Copr), all signed.")
     notes = parser.add_mutually_exclusive_group()
     notes.add_argument("--notes", metavar="TEXT", help="the notes of a new release")
     notes.add_argument("--notes-file", metavar="FILE", help="the notes of a new release, from FILE")
     parser.add_argument("--rpm", action="store_true",
-                        help="also the signed RPM and its public key (packaging/build-rpm.sh --sign), and a Copr "
-                             "build of it")
-    parser.add_argument("--no-copr", action="store_true", help="with --rpm, don't send it to Copr")
+                        help="(the signed RPM, and a Copr build of it, are made always now: kept for older scripts)")
+    parser.add_argument("--no-rpm", action="store_true", help="without the RPM (nor its Copr build)")
+    parser.add_argument("--no-copr", action="store_true", help="don't send the RPM to Copr")
     parser.add_argument("--no-build", action="store_true", help="use the files in dist/ (and build/rpm/) as they are")
     parser.add_argument("--no-appimage", action="store_true", help="without the AppImage")
     parser.add_argument("--no-tests", action="store_true", help="don't run the tests first")

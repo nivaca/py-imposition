@@ -6,6 +6,16 @@ source package, the AppImage and the RPM, are on
 [GitHub](https://github.com/nivaca/py-imposition/releases); the RPM is also
 in the Copr project nivaca/py-imposition.
 
+## Unreleased
+
+- **Every release signed**: besides the RPM, each file published (the
+  wheel, the source package, the AppImage) comes with its signature
+  (`.asc`), with `SHA256SUMS` and its signature, and with the public key;
+  the tag of the version is signed too. `tools/release.py` makes the
+  signed RPM always (`--no-rpm` leaves it out) and checks each signature
+  with the published key before anything is published. The READMEs say
+  how to check a download.
+
 ## 0.10.4 — 2026-11-21
 
 - `docs/OPEN-SOURCE.md` (and `docs/OPEN-SOURCE_es.md`, in Spanish) lists

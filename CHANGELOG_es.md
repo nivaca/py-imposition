@@ -6,6 +6,15 @@ paquete wheel, el paquete fuente, la AppImage y el RPM, están en
 [GitHub](https://github.com/nivaca/py-imposition/releases); el RPM está
 también en el proyecto de Copr nivaca/py-imposition.
 
+## Sin publicar
+
+- **Cada versión firmada**: además del RPM, cada archivo publicado (el
+  paquete wheel, el paquete fuente, la AppImage) va con su firma (`.asc`),
+  con `SHA256SUMS` y su firma, y con la clave pública; también la etiqueta
+  de la versión va firmada. `tools/release.py` hace siempre el RPM firmado
+  (`--no-rpm` lo deja fuera) y comprueba cada firma con la clave publicada
+  antes de publicar nada. Los README explican cómo comprobar una descarga.
+
 ## 0.10.4 — 2026-11-21
 
 - `docs/OPEN-SOURCE_es.md` (y `docs/OPEN-SOURCE.md`, en inglés) recoge el

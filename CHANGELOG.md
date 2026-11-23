@@ -6,7 +6,7 @@ source package, the AppImage and the RPM, are on
 [GitHub](https://github.com/nivaca/py-imposition/releases); the RPM is also
 in the Copr project nivaca/py-imposition.
 
-## Unreleased
+## 0.10.5 — 2026-11-22
 
 - **Every release signed**: besides the RPM, each file published (the
   wheel, the source package, the AppImage) comes with its signature

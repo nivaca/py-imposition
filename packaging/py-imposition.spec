@@ -10,7 +10,7 @@
 # Build with packaging/build-rpm.sh, which makes the source tarball.
 
 Name:           py-imposition
-Version:        0.10.4
+Version:        0.10.5
 Release:        1%{?dist}
 Summary:        PDF imposition toolkit: booklets, n-up, step and repeat and more
 
@@ -80,6 +80,10 @@ export HOME="$PWD/check-home" PY_IMPOSITION_CONFIG="$PWD/check-home/config" QT_Q
 %{_datadir}/icons/hicolor/*/apps/py-imposition.*
 
 %changelog
+* Sun Nov 22 2026 Nicolas Vaughan <nicolasvaughan@proton.me> - 0.10.5-1
+- Every release signed: each file with its signature, SHA256SUMS and its
+  signature, the public key, and a signed tag
+
 * Sat Nov 21 2026 Nicolas Vaughan <nicolasvaughan@proton.me> - 0.10.4-1
 - Python 3.14 or later is needed (it was 3.15); docs/OPEN-SOURCE.md lists the
   open-source software used, with its licences

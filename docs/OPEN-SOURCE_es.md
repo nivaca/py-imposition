@@ -5,7 +5,7 @@ py-imposition es software libre, bajo la Licencia Pública General de GNU,
 versión 3 o posterior (GPL-3.0-or-later).  Está hecho con el software de
 código abierto de esta lista, y funciona sobre él; de cada uno se da la
 licencia, con su identificador SPDX.  Las versiones son las de `uv.lock`
-para py-imposition 0.10.4.  Cada paquete lleva el texto completo de su
+para py-imposition 0.10.5.  Cada paquete lleva el texto completo de su
 propia licencia.
 
 

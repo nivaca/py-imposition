@@ -15,8 +15,8 @@ in the Copr project nivaca/py-imposition.
   with only that key (`--packages` adds the files of the release). `upload`
   sends it to Zenodo as a draft, a new version of the deposit if there is
   one already, and never publishes it. `tools/release.py` now collects the
-  deposit after the tag, and uploads it with `--zenodo`. The metadata are in
-  `.zenodo.json`.
+  deposit after the tag and uploads it as a draft, unless `--no-zenodo`. The
+  metadata are in `.zenodo.json`.
 
 ## 0.10.5 — 2026-11-22
 

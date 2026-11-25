@@ -8,6 +8,15 @@ in the Copr project nivaca/py-imposition.
 
 ## Unreleased
 
+- `tools/zenodo.py`: the description of the deposit is now the whole
+  README of the tag, in HTML. The draft also gets the contributor (the
+  project leader), the languages, the copyright, the repository on GitHub,
+  the programming language and the development status, these last through
+  Zenodo's records API (its deposit API doesn't take them). The token can
+  be kept in the desktop keyring (`secret-tool store --label="Zenodo
+  token" service zenodo`) instead of `$ZENODO_TOKEN`; `tools/zenodo.py
+  check-token` says whether there is one.
+
 - `tools/zenodo.py` prepares the deposit of a release for Zenodo. `collect`
   puts in `dist/zenodo/` the tree of the tag as
   `py-imposition-VERSION-source.tar.gz`, with its signature, a signed

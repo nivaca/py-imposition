@@ -44,6 +44,10 @@ Before doing anything, it shows the commands it will run and asks; --yes
 doesn't ask, --dry-run only shows them. The notes of a new release are
 --notes, --notes-file, or else made by GitHub from the commits (on Codeberg,
 none); a release that is there keeps its notes.
+
+The deposit for Zenodo is collected in dist/zenodo/ after the tag (tools/zenodo.py collect: the tree of
+the tag, signed, with SHA256SUMS and the public key); --zenodo also uploads it to Zenodo as a draft, which
+is never published here: review it and publish it on Zenodo by hand.
 """
 
 from __future__ import annotations
@@ -54,6 +58,7 @@ import re
 import shlex
 import shutil
 import subprocess
+import os
 import sys
 import tomllib
 from pathlib import Path
@@ -278,6 +283,23 @@ class Release:
             sys.exit(f"release.py: there is no {srpm()} (leave out --no-build to make it)")
         self.plan(f"Copr: build the RPM (project {COPR_PROJECT})", "copr-cli", "build", COPR_PROJECT, srpm())
 
+    def zenodo_collect(self):
+        """The deposit of the release for Zenodo, in dist/zenodo/ (tools/zenodo.py): the tree of the tag, signed,
+        with SHA256SUMS and the public key, each signature checked with only that key."""
+        self.plan("Zenodo: collect the deposit in dist/zenodo/", sys.executable, "tools/zenodo.py", "collect",
+                  "--tag", TAG)
+
+    def zenodo_upload(self):
+        """With --zenodo, dist/zenodo/ uploaded to Zenodo as a draft, never published: it is reviewed and published
+        there by hand."""
+        if not self.args.zenodo:
+            return
+        # (sin token se para aquí, antes de hacer nada, y no al final de la versión)
+        if not os.environ.get("ZENODO_TOKEN") and not self.args.dry_run:
+            sys.exit("release.py: --zenodo needs a Zenodo token in $ZENODO_TOKEN (see tools/zenodo.py)")
+        self.plan("Zenodo: upload the deposit as a draft (not published)", sys.executable, "tools/zenodo.py",
+                  "upload")
+
     def __call__(self):
         a = self.args
         self.forges = [a.only] if a.only else ["github", "codeberg"]
@@ -292,10 +314,12 @@ class Release:
         self.build()
         self.sign()
         self.tag()
+        self.zenodo_collect()
         for forge in self.forges:
             getattr(self, forge)(repos[forge])
         if a.rpm and not a.no_copr:
             self.copr()
+        self.zenodo_upload()
         self.run_plan()
 
 
@@ -318,6 +342,8 @@ def main(argv=None):
                              "replace the files of the releases")
     parser.add_argument("--only", choices=("github", "codeberg"), help="publish on one forge only")
     parser.add_argument("--tea-login", default="codeberg", help="the login of tea for Codeberg (default: codeberg)")
+    parser.add_argument("--zenodo", action="store_true",
+                        help="also upload dist/zenodo/ to Zenodo as a draft, not published ($ZENODO_TOKEN)")
     parser.add_argument("-n", "--dry-run", action="store_true", help="only show the commands")
     parser.add_argument("-y", "--yes", action="store_true", help="don't ask before running them")
     args = parser.parse_args(argv)

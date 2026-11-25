@@ -26,6 +26,9 @@ in the Copr project nivaca/py-imposition.
   one already, and never publishes it. `tools/release.py` now collects the
   deposit after the tag and uploads it as a draft, unless `--no-zenodo`. The
   metadata are in `.zenodo.json`.
+- `tools/zenodo.py`: the description of the deposit leaves out the line
+  that points to the README in other languages and the Screenshots section,
+  whose images Zenodo does not show.
 
 ## 0.10.5 — 2026-11-22
 

@@ -29,6 +29,10 @@ in the Copr project nivaca/py-imposition.
 - `tools/zenodo.py`: the description of the deposit leaves out the line
   that points to the README in other languages and the Screenshots section,
   whose images Zenodo does not show.
+- `tools/release.py` now publishes each release on Zenodo
+  (`tools/zenodo.py upload --publish`), instead of leaving a draft;
+  `--zenodo-draft` still leaves one. `tools/zenodo.py publish` publishes a
+  draft already there (by default the one waiting with the project's title).
 
 ## 0.10.5 — 2026-11-22
 

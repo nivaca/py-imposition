@@ -821,8 +821,13 @@ go to `out/`, and inputs move to `done/` (or to `errors/`, with a log file).
 
 ```bash
 uv sync --all-extras
-uv run pytest            # GUI tests run headless (QT_QPA_PLATFORM=offscreen) or are skipped without PySide6
+uv run python tools/test.py   # GUI tests run headless (QT_QPA_PLATFORM=offscreen) or are skipped without PySide6
 ```
+
+`tools/test.py` runs each test file in a pytest process of its own, as many
+at once as there are processors (`-j N` changes it, `-v` shows each file);
+the release and the RPM's `%check` run them so too. `uv run python -m
+pytest` runs them one after the other.
 
 The tests check page orders against worked examples of standard
 impositions and run every command end to end. `tests/test_interface.py`
@@ -891,7 +896,7 @@ uv run python tools/release.py --notes-file NOTES.md     # --dry-run to see the 
 
 It shows its plan and asks before running it:
 
-1. it runs the tests;
+1. it runs the tests (`tools/test.py`);
 2. it makes the wheel, the source package, the AppImage
    (`tools/bundle-appimage.py`) and the signed RPM (`packaging/build-rpm.sh
    --sign`; gpg asks for the passphrase);

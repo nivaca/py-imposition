@@ -33,6 +33,10 @@ in the Copr project nivaca/py-imposition.
   (`tools/zenodo.py upload --publish`), instead of leaving a draft;
   `--zenodo-draft` still leaves one. `tools/zenodo.py publish` publishes a
   draft already there (by default the one waiting with the project's title).
+- `tools/test.py` runs the tests at once, each test file in a pytest
+  process of its own, as many as there are processors, the slowest first.
+  `tools/release.py` and the RPM's `%check` run them so, instead of one
+  pytest for them all.
 
 ## 0.10.5 — 2026-11-22
 

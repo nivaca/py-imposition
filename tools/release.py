@@ -19,7 +19,8 @@ In order, each step only if it is needed:
    the versions agree (pyproject.toml, __init__.py and, unless --no-rpm, the
    spec), that the tools are installed (gh, tea, gpg; unless --no-rpm,
    rpmbuild and copr-cli) and that the signing key is in gpg;
-2. runs the tests (unless --no-tests);
+2. runs the tests (tools/test.py, each file in a process of its own, all at
+   once), unless --no-tests;
 3. makes the wheel and the source package (uv build) and the AppImage
    (tools/bundle-appimage.py) in dist/, unless --no-build (then those in
    dist/ are used); unless --no-rpm, also the signed RPM in build/rpm/
@@ -200,7 +201,8 @@ class Release:
 
     def tests(self):
         if not self.args.no_tests:
-            self.plan("Run the tests", "uv", "run", "--all-extras", "pytest", "-q")
+            # (cada archivo de pruebas en un proceso propio, todos a la vez: tools/test.py)
+            self.plan("Run the tests", "uv", "run", "--all-extras", "python", "tools/test.py")
 
     def build(self):
         if self.args.no_build:

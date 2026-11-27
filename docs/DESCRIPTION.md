@@ -248,7 +248,11 @@ the same time, in py-foliation and py-pdftools.
 Testing
 -------
 
-The program has 121 automated tests (`tests/`), run with pytest.  They
+The program has 121 automated tests (`tests/`), run with pytest:
+`tools/test.py` runs each test file in a pytest of its own, as many at
+once as there are processors, and the release script and the RPM's
+`%check` run them in the same way, so the RPM's build no longer waits on
+one long pytest and on its slow exit.  They
 check the page orders against worked examples of standard impositions,
 run every command from beginning to end on generated documents and read
 the results with pdftotext and `qpdf --check`, and impose the example

@@ -75,7 +75,8 @@ copr-cli create py-imposition \
 - Everything it needs is in Fedora: python3-uv-build (the build backend),
   python3-pikepdf, python3-reportlab, python3-pyside6. The build makes the
   wheel with Fedora's Python macros (=%pyproject_wheel=) and runs the whole
-  test suite in =%check=, without network.
+  test suite in =%check=, without network, as =tools/test.py= does: each
+  test file in a pytest of its own, as many at once as there are processors.
 - Python 3.15 or later is required: Fedora 45 has it; Fedora 44, with 3.14, is no
   longer built.
 

@@ -870,8 +870,13 @@ resultados van a `out/`, y los archivos de entrada se mueven a `done/` (o a
 
 ```bash
 uv sync --all-extras
-uv run pytest            # las pruebas de la interfaz gráfica se ejecutan sin pantalla (QT_QPA_PLATFORM=offscreen) o se omiten sin PySide6
+uv run python tools/test.py   # las pruebas de la interfaz gráfica se ejecutan sin pantalla (QT_QPA_PLATFORM=offscreen) o se omiten sin PySide6
 ```
+
+`tools/test.py` corre cada archivo de pruebas en un proceso de pytest propio,
+tantos a la vez como procesadores haya (`-j N` lo cambia, `-v` muestra cada
+archivo); así las corren también la publicación y el `%check` del RPM.
+`uv run python -m pytest` las corre una tras otra.
 
 Las pruebas comprueban el orden de las páginas con ejemplos resueltos de
 imposiciones habituales y ejecutan cada orden de principio a fin.
@@ -940,7 +945,7 @@ uv run python tools/release.py --notes-file NOTES.md     # --dry-run para ver an
 
 Muestra su plan y pregunta antes de ejecutarlo:
 
-1. ejecuta las pruebas;
+1. ejecuta las pruebas (`tools/test.py`);
 2. hace la wheel, el paquete fuente, la AppImage (`tools/bundle-appimage.py`)
    y el RPM firmado (`packaging/build-rpm.sh --sign`; gpg pide la frase de
    contraseña);

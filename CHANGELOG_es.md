@@ -34,6 +34,10 @@ también en el proyecto de Copr nivaca/py-imposition.
   `--zenodo-draft` todavía lo deja. `tools/zenodo.py publish` publica un
   borrador que ya está allí (por omisión, el que espera con el título del
   proyecto).
+- `tools/test.py` corre las pruebas a la vez, cada archivo en un proceso
+  de pytest propio, tantos como procesadores haya, primero los más lentos.
+  `tools/release.py` y el `%check` del RPM las corren así, y no en un
+  solo pytest.
 
 ## 0.10.5 — 2026-11-22
 

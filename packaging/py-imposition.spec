@@ -67,9 +67,12 @@ cp -pr src/py_imposition/icons/linux/hicolor %{buildroot}%{_datadir}/icons/
 desktop-file-validate %{buildroot}%{_datadir}/applications/py-imposition.desktop
 %pyproject_check_import -e 'py_imposition.gui*'
 # The whole test suite, on the installed package, with no settings of the
-# builder's and the window drawn offscreen.
+# builder's and the window drawn offscreen: each test file in a pytest of its
+# own, as many at once as there are processors (tools/test.py), not one
+# pytest for them all, which also takes long to quit, deleting what the
+# desktop's style kept of every window drawn.
 export HOME="$PWD/check-home" PY_IMPOSITION_CONFIG="$PWD/check-home/config" QT_QPA_PLATFORM=offscreen
-%pytest -q tests
+%{py3_test_envvars} %{python3} tools/test.py
 %{py3_test_envvars} %{buildroot}%{_bindir}/py-imposition --version | grep -q '%{version}'
 
 %files -f %{pyproject_files}

@@ -4,7 +4,7 @@
     uv run python tools/bundle-appimage.py [-o FOLDER] [--python APPIMAGE]
                                           [--python-version 3.15] [--appimagetool APPIMAGE]
 
-The AppImage is dist/py-imposition-VERSION-x86_64.AppImage (the version of
+The AppImage is build/release/py-imposition-VERSION-x86_64.AppImage (the version of
 pyproject.toml; --output gives another folder). It holds a Python of its own
 (a relocatable Python of the python-appimage project,
 https://github.com/niess/python-appimage) with py-imposition and everything it
@@ -44,7 +44,7 @@ import urllib.request
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-DIST = ROOT / "dist"
+DIST = ROOT / "build" / "release"  # (not dist/, which keeps only the RPM)
 APP_ID = "py-imposition"
 ARCH = "x86_64"
 VERSION = tomllib.loads((ROOT / "pyproject.toml").read_text())["project"]["version"]
@@ -314,7 +314,7 @@ def main(argv=None):
                                      description=f"Make an AppImage of py-imposition: {name()}, with a Python of "
                                                  "its own.")
     parser.add_argument("-o", "--output", type=Path, default=None,
-                        help="the folder to write it in (default: dist/)")
+                        help="the folder to write it in (default: build/release/)")
     parser.add_argument("--python", type=Path, metavar="APPIMAGE",
                         help="the Python AppImage to use (default: one of python-appimage, downloaded)")
     parser.add_argument("--python-version", default=PYTHON, metavar="VERSION",

@@ -140,9 +140,10 @@ if [ "$SIGN" = 1 ]; then
     done
 fi
 
-# The newest RPM goes to dist/ too, next to the wheel, the source package and
-# the AppImage, in place of the older ones (it stays in build/rpm/ as well,
-# where the release tools look for it).
+# The newest RPM goes to dist/ too, in place of the older ones: it is the only
+# package kept in dist/ (tools/release.py makes the others in build/release/,
+# and deletes them once they are published). It stays in build/rpm/ as well,
+# where the release tools look for it.
 mkdir -p "$DIR/dist"
 find "$DIR/dist" -maxdepth 1 -name 'py-imposition-*.rpm' ! -name '*.src.rpm' -delete
 for rpm in "${RPMS[@]}"; do

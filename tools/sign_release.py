@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Firma los archivos de una versión, como los recibirá quien los descargue, y lo comprueba.
 
-    python tools/sign_release.py --key FINGERPRINT --public KEYFILE --sums dist/SHA256SUMS FILE...
+    python tools/sign_release.py --key FINGERPRINT --public KEYFILE --sums build/release/SHA256SUMS FILE...
 
 Escribe SUMS (el SHA-256 de cada FILE, por su nombre, como lo lee `sha256sum -c`), una firma separada en
 ASCII (FILE.asc) de cada FILE y de SUMS, hecha por gpg con la clave FINGERPRINT, y luego comprueba cada firma

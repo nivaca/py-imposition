@@ -897,9 +897,9 @@ uv run python tools/release.py --notes-file NOTES.md     # --dry-run to see the 
 It shows its plan and asks before running it:
 
 1. it runs the tests (`tools/test.py`);
-2. it makes the wheel, the source package, the AppImage
-   (`tools/bundle-appimage.py`) and the signed RPM (`packaging/build-rpm.sh
-   --sign`; gpg asks for the passphrase);
+2. it makes the wheel, the source package and the AppImage
+   (`tools/bundle-appimage.py`) in `build/release/`, and the signed RPM
+   (`packaging/build-rpm.sh --sign`; gpg asks for the passphrase);
 3. it signs every file (`FILE.asc`), with `SHA256SUMS` and its signature,
    and checks each signature with only the public key that is published
    (`tools/sign_release.py`);
@@ -908,12 +908,16 @@ It shows its plan and asks before running it:
 5. it makes the GitHub and Codeberg releases with all the files (the wheel,
    the source package, the AppImage, the RPM, their signatures,
    `SHA256SUMS` and the public key);
-6. it sends the signed source RPM to Copr, which builds it for each Fedora.
+6. it sends the signed source RPM to Copr, which builds it for each Fedora;
+7. it uploads the deposit (collected in `build/zenodo/`) to Zenodo, and at
+   the end deletes `build/release/` and `build/zenodo/`: only the RPM is
+   kept here, in `build/rpm/` and its copy in `dist/`.
 
 `packaging/COPR.org` has the one-time setup (tools, the Copr token, the
 project) and the details. The pieces can also be run on their own:
-`uv run python tools/bundle-appimage.py` writes the AppImage to `dist/`, and
-`packaging/build-rpm.sh [--sign]` writes the RPMs to `build/rpm/`.
+`uv run python tools/bundle-appimage.py` writes the AppImage to
+`build/release/`, and `packaging/build-rpm.sh [--sign]` writes the RPMs to
+`build/rpm/` (and copies the binary one to `dist/`).
 
 ## License
 

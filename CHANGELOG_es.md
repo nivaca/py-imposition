@@ -38,6 +38,12 @@ también en el proyecto de Copr nivaca/py-imposition.
   de pytest propio, tantos como procesadores haya, primero los más lentos.
   `tools/release.py` y el `%check` del RPM las corren así, y no en un
   solo pytest.
+- Aquí solo se guarda el RPM: `tools/release.py` hace y firma el paquete wheel,
+  el paquete fuente, la AppImage y `SHA256SUMS` en `build/release/` (no en
+  `dist/`), y el depósito para Zenodo en `build/zenodo/`; los publica desde
+  allí y al final borra ambas carpetas. `tools/bundle-appimage.py` escribe
+  por omisión en `build/release/`; `dist/` solo tiene la copia del RPM que
+  deja `packaging/build-rpm.sh`.
 
 ## 0.10.5 — 2026-11-22
 

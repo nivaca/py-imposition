@@ -100,6 +100,10 @@ copr-cli create py-imposition \
    passphrase), the signature of every file and =SHA256SUMS=, each checked
    with the published key, the signed tag, the pushes to GitHub and
    Codeberg, the releases with all the files, and =copr-cli build py-imposition build/rpm/SRPMS/....src.rpm=.
+   The wheel, the source package, the AppImage, =SHA256SUMS= and the
+   signatures are made in =build/release/=, the deposit for Zenodo in
+   =build/zenodo/=; both are deleted at the end, once published, so only
+   the RPM is kept here (in =build/rpm/=, and its copy in =dist/=).
    =--no-copr= leaves the Copr build out; to do it by hand:
    #+begin_src sh
    packaging/build-rpm.sh --sign

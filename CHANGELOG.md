@@ -37,6 +37,12 @@ in the Copr project nivaca/py-imposition.
   process of its own, as many as there are processors, the slowest first.
   `tools/release.py` and the RPM's `%check` run them so, instead of one
   pytest for them all.
+- Only the RPM is kept here: `tools/release.py` makes and signs the wheel,
+  the source package, the AppImage and `SHA256SUMS` in `build/release/`
+  (not `dist/`), and the deposit for Zenodo in `build/zenodo/`, publishes
+  them from there and deletes both at the end. `tools/bundle-appimage.py`
+  writes to `build/release/` by default; `dist/` keeps only the copy of the
+  RPM that `packaging/build-rpm.sh` leaves there.
 
 ## 0.10.5 — 2026-11-22
 

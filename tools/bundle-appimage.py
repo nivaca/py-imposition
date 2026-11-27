@@ -1,31 +1,30 @@
 #!/usr/bin/env python3
-"""Make an AppImage of py-imposition, for Linux:
+"""Hace una AppImage de py-imposition, para Linux:
 
     uv run python tools/bundle-appimage.py [-o FOLDER] [--python APPIMAGE]
                                           [--python-version 3.15] [--appimagetool APPIMAGE]
 
-The AppImage is build/release/py-imposition-VERSION-x86_64.AppImage (the version of
-pyproject.toml; --output gives another folder). It holds a Python of its own
-(a relocatable Python of the python-appimage project,
-https://github.com/niess/python-appimage) with py-imposition and everything it
-needs installed into it, including PySide6 for the window, so it runs on any
-recent Linux (glibc 2.34 or later: Ubuntu 22.04, Debian 12, Fedora 35 and
-later) without installing anything.
+La AppImage es build/release/py-imposition-VERSION-x86_64.AppImage (la versión de
+pyproject.toml; --output da otra carpeta). Lleva un Python propio (un Python
+reubicable del proyecto python-appimage, https://github.com/niess/python-appimage)
+con py-imposition y todo lo que necesita instalado en él, PySide6 incluido para la ventana,
+de modo que corre en cualquier Linux reciente (glibc 2.34 o posterior: Ubuntu 22.04,
+Debian 12, Fedora 35 y posteriores) sin instalar nada.
 
-It starts the window; a command of the command line (booklet, nup...), an
-option, or "cli" runs the command line instead:
+Abre la ventana; una orden de la línea de órdenes (booklet, nup...), una opción o "cli"
+corren en cambio la línea de órdenes:
 
-    py-imposition.AppImage [file.pdf]                  the window
-    py-imposition.AppImage booklet in.pdf -o out.pdf   the command line
+    py-imposition.AppImage [file.pdf]                  la ventana
+    py-imposition.AppImage booklet in.pdf -o out.pdf   la línea de órdenes
     py-imposition.AppImage cli --help
 
-and so does the name it is called by, if it is a link named py-imposition or
-py-imposition-gui. "help" says so.
+y lo mismo hace el nombre con que se la llama, si es un enlace llamado py-imposition o
+py-imposition-gui. "help" lo explica.
 
-What it needs is downloaded the first time and kept in the user's cache
-folder (~/.cache/py-imposition-build): the Python and appimagetool
-(https://github.com/AppImage/appimagetool). The program's wheel is made with
-"uv build", and its dependencies come from PyPI (so this needs the network).
+Lo que necesita se descarga la primera vez y se guarda en la carpeta de caché del
+usuario (~/.cache/py-imposition-build): el Python y appimagetool
+(https://github.com/AppImage/appimagetool). El wheel del programa se hace con
+"uv build", y sus dependencias vienen de PyPI (así que esto necesita la red).
 """
 
 from __future__ import annotations

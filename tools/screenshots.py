@@ -1,29 +1,27 @@
 #!/usr/bin/env python3
-"""Take the screenshots of the README: the window with several commands, and
-the command line.
+"""Toma las capturas del README: la ventana con varias órdenes, y la línea
+de órdenes.
 
     uv run python tools/screenshots.py [-o FOLDER] [--only booklet,nup,...]
                                        [--langs en,es] [--scale 2] [--dark]
                                        [--size 1500x940]
 
-It writes FOLDER/gui_<command>_<lang>.png and FOLDER/cli_<lang>.png, in each
-language of the interface (by default in docs/img/, where README.md takes the
-English ones and README_es.md the Spanish ones), at SCALE times the size on
-the screen (2 by default, sharp on screens of high resolution).
+Escribe FOLDER/gui_<command>_<lang>.png y FOLDER/cli_<lang>.png, en cada idioma de la
+interfaz (por omisión en docs/img/, de donde README.md toma las inglesas y README_es.md
+las españolas), a SCALE veces el tamaño en pantalla (2 por omisión, nítidas en las
+pantallas de alta resolución).
 
-* The window runs in a process of its own with Qt's "offscreen" platform:
-  nothing appears on the screen, the size and scale don't depend on the
-  screen, and only the program's own window is captured (Qt draws it into
-  the image). Each shot has settings of its own in a temporary folder, so
-  the user's settings, recent options and sequence are not touched. The
-  example document is docs/example/numbers-100.pdf (100 pages, each
-  showing its own number), used by every shot.
-* The command line is a real session: the commands are run and their
-  output is drawn like a terminal (Konsole's Breeze colours, a monospaced
-  font), also by Qt.
+* La ventana corre en un proceso propio con la plataforma "offscreen" de Qt: nada
+  aparece en la pantalla, el tamaño y la escala no dependen de ella, y solo se captura
+  la ventana del programa (Qt la dibuja en la imagen). Cada captura tiene su propia
+  configuración en una carpeta temporal, así que no se tocan los ajustes del usuario,
+  sus opciones recientes ni su secuencia. El documento de ejemplo, el mismo en todas
+  las capturas, es docs/example/numbers-100.pdf (100 páginas, cada una con su número).
+* La línea de órdenes es una sesión real: las órdenes se corren de verdad y su salida
+  se dibuja como en una terminal (los colores Breeze de Konsole, una fuente
+  monoespaciada), también con Qt.
 
-It needs the gui extra (PySide6): uv sync --extra gui. Nothing else; no
-display is needed.
+Necesita el extra gui (PySide6): uv sync --extra gui. Nada más; no hace falta pantalla.
 """
 
 from __future__ import annotations

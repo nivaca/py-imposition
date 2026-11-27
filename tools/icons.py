@@ -1,27 +1,26 @@
 #!/usr/bin/env python3
-"""Make all the icons afresh from src/py_imposition/icons/py-imposition.svg:
+"""Hace de nuevo todos los iconos a partir de src/py_imposition/icons/py-imposition.svg:
 
     python3 tools/icons.py [--svg FILE] [-o FOLDER] [--dry-run]
 
-In FOLDER (src/py_imposition/icons/ by default) it writes:
+En FOLDER (por omisión src/py_imposition/icons/) escribe:
 
-* linux/hicolor/NxN/apps/py-imposition.png, for each N in HICOLOR_SIZES, and
-  linux/hicolor/scalable/apps/py-imposition.svg (a copy of the SVG), for
-  py-imposition-install and the window;
-* macos/py-imposition.iconset/icon_NxN[@2x].png and macos/py-imposition.icns;
+* linux/hicolor/NxN/apps/py-imposition.png, para cada N de HICOLOR_SIZES, y
+  linux/hicolor/scalable/apps/py-imposition.svg (una copia del SVG), para
+  py-imposition-install y la ventana;
+* macos/py-imposition.iconset/icon_NxN[@2x].png y macos/py-imposition.icns;
 * windows/py-imposition.ico.
 
-Each size is drawn by Inkscape from the SVG (never scaled down from a
-bigger PNG), all of them in a single run of Inkscape. The .ico is put
-together with Pillow from those same PNGs, and the .icns from the iconset
-as py-imposition-install does it (as iconutil would, with all ten sizes).
+Inkscape dibuja cada tamaño a partir del SVG (nunca reduciendo un PNG más grande),
+todos en una sola ejecución. El .ico lo arma Pillow con esos mismos PNG, y el .icns
+sale del iconset como lo hace py-imposition-install (como lo haría iconutil, con los diez
+tamaños).
 
-Inkscape is looked for in this order: $INKSCAPE, the AppImage at
-~/AppImages/inkscape.appimage, inkscape on the PATH, and last the Flatpak
-(org.inkscape.Inkscape). A Flatpak is run with "flatpak run", with absolute
-paths, and writing only inside FOLDER: it does not see the host's /tmp. So
-the PNGs are first drawn in a hidden folder inside FOLDER, and only moved to
-their places once all are there.
+Inkscape se busca en este orden: $INKSCAPE, la AppImage ~/AppImages/inkscape.appimage,
+el inkscape del PATH y, por último, el Flatpak (org.inkscape.Inkscape). Un Flatpak se
+ejecuta con "flatpak run", con rutas absolutas y escribiendo solo dentro de FOLDER: no
+ve el /tmp del sistema. Por eso los PNG se dibujan primero en una carpeta oculta
+dentro de FOLDER y solo pasan a su lugar cuando están todos.
 """
 
 import argparse
